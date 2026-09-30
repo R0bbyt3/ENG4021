@@ -1,0 +1,40 @@
+{% extends 'core/login/base.html' %}
+{% load static %}
+
+{% block title %}Entrar | FioFora{% endblock %}
+
+{% block login_styles %}
+<link rel="stylesheet" href="{% static 'core/login/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <p class="eyebrow">Boas-vindas de volta</p>
+    <h1>Entre na sua conta</h1>
+    <p class="form-intro">Acompanhe seus favoritos, compras e dados pessoais.</p>
+
+    <form class="form-stack" action="{% url 'login_page' %}" method="post">
+        {% csrf_token %}
+        <label class="field-label" for="email">E-mail</label>
+        <input class="form-control" id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com">
+
+        <label class="field-label" for="password">Senha</label>
+        <input class="form-control" id="password" name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha">
+
+        <div class="form-row form-row--between">
+            <label class="form-check" for="remember">
+                <input id="remember" name="remember" type="checkbox" checked>
+                <span>Lembrar de mim</span>
+            </label>
+            <a href="{% url 'password_reset_page' %}">Esqueci minha senha</a>
+        </div>
+
+        <button class="button button--full" type="submit">
+            <span>Entrar</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+        </button>
+    </form>
+
+    <p class="form-switch">Ainda não tem uma conta? <a href="{% url 'account_type_page' %}">Cadastre-se</a></p>
+    <p class="academic-note">Protótipo acadêmico: os dados não são armazenados.</p>
+</div>
+{% endblock %}

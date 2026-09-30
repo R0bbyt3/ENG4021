@@ -1,6 +1,6 @@
-{% extends 'core/base.html' %}
+{% extends 'core/products/base.html' %}
 
-{% block title %}Remover produto | Moda Justa{% endblock %}
+{% block title %}Remover produto | FioFora{% endblock %}
 
 {% block content %}
 <section class="form-section compact-section">
@@ -8,7 +8,7 @@
     <p>Você está prestes a remover <strong>{{ product.name }}</strong> da vitrine.</p>
     <form method="post" class="form-actions">
         {% csrf_token %}
-        <button class="button danger-button" type="submit">Sim, remover</button>
+        <button class="button button--danger" type="submit">Sim, remover</button>
         <a href="{% url 'home' %}">Cancelar</a>
     </form>
 </section>

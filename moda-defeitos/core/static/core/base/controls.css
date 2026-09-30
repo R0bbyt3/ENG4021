@@ -1,0 +1,145 @@
+.field-label {
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-field {
+    display: grid;
+    gap: 8px;
+}
+
+.form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-stack > .button {
+    margin-top: 3px;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 7px 0 9px;
+}
+
+.form-row--between {
+    justify-content: space-between;
+}
+
+.field-help {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.form-errors {
+    color: #9a3e3e;
+    font-size: 13px;
+}
+
+.form-errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 15px;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-medium);
+    font: inherit;
+}
+
+.form-control::placeholder {
+    color: #aaa79f;
+}
+
+.form-control:focus-visible,
+.form-check input:focus-visible,
+.button:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.form-check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--green);
+}
+
+.form-check a {
+    font-weight: 700;
+    text-decoration: none;
+}
+
+select.form-control {
+    appearance: none;
+    padding-right: 38px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 22px, calc(100% - 13px) 22px;
+    background-repeat: no-repeat;
+    background-size: 5px 5px, 5px 5px;
+}
+
+.button {
+    display: inline-flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 18px;
+    color: var(--white);
+    background: var(--ink);
+    border: 0;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.button:hover {
+    background: #373a32;
+}
+
+.button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.button--full {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.button--danger {
+    background: #9a3e3e;
+}
+
+.button--danger:hover {
+    background: #792f2f;
+}

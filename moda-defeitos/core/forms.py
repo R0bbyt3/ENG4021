@@ -14,5 +14,7 @@ class ProductForm(forms.ModelForm):
             'is_active': 'Exibir na vitrine',
         }
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 5}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
         }

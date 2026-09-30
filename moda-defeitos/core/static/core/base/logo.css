@@ -1,0 +1,32 @@
+.brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+}
+
+.brand-logo__mark {
+    display: block;
+    width: 36px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.text-logo {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 0.8;
+    letter-spacing: -0.08em;
+}
+
+.text-logo__first {
+    color: var(--green);
+}
+
+.text-logo__second {
+    color: var(--coral);
+    font-style: italic;
+}

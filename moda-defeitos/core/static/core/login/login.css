@@ -1,0 +1,13 @@
+.form-switch {
+    margin: 25px 0;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.academic-note {
+    margin-top: 22px;
+    color: #aaa79f;
+    font-size: 11px;
+    text-align: center;
+}

@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{% static 'core/login/base.css' %}">
+    {% block login_styles %}{% endblock %}
+{% endblock %}
+
+{% block page_body %}
+    <main class="auth-layout">
+        <section class="brand-panel" aria-label="Apresentação do FioFora">
+            <div class="brand-panel__frame">
+                <a class="brand-logo" href="{% url 'login_page' %}" aria-label="FioFora — página inicial">
+                    {% include 'core/components/logo.html' %}
+                </a>
+
+                <div class="brand-message">
+                    <p class="eyebrow eyebrow--coral">Peças reais. Detalhes às claras.</p>
+                    <p class="brand-message__title">O imperfeito<br>também merece ser<br>escolhido.</p>
+                    <p class="brand-message__text">
+                        Defeitos explicados com transparência, desconto proporcional e
+                        uma segunda chance para cada peça.
+                    </p>
+                    {% block account_badge %}{% endblock %}
+                </div>
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <div class="form-panel__top">
+                {% block top_action %}
+                    <span class="safe-label"><i class="bi bi-shield-check" aria-hidden="true"></i> Ambiente seguro</span>
+                {% endblock %}
+            </div>
+
+            <div class="form-panel__content">
+                {% block content %}{% endblock %}
+            </div>
+        </section>
+    </main>
+{% endblock %}

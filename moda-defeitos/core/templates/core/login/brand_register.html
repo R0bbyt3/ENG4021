@@ -1,0 +1,95 @@
+{% extends 'core/login/base.html' %}
+{% load static %}
+
+{% block title %}Cadastro de marca | FioFora{% endblock %}
+
+{% block login_styles %}
+<link rel="stylesheet" href="{% static 'core/login/register.css' %}">
+<link rel="stylesheet" href="{% static 'core/login/brand_register.css' %}">
+{% endblock %}
+
+{% block top_action %}
+<a class="back-link" href="{% url 'account_type_page' %}">← Voltar</a>
+{% endblock %}
+
+{% block account_badge %}
+<span class="selected-account"><i class="bi bi-check2"></i> Cadastro como marca</span>
+{% endblock %}
+
+{% block content %}
+<div class="form-card form-card--brand">
+    <p class="eyebrow">Cadastro de marca · Etapa 2 de 2</p>
+    <h1>Apresente sua marca ao FioFora</h1>
+    <p class="form-intro">Informe os dados oficiais e um contato que possamos confirmar depois.</p>
+
+    <form class="form-stack" action="{% url 'brand_register_page' %}" method="post">
+        {% csrf_token %}
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="brand-trade-name">Nome da marca</label>
+                <input class="form-control" id="brand-trade-name" name="trade_name" type="text" placeholder="Nome fantasia" autocomplete="organization">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="brand-cnpj">CNPJ</label>
+                <input class="form-control" id="brand-cnpj" name="cnpj" type="text" inputmode="numeric" placeholder="00.000.000/0000-00">
+            </div>
+        </div>
+
+        <label class="field-label" for="brand-legal-name">Razão social</label>
+        <input class="form-control" id="brand-legal-name" name="legal_name" type="text" placeholder="Nome empresarial registrado">
+
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="brand-segment">Atividade principal</label>
+                <select class="form-control" id="brand-segment" name="segment">
+                    <option value="" selected disabled>Selecione uma opção</option>
+                    <option value="moda">Moda e vestuário</option>
+                    <option value="acessorios">Acessórios</option>
+                    <option value="calcados">Calçados</option>
+                    <option value="casa">Casa e decoração</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="brand-location">Cidade e estado</label>
+                <input class="form-control" id="brand-location" name="location" type="text" placeholder="Rio de Janeiro, RJ">
+            </div>
+        </div>
+
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="brand-email">E-mail corporativo</label>
+                <input class="form-control" id="brand-email" name="email" type="email" placeholder="contato@suamarca.com" autocomplete="email">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="brand-phone">Telefone</label>
+                <input class="form-control" id="brand-phone" name="phone" type="tel" placeholder="(00) 0000-0000" autocomplete="tel">
+            </div>
+        </div>
+
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="brand-responsible">Responsável pela marca</label>
+                <input class="form-control" id="brand-responsible" name="responsible" type="text" placeholder="Nome completo" autocomplete="name">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="brand-social">Site ou Instagram</label>
+                <input class="form-control" id="brand-social" name="social" type="text" placeholder="@suamarca ou site.com.br">
+            </div>
+        </div>
+
+        <label class="field-label" for="brand-password">Senha</label>
+        <input class="form-control" id="brand-password" name="password" type="password" placeholder="Mínimo de 8 caracteres" autocomplete="new-password">
+
+        <p class="brand-form-help"><i class="bi bi-info-circle"></i> O CNPJ, a atividade e o responsável ajudam a validar o perfil empresarial da marca.</p>
+
+        <label class="form-check form-check--terms" for="brand-terms">
+            <input id="brand-terms" name="terms" type="checkbox">
+            <span>Li e aceito os <a href="#">Termos de uso</a> e a <a href="#">Política de privacidade</a>.</span>
+        </label>
+
+        <button class="button button--full" type="submit">
+            <span>Criar conta de marca</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+        </button>
+    </form>
+</div>
+{% endblock %}

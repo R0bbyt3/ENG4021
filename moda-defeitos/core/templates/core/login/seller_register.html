@@ -1,0 +1,64 @@
+{% extends 'core/login/base.html' %}
+{% load static %}
+
+{% block title %}Cadastro de vendedor | FioFora{% endblock %}
+
+{% block login_styles %}
+<link rel="stylesheet" href="{% static 'core/login/register.css' %}">
+{% endblock %}
+
+{% block top_action %}
+<a class="back-link" href="{% url 'account_type_page' %}">← Voltar</a>
+{% endblock %}
+
+{% block account_badge %}
+<span class="selected-account"><i class="bi bi-check2"></i> Cadastro como vendedor</span>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <p class="eyebrow">Cadastro · Etapa 2 de 2</p>
+    <h1>Crie sua conta de vendedor</h1>
+    <p class="form-intro">Use dados que você consiga confirmar depois.</p>
+
+    <form class="form-stack" action="{% url 'seller_register_page' %}" method="post">
+        {% csrf_token %}
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="seller-name">Nome completo</label>
+                <input class="form-control" id="seller-name" name="name" type="text" autocomplete="name" placeholder="Seu nome">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="seller-phone">Celular</label>
+                <input class="form-control" id="seller-phone" name="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+            </div>
+        </div>
+
+        <label class="field-label" for="seller-email">E-mail</label>
+        <input class="form-control" id="seller-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com">
+
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="seller-document">CPF</label>
+                <input class="form-control" id="seller-document" name="document" type="text" inputmode="numeric" placeholder="000.000.000-00">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="seller-location">Cidade e estado</label>
+                <input class="form-control" id="seller-location" name="location" type="text" placeholder="Rio de Janeiro, RJ">
+            </div>
+        </div>
+
+        <label class="field-label" for="seller-password">Senha</label>
+        <input class="form-control" id="seller-password" name="password" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres">
+
+        <label class="form-check form-check--terms" for="seller-terms">
+            <input id="seller-terms" name="terms" type="checkbox">
+            <span>Li e aceito os <a href="#">Termos de uso</a> e a <a href="#">Política de privacidade</a>.</span>
+        </label>
+
+        <button class="button button--full" type="submit">
+            <span>Criar conta</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+        </button>
+    </form>
+</div>
+{% endblock %}

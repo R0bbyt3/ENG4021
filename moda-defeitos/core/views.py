@@ -32,3 +32,35 @@ def product_delete(request, product_id):
         product.delete()
         return redirect('home')
     return render(request, 'core/product_confirm_delete.html', {'product': product})
+
+
+def login_page(request):
+    if request.method == 'POST':
+        return redirect('home')
+    return render(request, 'core/login/login.html')
+
+
+def password_reset_page(request):
+    return render(request, 'core/login/password_reset.html', {'demo_notice': request.method == 'POST'})
+
+
+def account_type_page(request):
+    return render(request, 'core/login/account_type.html')
+
+
+def buyer_register_page(request):
+    if request.method == 'POST':
+        return redirect('login_page')
+    return render(request, 'core/login/buyer_register.html')
+
+
+def seller_register_page(request):
+    if request.method == 'POST':
+        return redirect('login_page')
+    return render(request, 'core/login/seller_register.html')
+
+
+def brand_register_page(request):
+    if request.method == 'POST':
+        return redirect('login_page')
+    return render(request, 'core/login/brand_register.html')

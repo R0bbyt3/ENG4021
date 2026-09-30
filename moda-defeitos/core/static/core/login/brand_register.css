@@ -1,0 +1,19 @@
+.form-card--brand {
+    width: min(100%, 680px);
+}
+
+.brand-form-help {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 6px 0 2px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.brand-form-help i {
+    flex: 0 0 auto;
+    color: var(--green);
+    font-size: 14px;
+}

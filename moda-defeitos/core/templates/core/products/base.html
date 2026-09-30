@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{% static 'core/products.css' %}">
+{% endblock %}
+
+{% block page_body %}
+<header class="site-header">
+    <div class="container site-header__inner">
+        <a class="brand-logo" href="{% url 'home' %}" aria-label="FioFora — vitrine">
+            {% include 'core/components/logo.html' %}
+        </a>
+        <a class="button" href="{% url 'product_create' %}">Novo produto</a>
+    </div>
+</header>
+<main class="container">
+    {% block content %}{% endblock %}
+</main>
+{% endblock %}

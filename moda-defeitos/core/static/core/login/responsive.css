@@ -1,0 +1,74 @@
+@media (max-width: 1050px) {
+    .auth-layout {
+        grid-template-columns: 40% 60%;
+    }
+
+    .brand-message__title {
+        font-size: 42px;
+    }
+
+    .form-panel {
+        padding-right: 50px;
+        padding-left: 50px;
+    }
+}
+
+@media (max-width: 760px) {
+    .auth-layout {
+        display: block;
+    }
+
+    .brand-panel {
+        min-height: 420px;
+    }
+
+    .brand-panel__frame {
+        height: 384px;
+        min-height: 0;
+    }
+
+    .brand-message__title {
+        font-size: 39px;
+    }
+
+    .brand-message__text,
+    .selected-account {
+        display: none;
+    }
+
+    .form-panel {
+        min-height: auto;
+        padding: 110px 24px 70px;
+    }
+
+    .form-panel__top {
+        top: 40px;
+        right: 24px;
+    }
+
+    .form-card h1 {
+        font-size: 42px;
+    }
+}
+
+@media (max-width: 520px) {
+    .brand-panel {
+        min-height: 330px;
+        padding: 10px;
+    }
+
+    .brand-panel__frame {
+        height: 310px;
+        padding: 20px;
+    }
+
+    .brand-message {
+        right: 20px;
+        bottom: 22px;
+        left: 20px;
+    }
+
+    .brand-message__title {
+        font-size: 34px;
+    }
+}

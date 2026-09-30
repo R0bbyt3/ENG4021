@@ -1,0 +1,27 @@
+@import url("layout.css");
+@import url("forms.css");
+@import url("responsive.css");
+
+.selected-account {
+    display: table;
+    margin-top: 24px;
+    padding: 11px 16px;
+    color: #432c24;
+    background: var(--coral);
+    border-radius: var(--radius-medium);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.safe-label,
+.back-link {
+    color: #575b53;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.safe-label i,
+.selected-account i {
+    margin-right: 5px;
+}

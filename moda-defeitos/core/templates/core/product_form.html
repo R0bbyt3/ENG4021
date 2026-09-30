@@ -1,6 +1,6 @@
-{% extends 'core/base.html' %}
+{% extends 'core/products/base.html' %}
 
-{% block title %}{{ title }} | Moda Justa{% endblock %}
+{% block title %}{{ title }} | FioFora{% endblock %}
 
 {% block content %}
 <section class="form-section">
@@ -9,7 +9,23 @@
 
     <form method="post" class="product-form">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% for field in form %}
+            {% if field.name == 'is_active' %}
+            <label class="form-check" for="{{ field.id_for_label }}">
+                {{ field }}<span>{{ field.label }}</span>
+            </label>
+            {% else %}
+            <div class="form-field">
+                <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+            </div>
+            {% endif %}
+            {% if field.errors %}<div class="form-errors">{{ field.errors }}</div>{% endif %}
+        {% endfor %}
         <div class="form-actions">
             <button class="button" type="submit">Salvar produto</button>
             <a href="{% url 'home' %}">Cancelar</a>

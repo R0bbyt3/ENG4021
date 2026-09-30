@@ -1,0 +1,87 @@
+.auth-layout {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: minmax(440px, 0.94fr) minmax(520px, 1.06fr);
+}
+
+.brand-panel {
+    min-height: 100vh;
+    padding: 18px;
+    color: var(--white);
+    background:
+        linear-gradient(180deg, rgba(56, 75, 55, 0.34) 0%, rgba(32, 47, 38, 0.88) 100%),
+        url("../images/clothing-rack.jpg") center / 115% auto no-repeat;
+}
+
+.brand-panel__frame {
+    position: relative;
+    height: calc(100vh - 36px);
+    min-height: 650px;
+    padding: 28px;
+    border: 1px dashed rgba(255, 255, 255, 0.36);
+    border-radius: var(--radius-large);
+}
+
+.brand-message {
+    position: absolute;
+    right: 28px;
+    bottom: 24px;
+    left: 28px;
+    max-width: 590px;
+}
+
+.brand-panel .brand-logo {
+    padding: 8px 14px;
+    background: rgba(255, 253, 248, 0.82);
+    border-radius: var(--radius-medium);
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.eyebrow--coral {
+    color: #d87658;
+}
+
+.brand-message__title {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(44px, 4vw, 68px);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+}
+
+.brand-message__text {
+    max-width: 525px;
+    margin: 22px 0 0;
+    color: rgba(255, 255, 255, 0.83);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.form-panel {
+    position: relative;
+    display: grid;
+    min-height: 100vh;
+    padding: 30px clamp(38px, 7vw, 130px);
+    background: var(--paper);
+}
+
+.form-panel__top {
+    position: absolute;
+    top: 46px;
+    right: clamp(38px, 7vw, 130px);
+}
+
+.form-panel__content {
+    display: grid;
+    place-items: center;
+    width: 100%;
+}

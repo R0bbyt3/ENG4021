@@ -1,0 +1,66 @@
+{% extends 'core/login/base.html' %}
+{% load static %}
+
+{% block title %}Escolha sua conta | FioFora{% endblock %}
+
+{% block login_styles %}
+<link rel="stylesheet" href="{% static 'core/login/account_type.css' %}">
+{% endblock %}
+
+{% block top_action %}
+<a class="back-link" href="{% url 'login_page' %}">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <p class="eyebrow">Cadastro · Etapa 1 de 2</p>
+    <h1>Como você quer usar o FioFora?</h1>
+    <p class="form-intro">Essa escolha adapta o cadastro e pode ser alterada depois.</p>
+
+    <fieldset class="account-form">
+        <legend class="visually-hidden">Escolha o tipo de conta</legend>
+        <input class="account-selector" id="account-buyer" type="radio" name="account_type" checked>
+        <input class="account-selector" id="account-seller" type="radio" name="account_type">
+        <input class="account-selector" id="account-brand" type="radio" name="account_type">
+
+        <label class="account-option" for="account-buyer">
+            <span class="account-option__icon" aria-hidden="true"><i class="bi bi-bag"></i></span>
+            <span class="account-option__text">
+                <strong>Quero comprar</strong>
+                <small>Encontre peças de marca com pequenos defeitos e preços transparentes.</small>
+            </span>
+            <span class="radio-mark" aria-hidden="true"></span>
+        </label>
+
+        <label class="account-option" for="account-seller">
+            <span class="account-option__icon" aria-hidden="true"><i class="bi bi-tag"></i></span>
+            <span class="account-option__text">
+                <strong>Quero vender</strong>
+                <small>Cadastre peças e acompanhe seus anúncios em um só lugar.</small>
+            </span>
+            <span class="radio-mark" aria-hidden="true"></span>
+        </label>
+
+        <label class="account-option" for="account-brand">
+            <span class="account-option__icon" aria-hidden="true"><i class="bi bi-shop"></i></span>
+            <span class="account-option__text">
+                <strong>Represento uma marca</strong>
+                <small>Dê um novo destino a peças que não chegaram às araras.</small>
+            </span>
+            <span class="radio-mark" aria-hidden="true"></span>
+        </label>
+
+        <div class="account-actions">
+            <a class="button continue-buyer" href="{% url 'buyer_register_page' %}">
+                <span>Continuar</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="button continue-seller" href="{% url 'seller_register_page' %}">
+                <span>Continuar</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+            </a>
+            <a class="button continue-brand" href="{% url 'brand_register_page' %}">
+                <span>Continuar</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+            </a>
+        </div>
+    </fieldset>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'core/login/base.html' %}
+{% load static %}
+
+{% block title %}Cadastro de comprador | FioFora{% endblock %}
+
+{% block login_styles %}
+<link rel="stylesheet" href="{% static 'core/login/register.css' %}">
+{% endblock %}
+
+{% block top_action %}
+<a class="back-link" href="{% url 'account_type_page' %}">← Voltar</a>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <p class="eyebrow">Cadastro · Etapa 2 de 2</p>
+    <h1>Crie sua conta de comprador</h1>
+    <p class="form-intro">Use dados que você consiga confirmar depois.</p>
+
+    <form class="form-stack" action="{% url 'buyer_register_page' %}" method="post">
+        {% csrf_token %}
+        <div class="field-grid">
+            <div class="form-field">
+                <label class="field-label" for="buyer-name">Nome completo</label>
+                <input class="form-control" id="buyer-name" name="name" type="text" autocomplete="name" placeholder="Seu nome">
+            </div>
+            <div class="form-field">
+                <label class="field-label" for="buyer-phone">Celular</label>
+                <input class="form-control" id="buyer-phone" name="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+            </div>
+        </div>
+
+        <label class="field-label" for="buyer-email">E-mail</label>
+        <input class="form-control" id="buyer-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com">
+
+        <label class="field-label" for="buyer-password">Senha</label>
+        <input class="form-control" id="buyer-password" name="password" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres">
+
+        <label class="form-check form-check--terms" for="buyer-terms">
+            <input id="buyer-terms" name="terms" type="checkbox">
+            <span>Li e aceito os <a href="#">Termos de uso</a> e a <a href="#">Política de privacidade</a>.</span>
+        </label>
+
+        <button class="button button--full" type="submit">
+            <span>Criar conta</span><span aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
+        </button>
+    </form>
+</div>
+{% endblock %}

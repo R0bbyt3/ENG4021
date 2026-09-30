@@ -1,0 +1,109 @@
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.account-option {
+    position: relative;
+    display: grid;
+    min-height: 78px;
+    grid-template-columns: 44px 1fr 20px;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: rgba(255, 255, 255, 0.28);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+}
+
+.account-selector {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#account-buyer:checked ~ label[for="account-buyer"],
+#account-seller:checked ~ label[for="account-seller"],
+#account-brand:checked ~ label[for="account-brand"] {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 1px var(--green);
+}
+
+#account-buyer:focus-visible ~ label[for="account-buyer"],
+#account-seller:focus-visible ~ label[for="account-seller"],
+#account-brand:focus-visible ~ label[for="account-brand"] {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+}
+
+.account-option__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    background: #ebe8e0;
+    border-radius: var(--radius-small);
+    font-size: 18px;
+}
+
+.account-option__text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.account-option__text strong {
+    font-size: 14px;
+}
+
+.account-option__text small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.radio-mark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #bbb8b0;
+    border-radius: 50%;
+}
+
+#account-buyer:checked ~ label[for="account-buyer"] .radio-mark,
+#account-seller:checked ~ label[for="account-seller"] .radio-mark,
+#account-brand:checked ~ label[for="account-brand"] .radio-mark {
+    border: 5px solid var(--paper);
+    outline: 1px solid var(--green);
+    background: var(--green);
+}
+
+.account-actions .button {
+    display: none;
+}
+
+#account-buyer:checked ~ .account-actions .continue-buyer,
+#account-seller:checked ~ .account-actions .continue-seller,
+#account-brand:checked ~ .account-actions .continue-brand {
+    display: flex;
+}
+
+.account-actions .button {
+    width: 150px;
+    margin-top: 10px;
+}
+
+@media (max-width: 520px) {
+    .account-option {
+        grid-template-columns: 38px 1fr 18px;
+        padding: 12px;
+    }
+
+    .account-option__text small {
+        line-height: 1.35;
+    }
+}

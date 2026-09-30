@@ -4,18 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Moda com pequenos defeitos{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>{% block title %}FioFora{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'core/icons/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'core/base/site.css' %}">
+    {% block page_styles %}{% endblock %}
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a class="brand" href="{% url 'home' %}">Moda Justa</a>
-            <a class="button" href="{% url 'product_create' %}">Novo produto</a>
-        </div>
-    </header>
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+    {% block page_body %}{% endblock %}
 </body>
 </html>
