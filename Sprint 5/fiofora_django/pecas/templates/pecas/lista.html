@@ -1,0 +1,30 @@
+{% extends "pecas/base.html" %}
+
+{% block titulo %}FioFora — Peças com pequenos defeitos{% endblock %}
+
+{% block conteudo %}
+  <h1 class="page-title serif">Peças com pequenos defeitos</h1>
+  <p class="page-sub">Cada desconto é calculado pela gravidade real do defeito.</p>
+
+  {% if pecas %}
+    <div class="grid">
+      {% for peca in pecas %}
+        <a class="card" href="{% url 'pecas:produto' peca.pk %}">
+          <div class="card-photo">Foto da peça</div>
+          <div class="card-body">
+            <div class="brand-name">{{ peca.vendedor.nome }}</div>
+            <div class="name">{{ peca.nome }}</div>
+            <span class="severity-badge {{ peca.faixa }}"><span class="severity-dot"></span>{{ peca.faixa_label }}</span>
+            <div class="price-row">
+              <span class="price-old">R$ {{ peca.preco_original|floatformat:2 }}</span>
+              <span class="price-new">R$ {{ peca.preco_final|floatformat:2 }}</span>
+              <span class="price-off">{{ peca.desconto_percentual }}% off</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">Nenhuma peça cadastrada ainda. Cadastre peças pelo painel em /admin/.</div>
+  {% endif %}
+{% endblock %}

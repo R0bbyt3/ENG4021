@@ -1,0 +1,29 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}FioFora{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'pecas/css/fiofora.css' %}">
+</head>
+<body>
+
+<header class="brand-header">
+  <a href="{% url 'pecas:lista' %}" class="logo" aria-label="FioFora, página inicial"><span class="fio">fio</span><span class="fora">fora</span></a>
+  <div class="badge-anunciar">Anunciar peça</div>
+</header>
+
+<main class="page">
+  {% block conteudo %}{% endblock %}
+</main>
+
+<footer class="brand-footer">
+  <div>
+    <div class="logo"><span class="fio">fio</span><span class="fora">fora</span></div>
+    <div class="tag">Moda com pequenos defeitos, preço justo.</div>
+  </div>
+  <div class="tag">Transparência · Preço justo · Menos descarte</div>
+</footer>
+
+</body>
+</html>
