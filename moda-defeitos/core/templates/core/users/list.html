@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Usuários | FioFora{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{% static 'core/users/list.css' %}">{% endblock %}
+{% block page_body %}
+<div class="users-topbar"><span>Moda circular com transparência em cada preço</span><span>Gestão de contas</span></div>
+<header class="users-header">
+  <a class="users-logo" href="{% url 'home' %}" aria-label="FioFora - vitrine">{% include 'core/components/logo.html' %}</a>
+  <nav aria-label="Navegação"><a href="{% url 'home' %}">Vitrine</a><a href="{% url 'admin:index' %}">Administração</a></nav>
+  <span class="team-badge">Área da equipe</span>
+</header>
+<main class="users-main">
+  <p class="users-eyebrow">FIOFORA / GESTÃO DE CONTAS</p>
+  <div class="users-title"><div><h1>Quem faz parte<br><em>da FioFora.</em></h1><p>Consulte os compradores, vendedores e marcas da plataforma.</p></div><span class="users-count">{{ total }} conta{{ total|pluralize:"s" }} encontrada{{ total|pluralize:"s" }}</span></div>
+  <form method="get" class="users-filters" role="search">
+    <div class="search-field"><label for="search">Buscar usuário</label><input id="search" name="q" type="search" maxlength="120" value="{{ q }}" placeholder="Nome, e-mail, usuário ou loja"></div>
+    <div><label for="role">Tipo de conta</label><select id="role" name="role"><option value="">Todos os tipos</option>{% for value, label in roles %}<option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}<option value="unassigned" {% if role == 'unassigned' %}selected{% endif %}>Sem perfil</option></select></div>
+    <div><label for="status">Situação</label><select id="status" name="status"><option value="">Todas</option><option value="active" {% if status == 'active' %}selected{% endif %}>Ativo</option><option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativo</option></select></div>
+    <button type="submit">Aplicar filtros</button><a class="clear-filters" href="{% url 'user_list' %}">Limpar</a>
+  </form>
+  <section class="users-panel" aria-label="Usuários cadastrados">
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela de usuários, deslize horizontalmente em telas pequenas">
+  <table><caption>Contas cadastradas na plataforma</caption><thead><tr><th scope="col">Usuário</th><th scope="col">E-mail</th><th scope="col">Tipo</th><th scope="col">Loja ou marca</th><th scope="col">Situação</th><th scope="col">Cadastro</th></tr></thead><tbody>
+  {% for account in page_obj %}<tr>
+    <td><div class="person"><span class="avatar" aria-hidden="true">{{ account.first_name|default:account.username|slice:":1"|upper }}</span><div><strong>{{ account.get_full_name|default:account.username }}</strong><small>@{{ account.username }}</small></div></div></td>
+    <td>{{ account.email|default:"Não informado" }}</td><td><span class="role-badge role-badge--{{ account.profile.role|default:'unassigned' }}">{{ account.profile.get_role_display|default:"Sem perfil" }}</span></td><td>{{ account.profile.store_name|default:"—" }}</td>
+    <td><span class="status-badge {% if not account.is_active %}inactive{% endif %}">{% if account.is_active %}Ativo{% else %}Inativo{% endif %}</span></td><td>{{ account.date_joined|date:"d/m/Y" }}</td>
+  </tr>{% empty %}<tr><td colspan="6" class="empty"><strong>Nenhum usuário encontrado</strong><p>Tente outro nome ou limpe os filtros para ver todas as contas.</p><a href="{% url 'user_list' %}">Limpar filtros</a></td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="users-footer"><span>Exibindo {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ total }}</span><nav aria-label="Paginação">
+    {% if page_obj.has_previous %}<a href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+    <span aria-current="page">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}
+  </nav></div></section>
+  <p class="users-note">FioFora · Moda com pequenos defeitos, preço justo.</p>
+</main>
+{% endblock %}
