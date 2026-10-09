@@ -126,3 +126,9 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Chaves consistentes com a migração original do projeto.
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Origem usada pelo encaminhamento local do Codespaces.
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ["https://localhost:8000"]

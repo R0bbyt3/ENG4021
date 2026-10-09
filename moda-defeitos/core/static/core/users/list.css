@@ -1,0 +1,98 @@
+/* Identidade visual observada nos três protótipos Lovable da FioFora.
+   Estilos restritos à listagem para preservar as telas dos demais membros. */
+body {
+    --background: #f5f1e8;
+    --paper: #faf8f2;
+    --white: #fffefa;
+    --ink: #2c3028;
+    --muted: #6c7065;
+    --line: #deddd4;
+    --green: #435641;
+    --coral: #ab624c;
+    background: var(--background);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+}
+.users-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px max(28px, calc((100% - 1184px) / 2));
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 11px;
+}
+.users-header {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    padding: 24px max(28px, calc((100% - 1184px) / 2));
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+}
+.users-logo { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+.users-logo .text-logo { font-size: 32px; font-weight: 400; letter-spacing: -1.5px; }
+.users-logo .text-logo__first, .users-logo .text-logo__second { color: var(--green); }
+.users-logo .text-logo__second { font-style: normal; }
+.users-header nav { display: flex; justify-content: flex-end; gap: 28px; flex: 1; }
+.users-header nav a { color: var(--ink); text-decoration: none; font-size: 13px; }
+.users-header nav a:hover { color: var(--coral); }
+.team-badge { border: 1px solid var(--line); color: var(--muted); padding: 7px 11px; border-radius: 20px; font-size: 11px; }
+.users-main { max-width: 1240px; margin: 0 auto; padding: 48px 28px; }
+.users-eyebrow { font-size: 10px; letter-spacing: 1.4px; font-weight: bold; color: var(--coral); margin-bottom: 17px; }
+.users-title { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 32px; }
+.users-title h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(36px, 4vw, 52px); font-weight: 400; color: var(--green); margin-bottom: 17px; line-height: 1.12; letter-spacing: -1px; }
+.users-title h1 em { color: var(--coral); font-weight: 400; }
+.users-title p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.users-count { white-space: nowrap; color: var(--muted); font-size: 12px; padding-bottom: 4px; }
+.users-filters { display: flex; align-items: flex-end; gap: 14px; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+.users-filters label { display: block; font-size: 12px; margin-bottom: 9px; }
+.users-filters input, .users-filters select { height: 44px; border: 1px solid var(--line); border-radius: 4px; padding: 0 12px; background: var(--white); color: var(--ink); width: 100%; font-size: 13px; }
+.users-filters .search-field { flex: 1; min-width: 200px; }
+.users-filters button { height: 44px; padding: 0 20px; white-space: nowrap; background: var(--green); color: var(--white); border: 0; border-radius: 4px; font-size: 13px; cursor: pointer; }
+.users-filters button:hover { background: #354632; }
+.clear-filters { padding: 14px 0; color: var(--green); font-size: 12px; }
+.users-panel { background: var(--white); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+caption { padding: 20px 24px; text-align: left; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: var(--green); border-bottom: 1px solid var(--line); }
+th { background: var(--paper); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding: 17px 20px; }
+td { padding: 19px 20px; border-bottom: 1px solid #eeece5; vertical-align: middle; }
+td:nth-child(2) { overflow-wrap: anywhere; max-width: 260px; }
+.person { display: flex; align-items: center; gap: 12px; min-width: 170px; }
+.person strong { display: block; font-weight: 500; }
+.person small { display: block; font-size: 11px; color: var(--muted); margin-top: 5px; }
+.avatar { display: grid; place-items: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; background: #ece6da; color: var(--green); font-family: Georgia, 'Times New Roman', serif; font-size: 19px; }
+.role-badge { display: inline-block; white-space: nowrap; background: #efeee6; padding: 6px 9px; border-radius: 2px; font-size: 11px; }
+.role-badge--seller { background: #e9ede3; color: #435641; }
+.role-badge--brand { background: #f1e2d5; color: #7f523e; }
+.status-badge { display: inline-block; white-space: nowrap; color: #40563b; background: #e8eee2; padding: 6px 10px; border-radius: 20px; font-size: 11px; }
+.status-badge.inactive { color: #8a5140; background: #f4e6dc; }
+.users-footer { display: flex; justify-content: space-between; gap: 15px; padding: 19px 24px; color: var(--muted); font-size: 12px; }
+.users-footer nav { display: flex; gap: 16px; align-items: center; }
+.users-footer a, .empty a { color: var(--green); }
+.users-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 28px; }
+.empty { text-align: center; padding: 48px 20px; }
+.empty p { margin: 12px 0 20px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, .table-scroll:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+@media (max-width: 850px) {
+    .users-topbar { padding: 10px 24px; }
+    .users-topbar span:last-child { display: none; }
+    .users-header { gap: 18px; padding: 18px 24px; }
+    .team-badge { display: none; }
+    .users-title { display: block; }
+    .users-count { display: block; margin-top: 18px; }
+    .users-filters { flex-wrap: wrap; }
+    .users-filters .search-field { flex-basis: 100%; }
+    .users-filters > div:not(.search-field) { flex: 1; }
+    .users-main { padding: 30px 18px; }
+    .users-footer { flex-direction: column; }
+    .users-header nav { justify-content: flex-end; gap: 20px; }
+}
+@media (max-width: 420px) {
+    .users-header { flex-wrap: wrap; }
+    .users-header nav { flex-basis: 100%; justify-content: flex-start; }
+    .users-filters > div:not(.search-field) { flex-basis: 100%; }
+    .users-footer nav { flex-wrap: wrap; }
+}
