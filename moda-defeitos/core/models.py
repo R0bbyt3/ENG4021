@@ -237,6 +237,10 @@ class OrderItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
 
+    @property
+    def subtotal(self):
+        return self.unit_price * self.quantity
+
     class Meta:
         verbose_name = "item do pedido"
         verbose_name_plural = "itens do pedido"

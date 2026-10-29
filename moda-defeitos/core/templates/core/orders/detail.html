@@ -1,0 +1,32 @@
+{% extends 'core/orders/base.html' %}
+
+{% block title %}Pedido {{ order.reference }} | FioFora{% endblock %}
+
+{% block orders_content %}
+<section class="hero order-heading">
+    <h1>Seu pedido</h1>
+    <p class="order-reference">{{ order.reference }}</p>
+    <p>Registrado em {{ order.created_at|date:'d/m/Y' }} às {{ order.created_at|date:'H:i' }} · <span class="order-status">{{ order.get_status_display }}</span></p>
+</section>
+
+<p class="order-notice"><strong>Compra demonstrativa.</strong> Nenhum pagamento foi realizado e não haverá entrega.</p>
+
+<section class="order-card order-receipt" aria-labelledby="items-heading">
+    <h2 id="items-heading">Resumo da compra</h2>
+    {% for item in order.items.all %}
+    <article class="order-item">
+        <div>
+            <h3>{{ item.product_name }}</h3>
+            <p>{{ item.quantity }} unidade{{ item.quantity|pluralize:'s' }} · R$ {{ item.unit_price|floatformat:2 }} cada</p>
+        </div>
+        <strong class="order-price">R$ {{ item.subtotal|floatformat:2 }}</strong>
+    </article>
+    {% endfor %}
+    <dl class="order-totals">
+        <div class="order-total"><dt>Total do pedido</dt><dd>R$ {{ order.total|floatformat:2 }}</dd></div>
+    </dl>
+</section>
+<div class="order-actions">
+    <a class="button" href="{% url 'home' %}">Continuar comprando</a>
+</div>
+{% endblock %}

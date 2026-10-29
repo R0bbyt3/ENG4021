@@ -1,0 +1,55 @@
+{% extends 'core/orders/base.html' %}
+
+{% block title %}Checkout | FioFora{% endblock %}
+
+{% block orders_content %}
+<section class="hero order-heading">
+    <a class="order-back" href="{% url 'cart_page' %}">Voltar ao carrinho</a>
+    <h1>Checkout simulado</h1>
+    <p>Confira suas peças antes de confirmar o pedido.</p>
+</section>
+
+<p class="order-notice"><strong>Ambiente de demonstração.</strong> Nenhum pagamento será processado e não haverá entrega.</p>
+
+<div class="order-layout">
+    <div class="order-sections">
+        <section class="order-card" aria-labelledby="buyer-heading">
+            <h2 id="buyer-heading">Dados do comprador</h2>
+            <p>{{ request.user.get_full_name|default:request.user.username }}</p>
+            <p class="order-muted">{{ request.user.email }}</p>
+            <a href="{% url 'account_page' %}">Editar meus dados</a>
+        </section>
+        <section class="order-card" aria-labelledby="items-heading">
+            <h2 id="items-heading">Suas peças</h2>
+            {% for line in lines %}
+            <article class="order-item">
+                <div>
+                    <h3>{{ line.product.name }}</h3>
+                    <p>{{ line.product.description|truncatechars:140 }}</p>
+                    <p>{{ line.item.quantity }} unidade{{ line.item.quantity|pluralize:'s' }} · R$ {{ line.product.price|floatformat:2 }} cada</p>
+                    {% if line.problem %}<p class="form-errors" role="alert">{{ line.problem }}</p>{% endif %}
+                </div>
+                <strong class="order-price">R$ {{ line.subtotal|floatformat:2 }}</strong>
+            </article>
+            {% endfor %}
+        </section>
+    </div>
+    <aside class="order-card order-summary" aria-labelledby="summary-heading">
+        <h2 id="summary-heading">Resumo</h2>
+        <dl class="order-totals">
+            <div><dt>Peças disponíveis</dt><dd>{{ pieces }}</dd></div>
+            <div><dt>Subtotal</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
+            <div><dt>Frete</dt><dd>Não se aplica</dd></div>
+            <div class="order-total"><dt>Total</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
+        </dl>
+        {% if has_unavailable %}
+        <p class="form-errors" role="alert">Ajuste os itens indisponíveis no carrinho antes de finalizar.</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <button class="button button--full" type="submit"{% if has_unavailable %} disabled{% endif %}>Finalizar pedido simulado</button>
+        </form>
+        <p class="field-help">Os valores e a disponibilidade são conferidos ao confirmar.</p>
+    </aside>
+</div>
+{% endblock %}

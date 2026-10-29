@@ -1,0 +1,14 @@
+{% extends 'core/products/base.html' %}
+{% load static %}
+
+{% block page_styles %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'core/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+{% for message in messages %}
+<p class="order-message{% if message.tags %} order-message--{{ message.tags }}{% endif %}" role="status">{{ message }}</p>
+{% endfor %}
+{% block orders_content %}{% endblock %}
+{% endblock %}

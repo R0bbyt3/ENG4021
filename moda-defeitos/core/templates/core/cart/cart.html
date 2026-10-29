@@ -60,7 +60,10 @@
         {% if has_unavailable %}
         <p class="field-help">Itens indisponíveis ficam de fora do total. Ajuste a quantidade ou remova-os.</p>
         {% endif %}
-        {# Membro 5: o botão "Finalizar compra" (checkout demonstrativo) entra aqui. #}
+        {% if not has_unavailable %}
+        <a class="button button--full" href="{% url 'checkout' %}">Finalizar compra</a>
+        {% endif %}
+        <p class="field-help">Compra demonstrativa, sem cobrança ou entrega.</p>
         <a class="cart-continue" href="{% url 'home' %}">Continuar comprando</a>
     </aside>
 </div>

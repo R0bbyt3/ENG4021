@@ -98,9 +98,9 @@ def cart_add(request, product_id):
         return redirect('cart_page')
 
     with transaction.atomic():
-        product = get_object_or_404(Product.objects.select_for_update(), pk=product_id)
         # Travar o carrinho do usuário evita que dois cliques seguidos furem o estoque.
         cart, _ = Cart.objects.select_for_update().get_or_create(user=request.user)
+        product = get_object_or_404(Product.objects.select_for_update(), pk=product_id)
         item = CartItem.objects.filter(cart=cart, product=product).first()
         current = item.quantity if item else 0
 
@@ -125,6 +125,7 @@ def cart_add(request, product_id):
 def cart_update_item(request, item_id):
     quantity = parse_quantity(request.POST.get('quantity'))
     with transaction.atomic():
+        Cart.objects.select_for_update().filter(user=request.user).first()
         # Filtrar por cart__user impede mexer no carrinho de outra pessoa (404).
         item = get_object_or_404(
             CartItem.objects.select_for_update().select_related('product'),
@@ -144,8 +145,10 @@ def cart_update_item(request, item_id):
 @require_POST
 @login_required
 def cart_remove_item(request, item_id):
-    item = get_object_or_404(CartItem.objects.select_related('product'), pk=item_id, cart__user=request.user)
-    name = item.product.name
-    item.delete()
+    with transaction.atomic():
+        Cart.objects.select_for_update().filter(user=request.user).first()
+        item = get_object_or_404(CartItem.objects.select_related('product'), pk=item_id, cart__user=request.user)
+        name = item.product.name
+        item.delete()
     messages.success(request, f'“{name}” foi removida do carrinho.')
     return redirect('cart_page')
