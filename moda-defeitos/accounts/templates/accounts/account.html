@@ -20,6 +20,9 @@
         </div>
         <nav class="account-navigation">
             <a class="is-current" href="#profile-details" aria-current="page">Perfil</a>
+            {% if request.user.is_staff or profile.role == 'buyer' %}
+            <a href="{% url 'order_list' %}">Meus pedidos</a>
+            {% endif %}
             {% if profile and profile.role != 'buyer' %}
             <a href="#business-details">Loja ou marca</a>
             {% endif %}

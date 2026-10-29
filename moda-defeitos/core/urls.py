@@ -5,6 +5,7 @@ from . import views, seller_views, cart_views, favorite_views, order_views
 
 urlpatterns = [
     path('checkout/', order_views.checkout, name='checkout'),
+    path('pedidos/', order_views.order_list, name='order_list'),
     path('pedidos/<int:order_id>/', order_views.order_detail, name='order_detail'),
     path('carrinho/', cart_views.cart_page, name='cart_page'),
     path('carrinho/adicionar/<int:product_id>/', cart_views.cart_add, name='cart_add'),

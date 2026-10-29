@@ -6,6 +6,9 @@
 <section class="hero cart-hero">
     <h1>Seu carrinho</h1>
     <p>Confira as peças, o defeito de cada uma e o valor antes de seguir.</p>
+    {% if request.user.is_staff or request.user.profile.role == 'buyer' %}
+    <a href="{% url 'order_list' %}">Ver meus pedidos</a>
+    {% endif %}
 </section>
 
 {% if messages %}

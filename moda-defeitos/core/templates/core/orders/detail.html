@@ -4,6 +4,7 @@
 
 {% block orders_content %}
 <section class="hero order-heading">
+    <a class="order-back" href="{% url 'order_list' %}">Voltar aos meus pedidos</a>
     <h1>Seu pedido</h1>
     <p class="order-reference">{{ order.reference }}</p>
     <p>Registrado em {{ order.created_at|date:'d/m/Y' }} às {{ order.created_at|date:'H:i' }} · <span class="order-status">{{ order.get_status_display }}</span></p>
@@ -27,6 +28,7 @@
     </dl>
 </section>
 <div class="order-actions">
-    <a class="button" href="{% url 'home' %}">Continuar comprando</a>
+    <a class="button" href="{% url 'order_list' %}">Ver meus pedidos</a>
+    <a href="{% url 'home' %}">Continuar comprando</a>
 </div>
 {% endblock %}

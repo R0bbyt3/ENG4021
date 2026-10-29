@@ -1,0 +1,49 @@
+{% extends 'core/orders/base.html' %}
+
+{% block title %}Meus pedidos | FioFora{% endblock %}
+
+{% block orders_content %}
+<section class="hero order-heading">
+    <a class="order-back" href="{% url 'account_page' %}">Minha conta</a>
+    <h1>Meus pedidos</h1>
+    <p>Seu histórico de compras, com os valores registrados em cada pedido.</p>
+</section>
+
+{% if page_obj %}
+<div class="section-heading">
+    <h2>Histórico de compras</h2>
+    <span>{{ page_obj.paginator.count }} pedido{{ page_obj.paginator.count|pluralize:'s' }}</span>
+</div>
+<section class="order-history" aria-label="Seus pedidos">
+    {% for order in page_obj %}
+    <article class="order-card">
+        <div class="order-card-heading">
+            <div>
+                <h2 class="order-reference"><a href="{% url 'order_detail' order.pk %}">{{ order.reference }}</a></h2>
+                <p class="order-muted">{{ order.created_at|date:'d/m/Y' }} às {{ order.created_at|date:'H:i' }} · {{ order.items.all|length }} {{ order.items.all|length|pluralize:'item,itens' }}</p>
+            </div>
+            <span class="order-status">{{ order.get_status_display }}</span>
+        </div>
+        <div class="order-history-footer">
+            <p>Total do pedido <strong class="order-price">R$ {{ order.total|floatformat:2 }}</strong></p>
+            <a class="button" href="{% url 'order_detail' order.pk %}">Ver detalhes</a>
+        </div>
+    </article>
+    {% endfor %}
+</section>
+
+{% if page_obj.has_other_pages %}
+<nav class="order-pagination" aria-label="Paginação dos pedidos">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}
+    <span aria-current="page">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<section class="empty-state order-empty">
+    <h2>Você ainda não fez nenhum pedido</h2>
+    <p>Escolha suas peças na vitrine e finalize a compra pelo carrinho. Seus pedidos aparecerão aqui.</p>
+    <a class="button" href="{% url 'home' %}">Explorar a vitrine</a>
+</section>
+{% endif %}
+{% endblock %}
