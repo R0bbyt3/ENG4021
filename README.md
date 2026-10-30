@@ -20,7 +20,7 @@ ENG4021/
 ├── Sprint 1/                 # Materiais e exercícios da Sprint 1
 ├── Sprint 2/                 # Materiais e exercícios da Sprint 2
 ├── ...                       # Próximas sprints
-└── moda-defeitos/            # Repositório específico do aplicativo Django
+└── fio-fora/                 # Repositório específico do aplicativo Django
 ```
 
 ### Guia de organização
@@ -31,18 +31,18 @@ ENG4021/
 - A pasta de uma sprint deve reunir apenas os materiais daquela etapa, para
     que seja possível acompanhar a evolução do projeto sem misturar versões ou
     atividades diferentes.
-- A pasta `moda-defeitos` contém o projeto codado do aplicativo e sua própria
+- A pasta `fio-fora` contém o projeto codado do aplicativo e sua própria
     estrutura Django. A explicação técnica dessa parte está documentada a partir
     da seção seguinte.
 - Este `README.md` apresenta primeiro a organização geral do repositório e,
     depois, a instalação, a arquitetura e o estado atual do aplicativo.
 
-## 2. Repositório específico do aplicativo: `moda-defeitos`
+## 2. Repositório específico do aplicativo: `fio-fora`
 
 Esta é a parte do projeto que já foi implementada em código. O aplicativo é uma
 plataforma Django para exibir produtos com pequenos defeitos de fabricação,
 informar o defeito e apresentar um preço reduzido de forma transparente. Os
-arquivos do sistema ficam dentro de `moda-defeitos/`; as pastas de sprint não
+arquivos do sistema ficam dentro de `fio-fora/`; as pastas de sprint não
 fazem parte da estrutura interna do aplicativo.
 
 ### 2.1 Instalação
@@ -100,7 +100,7 @@ Se aparecer a versão do Python, a instalação está pronta.
 Se você está na pasta `ENG4021`, entre na pasta do projeto:
 
 ```bash
-cd moda-defeitos
+cd fio-fora
 ```
 
 Depois, use os comandos do seu sistema abaixo.
@@ -161,10 +161,10 @@ Na Home, a URL chama a `home`, que busca os `Product` e envia a lista para o
 template. No cadastro, a URL chama outra view, que usa o `ProductForm`, salva o
 produto e redireciona para a Home.
 
-### Estrutura interna de `moda-defeitos`
+### Estrutura interna de `fio-fora`
 
 ```text
-moda-defeitos/
+fio-fora/
 ├── manage.py                 # Comandos do Django
 ├── requirements.txt          # Dependências do projeto
 ├── README.md                 # Guia do projeto
@@ -383,4 +383,4 @@ telas ainda está em andamento.
 
 O cadastro de compradores, vendedores e marcas é processado pelo app `accounts`,
 com validação dos dados, senha protegida e criação do perfil no banco. Após
-atualizar o código, execute `python manage.py migrate` dentro de `moda-defeitos`.
+atualizar o código, execute `python manage.py migrate` dentro de `fio-fora`.
