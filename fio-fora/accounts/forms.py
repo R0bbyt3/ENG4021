@@ -54,7 +54,6 @@ class BuyerRegistrationForm(UserCreationForm):
         self.fields['name'].widget.attrs['autocomplete'] = 'name'
         self.fields['email'].widget.attrs['autocomplete'] = 'email'
         self.fields['phone'].widget.attrs['autocomplete'] = 'tel'
-        self.fields['password'].widget.attrs['autocomplete'] = 'new-password'
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -159,6 +158,7 @@ class AccountProfileForm(forms.Form):
         self.fields['name'].widget.attrs['autocomplete'] = 'name'
         self.fields['email'].widget.attrs['autocomplete'] = 'email'
         self.fields['phone'].widget.attrs['autocomplete'] = 'tel'
+        self.fields['password'].widget.attrs['autocomplete'] = 'new-password'
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip().lower()
