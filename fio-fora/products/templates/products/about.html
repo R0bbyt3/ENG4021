@@ -1,0 +1,51 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Sobre | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Sobre a FioFora</p>
+    <h1>Pequenos defeitos.<br><em>Escolhas mais conscientes.</em></h1>
+    <p>Moda com pequenos defeitos, preço justo e informação para você decidir.</p>
+</header>
+
+<div class="two-columns">
+    <section class="panel">
+        <h2>Por que a FioFora existe?</h2>
+        <p>Uma mancha, uma costura fora do lugar ou um botão faltando podem afastar uma roupa do circuito de venda convencional. Isso pode gerar desperdício de peças que ainda têm utilidade.</p>
+        <p>A FioFora aproxima compradores de lojas e marcas com essas peças. A proposta é explicar o defeito e relacionar sua gravidade ao desconto, em vez de mostrar apenas uma promoção sem contexto.</p>
+    </section>
+    <section class="panel panel--note">
+        <h2>Um projeto acadêmico</h2>
+        <p>Somos a equipe FioFora, da disciplina ENG4021 - Projeto de Software, da PUC-Rio. Este ambiente é um protótipo acadêmico para demonstrar e testar a proposta com usuários.</p>
+        <p>Cadastros e pedidos fazem parte da demonstração. Não há cobrança ou entrega real de produtos neste ambiente.</p>
+        <a class="button button--secondary" href="{% url 'home' %}">Conhecer as peças</a>
+    </section>
+</div>
+
+<section class="panel about-method" aria-labelledby="criteria-title">
+    <h2 id="criteria-title">Como classificamos o defeito</h2>
+    <p>Cada critério recebe uma nota de 1 a 3. Os pesos em uso vêm do mesmo modelo que calcula a severidade e o desconto no cadastro e no simulador.</p>
+    <div class="criteria-table-wrapper" role="region" aria-label="Tabela de critérios do defeito" tabindex="0">
+        <table class="criteria-table">
+            <caption>Três critérios, seus pesos e a definição de cada nível</caption>
+            <thead><tr><th scope="col">Critério e peso</th><th scope="col">Nota</th><th scope="col">Nível</th><th scope="col">Definição</th></tr></thead>
+            <tbody>
+                {% for criterion in criteria %}
+                    {% for choice, description in criterion.levels %}
+                    <tr>
+                        {% if forloop.first %}<th scope="rowgroup" rowspan="3">{{ criterion.name }}<span class="field-help">Peso {{ criterion.weight|floatformat:2 }}</span></th>{% endif %}
+                        <td>{{ choice.0 }}</td><th scope="row">{{ choice.1 }}</th><td>{{ description }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h3>De onde vieram os pesos?</h3>
+    <p>A equipe realizou oito entrevistas com usuários, comparando situações de defeito e os descontos mínimos que aceitariam. O resumo das entrevistas, seção 4, registra a calibração: tipo tem maior peso, seguido de localização e extensão.</p>
+    <p>Essa pesquisa é exploratória: oito entrevistas orientam o protótipo, mas não representam todo o mercado. A nota organiza a informação; fotos e descrição continuam essenciais para avaliar a peça.</p>
+    <p><a href="https://github.com/R0bbyt3/ENG4021/blob/main/Sprint%202/S2_ResumoEntrevistas_M.pdf">Ler o resumo das oito entrevistas</a></p>
+    <a class="button" href="{% url 'discount_simulator' %}">Experimentar o simulador</a>
+</section>
+{% endblock %}

@@ -8,17 +8,62 @@
     <p>Veja o produto, o defeito e o preço de forma transparente.</p>
 </section>
 
+<form class="catalog-controls panel" action="{% url 'home' %}" method="get" aria-label="Buscar, filtrar e ordenar peças">
+    {% if active_band %}<input type="hidden" name="faixa" value="{{ active_band }}">{% endif %}
+    <div class="catalog-controls-grid">
+        <div class="form-field catalog-search">
+            <label class="field-label" for="catalog-query">Buscar por nome da peça ou marca</label>
+            <input type="search" name="q" id="catalog-query" value="{{ search_query }}" placeholder="Ex.: camisa de linho">
+        </div>
+        <div class="form-field">
+            <label class="field-label" for="catalog-brand">Marca</label>
+            <select name="marca" id="catalog-brand">
+                <option value="">Todas as marcas</option>
+                {% if unknown_brand %}<option value="{{ selected_brand }}" selected>{{ selected_brand }} (indisponível)</option>{% endif %}
+                {% for brand in brands %}<option value="{{ brand }}"{% if selected_brand == brand %} selected{% endif %}>{{ brand }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-field">
+            <label class="field-label" for="catalog-category">Categoria</label>
+            <select name="categoria" id="catalog-category">
+                <option value="">Todas as categorias</option>
+                {% if unknown_category %}<option value="{{ selected_category }}" selected>{{ selected_category }} (indisponível)</option>{% endif %}
+                {% for category in categories %}<option value="{{ category.slug }}"{% if selected_category == category.slug %} selected{% endif %}>{{ category.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-field">
+            <label class="field-label" for="catalog-size">Tamanho</label>
+            <select name="tamanho" id="catalog-size">
+                <option value="">Todos os tamanhos</option>
+                {% if unknown_size %}<option value="{{ selected_size }}" selected>{{ selected_size }} (indisponível)</option>{% endif %}
+                {% for size in sizes %}<option value="{{ size }}"{% if selected_size == size %} selected{% endif %}>{{ size }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-field">
+            <label class="field-label" for="catalog-order">Ordenar por</label>
+            <select name="ordem" id="catalog-order">
+                <option value="">Mais recentes</option>
+                <option value="desconto"{% if ordering == 'desconto' %} selected{% endif %}>Maior desconto</option>
+                <option value="preco"{% if ordering == 'preco' %} selected{% endif %}>Menor preço</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-actions">
+        <button class="button" type="submit">Aplicar busca e filtros</button>
+        {% if has_controls %}<a class="button button--secondary" href="{% url 'home' %}">Limpar filtros</a>{% endif %}
+    </div>
+</form>
+
 <nav class="severity-filters" aria-label="Filtrar por severidade do defeito">
     <span>Severidade:</span>
-    <a class="filter-chip{% if not active_band %} is-active{% endif %}" href="{% url 'home' %}"{% if not active_band %} aria-current="true"{% endif %}>Todas</a>
-    {% for value, label in bands %}
-    <a class="filter-chip{% if active_band == value %} is-active{% endif %}" href="?faixa={{ value }}"{% if active_band == value %} aria-current="true"{% endif %}><span class="severity-dot severity-dot--{{ value }}"></span>{{ label }}</a>
+    {% for band in band_links %}
+    <a class="filter-chip{% if active_band == band.value %} is-active{% endif %}" href="{% url 'home' %}{% if band.query %}?{{ band.query }}{% endif %}"{% if active_band == band.value %} aria-current="true"{% endif %}>{% if band.value %}<span class="severity-dot severity-dot--{{ band.value }}"></span>{% endif %}{{ band.label }}</a>
     {% endfor %}
 </nav>
 
 <div class="section-heading">
     <h2>Produtos disponíveis</h2>
-    <span>{{ products|length }} {{ products|length|pluralize:"item,itens" }}</span>
+    <span role="status">{{ result_count }} peça{{ result_count|pluralize }}</span>
 </div>
 
 {% if products %}
@@ -33,11 +78,11 @@
     </article>
     {% endfor %}
 </section>
-{% elif active_band %}
+{% elif has_filters %}
 <section class="empty-state">
-    <h2>Nenhuma peça nessa faixa</h2>
-    <p>Ainda não há peças com severidade {{ active_band }} na vitrine.</p>
-    <a class="button" href="{% url 'home' %}">Ver todas as peças</a>
+    <h2>{% if active_band %}Nenhuma peça nessa faixa{% else %}Nenhuma peça encontrada{% endif %}</h2>
+    <p>Nenhuma peça corresponde à combinação de busca e filtros escolhida. Tente outros critérios.</p>
+    <a class="button" href="{% url 'home' %}">Limpar filtros</a>
 </section>
 {% else %}
 <section class="empty-state">

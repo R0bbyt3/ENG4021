@@ -601,3 +601,162 @@ class FotosDaPecaTests(TestCase):
         """Sem enctype multipart o navegador não envia foto nenhuma."""
         response = self.client.get(reverse('product_create'))
         self.assertContains(response, 'enctype="multipart/form-data"')
+
+
+class CatalogControlsTests(TestCase):
+    """Busca, filtros e ordenação funcionam juntos sem perder favoritos."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.shirts = Category.objects.create(name='Camisetas', slug='camisetas')
+        cls.trousers = Category.objects.create(name='Calças', slug='calcas')
+        cls.empty_category = Category.objects.create(name='Sem peças', slug='sem-pecas')
+        cls.first = criar_peca('Camisa de linho', 1, 3, 2, brand='Linha & Cia', size='M',
+            category=cls.shirts, original_price=Decimal('100'), price=Decimal('70'))
+        cls.second = criar_peca('Camiseta básica', 1, 1, 1, brand='Circular', size='P',
+            category=cls.shirts, original_price=Decimal('200'), price=Decimal('170'))
+        cls.third = criar_peca('Calça jeans', 3, 3, 3, brand='Linha & Cia', size='M',
+            category=cls.trousers, original_price=Decimal('100'), price=Decimal('50'))
+        cls.no_original = Product.objects.create(name='Saia sem preço original', description='Detalhes', price=Decimal('20'))
+        cls.inactive = criar_peca('Peça oculta', brand='Só inativa', size='XXG', category=cls.empty_category, is_active=False)
+
+    def results(self, **params):
+        response = self.client.get(reverse('home'), params)
+        self.assertEqual(response.status_code, 200)
+        return response, [product.pk for product in response.context['products']]
+
+    def test_individual_filters_and_full_combination(self):
+        cases = [({'marca': 'Linha & Cia'}, [self.first, self.third]),
+                 ({'categoria': 'camisetas'}, [self.first, self.second]),
+                 ({'tamanho': 'P'}, [self.second]), ({'faixa': 'moderada'}, [self.first]),
+                 ({'marca': 'Linha & Cia', 'categoria': 'camisetas', 'tamanho': 'M',
+                   'faixa': 'moderada', 'q': 'linho'}, [self.first]),
+                 ({'marca': 'Circular', 'tamanho': 'M'}, [])]
+        for params, expected in cases:
+            with self.subTest(params=params):
+                response, ids = self.results(**params)
+                self.assertCountEqual(ids, [product.pk for product in expected])
+                self.assertEqual(response.context['result_count'], len(expected))
+                self.assertNotIn(self.inactive.pk, ids)
+
+    def test_options_come_from_whole_active_catalog_without_blanks_or_duplicates(self):
+        response, _ = self.results(marca='Circular', tamanho='P')
+        self.assertEqual(response.context['brands'], ['Circular', 'Linha & Cia'])
+        self.assertEqual(response.context['sizes'], ['M', 'P'])
+        self.assertCountEqual(response.context['categories'], [self.shirts, self.trousers])
+        self.assertNotContains(response, 'Só inativa')
+        self.assertNotContains(response, 'XXG')
+
+    def test_search_matches_name_and_brand_without_case_and_trims_spaces(self):
+        for query, expected in [('  LINHO ', [self.first]), ('circular', [self.second]),
+                                ('Linha & Cia', [self.first, self.third])]:
+            with self.subTest(query=query):
+                _, ids = self.results(q=query)
+                self.assertCountEqual(ids, [product.pk for product in expected])
+
+    def test_unknown_filters_show_zero_and_clear_link_returns_all(self):
+        for params in [{'marca': 'Inexistente'}, {'categoria': '999999999999999999999999999'},
+                       {'tamanho': 'ZZ'}, {'q': 'Nada parecido'}]:
+            with self.subTest(params=params):
+                response, ids = self.results(**params)
+                self.assertEqual(ids, [])
+                self.assertContains(response, '0 peças')
+                self.assertContains(response, 'Limpar filtros')
+                self.assertContains(response, f'href="{reverse("home")}"')
+        self.assertEqual(len(self.results()[1]), 4)
+
+    def test_price_and_default_recent_order(self):
+        self.assertEqual(self.results(ordem='preco')[1],
+                         [self.no_original.pk, self.third.pk, self.first.pk, self.second.pk])
+        self.assertEqual(self.results()[1],
+                         [self.no_original.pk, self.third.pk, self.second.pk, self.first.pk])
+
+    def test_discount_order_uses_actual_card_discount_instead_of_severity(self):
+        self.first.price = Decimal('40')
+        self.first.save()
+        self.assertEqual(self.results(ordem='desconto')[1],
+                         [self.first.pk, self.third.pk, self.second.pk, self.no_original.pk])
+
+    def test_discount_ties_use_lower_price_and_missing_discount_is_last(self):
+        tie = criar_peca('Outra promoção', original_price=Decimal('60'), price=Decimal('30'))
+        full = criar_peca('Sem desconto', original_price=Decimal('40'), price=Decimal('40'))
+        ids = self.results(ordem='desconto')[1]
+        self.assertEqual(ids[:2], [tie.pk, self.third.pk])
+        self.assertEqual(ids[-2:], [self.no_original.pk, full.pk])
+
+    def test_controls_preserve_selected_filters_search_and_order(self):
+        response, ids = self.results(marca='Linha & Cia', categoria='camisetas', tamanho='M',
+                                    faixa='moderada', q='linho', ordem='desconto')
+        self.assertEqual(ids, [self.first.pk])
+        for text in ['name="faixa" value="moderada"', 'value="desconto" selected',
+                     'value="camisetas" selected', 'value="Linha &amp; Cia" selected',
+                     'name="q" id="catalog-query" value="linho"']:
+            self.assertContains(response, text)
+
+    def test_severity_links_preserve_other_controls_and_encode_special_characters(self):
+        from urllib.parse import parse_qs
+        params = {'marca': 'Linha & Cia', 'categoria': 'camisetas', 'tamanho': 'M',
+                  'faixa': 'moderada', 'q': 'camisa & linho', 'ordem': 'preco'}
+        response, _ = self.results(**params)
+        for link in response.context['band_links']:
+            expected = {key: [value] for key, value in params.items() if key != 'faixa'}
+            if link['value']:
+                expected['faixa'] = [link['value']]
+            self.assertEqual(parse_qs(link['query']), expected)
+
+    def test_unknown_order_and_severity_are_ignored_safely(self):
+        response, ids = self.results(ordem='-seller__password', faixa='inexistente')
+        self.assertEqual(ids, self.results()[1])
+        self.assertEqual(response.context['ordering'], '')
+        self.assertEqual(response.context['active_band'], '')
+
+    def test_values_are_escaped(self):
+        response, _ = self.results(q='<script>alert(1)</script>', marca='"><img src=x onerror=1>')
+        self.assertNotContains(response, '<script>alert(1)</script>')
+        self.assertNotContains(response, '<img src=x onerror=1>')
+        self.assertContains(response, '&lt;script&gt;')
+
+    def test_empty_catalog_renders_controls_and_count(self):
+        Product.objects.all().delete()
+        response, ids = self.results()
+        self.assertEqual(ids, [])
+        for text in ['A vitrine está vazia', '0 peças', 'Todas as marcas']:
+            self.assertContains(response, text)
+
+    def test_favorites_and_cart_still_work_after_filtering(self):
+        buyer = get_user_model().objects.create_user('catalog-buyer@example.com')
+        UserProfile.objects.create(user=buyer, role='buyer')
+        Favorite.objects.create(user=buyer, product=self.first)
+        self.client.force_login(buyer)
+        response, _ = self.results(marca='Linha & Cia', ordem='preco')
+        saved = next(product for product in response.context['products'] if product.pk == self.first.pk)
+        self.assertTrue(saved.is_favorite)
+        self.assertContains(response, reverse('favorite_remove', args=[self.first.pk]))
+        self.assertContains(response, reverse('cart_add', args=[self.first.pk]))
+
+
+class AboutAndPolicyTests(TestCase):
+    def test_public_about_explains_nine_levels_research_and_model_weights(self):
+        from .models import PESO_EXTENSAO, PESO_LOCALIZACAO, PESO_TIPO
+        response = self.client.get(reverse('about'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item['weight'] for item in response.context['criteria']],
+                         [PESO_TIPO, PESO_LOCALIZACAO, PESO_EXTENSAO])
+        for text in ['oito entrevistas', 'ENG4021', 'PUC-Rio', 'protótipo acadêmico',
+                     'Estético', 'Funcional reparável', 'Funcional não reparável',
+                     'Escondido', 'Semivisível', 'Visível', 'Pequena', 'Média', 'Grande',
+                     '0,45', '0,35', '0,20', 'S2_ResumoEntrevistas_M.pdf']:
+            self.assertContains(response, text)
+
+    def test_about_header_is_active_and_links_to_catalog_and_simulator(self):
+        response = self.client.get(reverse('about'))
+        self.assertContains(response, f'href="{reverse("about")}" aria-current="page"')
+        self.assertContains(response, reverse('home'))
+        self.assertContains(response, reverse('discount_simulator'))
+
+    def test_product_detail_has_visible_policy_and_preserves_existing_content(self):
+        product = criar_peca('Camisa de teste')
+        response = self.client.get(reverse('product_detail', args=[product.pk]))
+        for text in ['Política de troca e devolução', 'Não realizamos vendas, cobranças ou entregas reais',
+                     'Ficha do defeito', reverse('about'), 'avaliações']:
+            self.assertContains(response, text)

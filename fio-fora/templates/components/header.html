@@ -8,6 +8,7 @@
         <nav class="site-nav" aria-label="Navegação principal">
             <a href="{% url 'home' %}"{% if current == 'home' %} aria-current="page"{% endif %}>Vitrine</a>
             <a href="{% url 'discount_simulator' %}"{% if current == 'discount_simulator' %} aria-current="page"{% endif %}>Simulador</a>
+            <a href="{% url 'about' %}"{% if current == 'about' %} aria-current="page"{% endif %}>Sobre</a>
             {% if is_seller %}
             <a href="{% url 'my_products' %}"{% if current == 'my_products' %} aria-current="page"{% endif %}>Minhas peças</a>
             {% endif %}
