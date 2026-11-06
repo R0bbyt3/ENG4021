@@ -768,3 +768,10 @@ class AboutAndPolicyTests(TestCase):
         for text in ['Política de troca e devolução', 'Não realizamos vendas, cobranças ou entregas reais',
                      'Ficha do defeito', reverse('about'), 'avaliações']:
             self.assertContains(response, text)
+
+    def test_policy_explains_deadline_defect_rule_how_to_ask_and_shipping(self):
+        product = criar_peca('Camisa de teste')
+        response = self.client.get(reverse('product_detail', args=[product.pk]))
+        for text in ['até 7 dias', 'Peça diferente do anúncio', 'Defeito já informado',
+                     'Como pedir', 'Meus pedidos', 'Envio e reembolso', 'regras de exemplo do protótipo']:
+            self.assertContains(response, text)
