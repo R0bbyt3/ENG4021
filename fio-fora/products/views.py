@@ -41,6 +41,16 @@ def contact(request):
     return render(request, 'products/contact.html')
 
 
+def terms(request):
+    """Termos de uso: página pública e só de texto, com regras de exemplo do protótipo."""
+    return render(request, 'products/terms.html')
+
+
+def privacy(request):
+    """Política de privacidade: página pública e só de texto, sem consulta ao banco."""
+    return render(request, 'products/privacy.html')
+
+
 def home(request):
     """Todos os controles da vitrine compartilham a mesma URL por GET."""
     band = request.GET.get('faixa', '').strip()

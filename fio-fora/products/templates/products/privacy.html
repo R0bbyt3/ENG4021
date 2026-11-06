@@ -1,0 +1,52 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Política de privacidade | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Privacidade</p>
+    <h1>Como cuidamos<br><em>dos seus dados.</em></h1>
+    <p>O que a FioFora guarda, para que serve e o que você pode fazer a respeito.</p>
+</header>
+
+<div class="legal">
+    <section class="panel panel--note">
+        <h2>Um projeto acadêmico</h2>
+        <p>A FioFora é um protótipo de estudantes da PUC-Rio. Esta política descreve o que o site realmente faz hoje, em linguagem simples, e não é um documento jurídico de uma empresa real. Use dados de teste se preferir.</p>
+    </section>
+
+    <section class="panel">
+        <h2>1. O que guardamos</h2>
+        <ul>
+            <li><strong>Em toda conta:</strong> nome, e-mail, senha (guardada de forma protegida, nunca em texto aberto) e, se você informar, telefone.</li>
+            <li><strong>Em contas de vendedor e de marca:</strong> também CPF ou CNPJ, cidade e estado e, conforme o tipo de conta, nome da loja, razão social, atividade principal e site ou Instagram.</li>
+            <li><strong>Do uso do site:</strong> peças anunciadas e suas fotos, pedidos, favoritos e avaliações.</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>2. Para que usamos</h2>
+        <ul>
+            <li>Entrar na sua conta e recuperar a senha por e-mail.</li>
+            <li>Mostrar as suas peças e pedidos, e enviar o e-mail de confirmação de uma compra.</li>
+            <li>Exibir publicamente apenas o que faz parte do anúncio e das avaliações.</li>
+        </ul>
+        <p>Não vendemos os seus dados nem os usamos para propaganda.</p>
+    </section>
+
+    <section class="panel">
+        <h2>3. Cookies</h2>
+        <p>Usamos só cookies necessários ao funcionamento: o da sessão, que mantém você logado (o "Lembrar de mim" prolonga esse tempo), e o de segurança dos formulários. Não há cookies de rastreamento nem de publicidade.</p>
+    </section>
+
+    <section class="panel">
+        <h2>4. Pagamento</h2>
+        <p>A FioFora não cobra nada e não pede dados de cartão.</p>
+    </section>
+
+    <section class="panel">
+        <h2>5. Seus direitos e dúvidas</h2>
+        <p>Você pode corrigir seus dados em "Minha conta" e pedir a exclusão deles pela página de <a href="{% url 'contact' %}">contato</a>. Veja também os <a href="{% url 'terms' %}">termos de uso</a> e as <a href="{% url 'faq' %}">perguntas frequentes</a>.</p>
+    </section>
+</div>
+{% endblock %}

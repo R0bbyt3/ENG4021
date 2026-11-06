@@ -822,3 +822,26 @@ class ContactTests(TestCase):
     def test_faq_and_careers_link_to_contact(self):
         self.assertContains(self.client.get(reverse('faq')), reverse('contact'))
         self.assertContains(self.client.get(reverse('careers')), reverse('contact'))
+
+
+class TermsAndPrivacyTests(TestCase):
+    def test_terms_is_public_and_covers_buyers_and_sellers(self):
+        response = self.client.get(reverse('terms'))
+        self.assertEqual(response.status_code, 200)
+        for text in ['Termos de uso', 'Sua conta', 'Para quem compra', 'Para quem vende',
+                     'O que não pode', 'projeto acadêmico']:
+            self.assertContains(response, text)
+        self.assertContains(response, reverse('privacy'))
+
+    def test_privacy_is_public_and_lists_the_data_kept(self):
+        response = self.client.get(reverse('privacy'))
+        self.assertEqual(response.status_code, 200)
+        for text in ['O que guardamos', 'CPF ou CNPJ', 'Cookies', 'não pede dados de cartão',
+                     'Seus direitos']:
+            self.assertContains(response, text)
+        self.assertContains(response, reverse('terms'))
+
+    def test_contact_links_to_terms_and_privacy(self):
+        response = self.client.get(reverse('contact'))
+        self.assertContains(response, reverse('terms'))
+        self.assertContains(response, reverse('privacy'))
