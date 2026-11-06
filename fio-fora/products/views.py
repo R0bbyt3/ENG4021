@@ -21,6 +21,21 @@ def faq(request):
     return render(request, 'products/faq.html')
 
 
+def careers(request):
+    """Trabalhe conosco: página pública e só de texto; as vagas são fictícias."""
+    openings = [
+        {'name': 'Curadoria de peças',
+         'text': 'Conferir fotos e descrições dos anúncios para que o defeito esteja sempre claro.'},
+        {'name': 'Atendimento',
+         'text': 'Ajudar compradores e vendedores com dúvidas sobre pedidos, trocas e cadastro.'},
+        {'name': 'Desenvolvimento',
+         'text': 'Criar e melhorar as telas e as regras do site, com testes e documentação.'},
+        {'name': 'Comunicação',
+         'text': 'Escrever e mostrar a proposta da FioFora para quem ainda não conhece.'},
+    ]
+    return render(request, 'products/careers.html', {'openings': openings})
+
+
 def home(request):
     """Todos os controles da vitrine compartilham a mesma URL por GET."""
     band = request.GET.get('faixa', '').strip()
