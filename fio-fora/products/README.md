@@ -136,6 +136,16 @@ para a página de cada peça levam até ela.
 
 > **[PRINT]** Página de perguntas frequentes com uma pergunta aberta.
 
+## Trabalhe conosco
+
+`/trabalhe-conosco/` (`careers`) é pública e só tem texto: as quatro áreas da
+equipe (Curadoria de peças, Atendimento, Desenvolvimento e Comunicação) vêm de
+uma lista na própria view. As áreas são fictícias e a página avisa que não há
+processo seletivo aberto. Ela é ligada pela página Sobre e pelas perguntas
+frequentes. Não há formulário nem model.
+
+> **[PRINT]** Página Trabalhe conosco com os cards das áreas.
+
 ## Sobre e política de troca
 
 `/sobre/` é pública e está ligada ao cabeçalho. Mostra o problema do descarte,

@@ -172,12 +172,21 @@
 
 /* Perguntas frequentes: grupos com perguntas que abrem e fecham (details, sem JavaScript). */
 .faq { display: grid; gap: 32px; max-width: 800px; padding-bottom: 60px; }
+.faq-more { margin: -28px 0 60px; color: var(--muted); }
 .faq-group h2 { margin: 0 0 12px; color: var(--green); font: 400 26px/1.2 Georgia, serif; }
 .faq details { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-medium); }
 .faq details + details { margin-top: 10px; }
 .faq summary { padding: 16px 20px; font-weight: 700; cursor: pointer; }
 .faq details[open] summary { border-bottom: 1px solid var(--line); }
 .faq details p { margin: 0; padding: 16px 20px; color: var(--muted); line-height: 1.6; }
+
+/* Trabalhe conosco: áreas da equipe em cards. */
+.careers-section { margin-bottom: 40px; }
+.careers-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.careers-grid h3 { margin: 0 0 8px; color: var(--ink); font-size: 18px; }
+.careers-grid p { margin: 0; color: var(--muted); line-height: 1.6; }
+.careers-note { margin-bottom: 60px; }
+.careers-note .form-actions { flex-wrap: wrap; margin-top: 22px; }
 
 /* Página Sobre: história, passos, critérios em cards e fórmula. */
 .about-title { margin: 0 0 14px; color: var(--green); font: 400 30px/1.2 Georgia, serif; }
@@ -211,7 +220,7 @@
 
 @media (max-width: 760px) {
     .catalog-controls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .about-intro, .criteria-grid, .about-closing { grid-template-columns: 1fr; }
+    .about-intro, .criteria-grid, .about-closing, .careers-grid { grid-template-columns: 1fr; }
     .about-intro { gap: 28px; }
 }
 @media (max-width: 440px) {

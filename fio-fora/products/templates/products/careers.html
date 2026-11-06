@@ -1,0 +1,32 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Trabalhe conosco | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Trabalhe conosco</p>
+    <h1>Venha fazer parte<br><em>da equipe FioFora.</em></h1>
+    <p>Acreditamos que uma peça com pequeno defeito ainda merece uma segunda chance, e queremos gente que pense assim.</p>
+</header>
+
+<section class="careers-section" aria-labelledby="openings-title">
+    <h2 class="about-title" id="openings-title">Áreas da equipe</h2>
+    <div class="careers-grid">
+        {% for opening in openings %}
+        <article class="panel">
+            <h3>{{ opening.name }}</h3>
+            <p>{{ opening.text }}</p>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel panel--note careers-note">
+    <h2>Um projeto acadêmico</h2>
+    <p>A FioFora é um protótipo feito por estudantes da disciplina ENG4021 - Projeto de Software, da PUC-Rio. As áreas acima são fictícias: servem para mostrar como esta página funcionaria num site de verdade, e não há processo seletivo aberto.</p>
+    <div class="form-actions">
+        <a class="button" href="{% url 'about' %}">Conhecer a FioFora</a>
+        <a class="button button--secondary" href="{% url 'faq' %}">Perguntas frequentes</a>
+    </div>
+</section>
+{% endblock %}

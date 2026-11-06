@@ -794,3 +794,17 @@ class FaqTests(TestCase):
         product = criar_peca('Camisa de teste')
         self.assertContains(self.client.get(reverse('about')), reverse('faq'))
         self.assertContains(self.client.get(reverse('product_detail', args=[product.pk])), reverse('faq'))
+
+
+class CareersTests(TestCase):
+    def test_careers_is_public_and_lists_the_team_areas(self):
+        response = self.client.get(reverse('careers'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['openings']), 4)
+        for text in ['Trabalhe conosco', 'Curadoria de peças', 'Atendimento', 'Desenvolvimento',
+                     'Comunicação', 'não há processo seletivo aberto']:
+            self.assertContains(response, text)
+
+    def test_about_and_faq_link_to_careers(self):
+        self.assertContains(self.client.get(reverse('about')), reverse('careers'))
+        self.assertContains(self.client.get(reverse('faq')), reverse('careers'))
