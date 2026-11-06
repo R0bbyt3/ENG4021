@@ -170,6 +170,15 @@
 .return-policy li + li { margin-top: 6px; }
 .return-policy-note { margin: 18px 0 14px; color: var(--muted); font-size: 14px; }
 
+/* Perguntas frequentes: grupos com perguntas que abrem e fecham (details, sem JavaScript). */
+.faq { display: grid; gap: 32px; max-width: 800px; padding-bottom: 60px; }
+.faq-group h2 { margin: 0 0 12px; color: var(--green); font: 400 26px/1.2 Georgia, serif; }
+.faq details { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-medium); }
+.faq details + details { margin-top: 10px; }
+.faq summary { padding: 16px 20px; font-weight: 700; cursor: pointer; }
+.faq details[open] summary { border-bottom: 1px solid var(--line); }
+.faq details p { margin: 0; padding: 16px 20px; color: var(--muted); line-height: 1.6; }
+
 /* Página Sobre: história, passos, critérios em cards e fórmula. */
 .about-title { margin: 0 0 14px; color: var(--green); font: 400 30px/1.2 Georgia, serif; }
 .about-intro p, .about-lead { color: var(--muted); line-height: 1.6; }

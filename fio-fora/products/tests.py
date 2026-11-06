@@ -775,3 +775,22 @@ class AboutAndPolicyTests(TestCase):
         for text in ['até 7 dias', 'Peça diferente do anúncio', 'Defeito já informado',
                      'Como pedir', 'Meus pedidos', 'Envio e reembolso', 'regras de exemplo do protótipo']:
             self.assertContains(response, text)
+
+
+class FaqTests(TestCase):
+    def test_faq_is_public_and_answers_buyers_and_sellers(self):
+        response = self.client.get(reverse('faq'))
+        self.assertEqual(response.status_code, 200)
+        for text in ['Perguntas frequentes', 'Como compro uma peça?', 'A compra é de verdade?',
+                     'Como vendo uma peça?', 'Esqueci minha senha', 'O que é a severidade do defeito?']:
+            self.assertContains(response, text)
+
+    def test_faq_links_to_related_pages(self):
+        response = self.client.get(reverse('faq'))
+        for name in ['home', 'about', 'discount_simulator', 'signup', 'password_reset']:
+            self.assertContains(response, f'href="{reverse(name)}"')
+
+    def test_about_and_product_page_link_to_faq(self):
+        product = criar_peca('Camisa de teste')
+        self.assertContains(self.client.get(reverse('about')), reverse('faq'))
+        self.assertContains(self.client.get(reverse('product_detail', args=[product.pk])), reverse('faq'))

@@ -126,6 +126,16 @@ Exemplo: `/vitrine/?categoria=camisetas&tamanho=M&faixa=moderada&q=linho&ordem=p
 - Para manter o cálculo no model sem duplicar a fórmula, a ordenação é feita
   em memória sobre o catálogo filtrado. Esta vitrine não usa paginação.
 
+## Perguntas frequentes
+
+`/ajuda/` (`faq`) é pública e só tem texto: não consulta o banco. Reúne as
+dúvidas de quem compra, de quem vende e de quem tem conta, em quatro grupos
+(Comprar, Defeitos e descontos, Vender, Conta). Cada pergunta é um
+`<details>`, que abre e fecha sem JavaScript. Os links para a página Sobre e
+para a página de cada peça levam até ela.
+
+> **[PRINT]** Página de perguntas frequentes com uma pergunta aberta.
+
 ## Sobre e política de troca
 
 `/sobre/` é pública e está ligada ao cabeçalho. Mostra o problema do descarte,

@@ -16,6 +16,11 @@ from .models import (
 )
 
 
+def faq(request):
+    """Perguntas frequentes: página pública, só texto (sem consulta ao banco)."""
+    return render(request, 'products/faq.html')
+
+
 def home(request):
     """Todos os controles da vitrine compartilham a mesma URL por GET."""
     band = request.GET.get('faixa', '').strip()
