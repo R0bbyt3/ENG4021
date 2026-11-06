@@ -153,6 +153,8 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '') == '1'
+# Segundos de espera pelo servidor de e-mail; sem limite, um servidor fora do ar trava a página.
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '10'))
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'FioFora <nao-responda@fiofora.local>')
 
 # O link de recuperação de senha vale por 1 hora (em segundos) e só pode ser usado uma vez.

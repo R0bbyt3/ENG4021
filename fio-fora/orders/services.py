@@ -64,8 +64,9 @@ def send_order_confirmation(order, order_url):
     context = {'order': order, 'items': order.items.all(), 'order_url': order_url}
     subject = render_to_string('orders/email/order_confirmation_subject.txt', context).strip()
     body = render_to_string('orders/email/order_confirmation.txt', context)
+    html = render_to_string('orders/email/order_confirmation.html', context)
     try:
-        send_mail(subject, body, None, [order.user.email])
+        send_mail(subject, body, None, [order.user.email], html_message=html)
     except OSError:
         return False
     return True
