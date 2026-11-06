@@ -868,3 +868,17 @@ class ErrorPagesTests(TestCase):
         html = response.content.decode()
         self.assertIn('Algo deu', html)
         self.assertIn(reverse('home'), html)
+
+
+class FooterTests(TestCase):
+    def test_footer_links_to_info_pages_on_the_shop_and_on_error_pages(self):
+        pages = [self.client.get(reverse('home')), self.client.get('/uma-pagina-que-nao-existe/')]
+        for response in pages:
+            for name in ['about', 'careers', 'contact', 'faq', 'discount_simulator',
+                         'password_reset', 'terms', 'privacy']:
+                self.assertContains(response, f'href="{reverse(name)}"', status_code=response.status_code)
+
+    def test_footer_is_visible_when_logged_in(self):
+        user = get_user_model().objects.create_user('comprador@example.com', 'comprador@example.com', 'Senha-forte-524!')
+        self.client.force_login(user)
+        self.assertContains(self.client.get(reverse('about')), 'Informações legais')

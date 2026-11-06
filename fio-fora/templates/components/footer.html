@@ -1,0 +1,33 @@
+<footer class="site-footer">
+    <div class="container">
+        <div class="site-footer__columns">
+            <div class="site-footer__brand">
+                <a class="brand-logo" href="{% url 'home' %}" aria-label="FioFora — vitrine">
+                    {% include 'components/logo.html' %}
+                </a>
+                <p>Moda circular com defeitos explicados e desconto proporcional.</p>
+            </div>
+
+            <nav aria-label="Conheça a FioFora">
+                <h2>Conheça</h2>
+                <a href="{% url 'about' %}">Sobre</a>
+                <a href="{% url 'careers' %}">Trabalhe conosco</a>
+                <a href="{% url 'contact' %}">Contato</a>
+            </nav>
+
+            <nav aria-label="Ajuda">
+                <h2>Ajuda</h2>
+                <a href="{% url 'faq' %}">Perguntas frequentes</a>
+                <a href="{% url 'discount_simulator' %}">Simulador de desconto</a>
+                <a href="{% url 'password_reset' %}">Esqueci minha senha</a>
+            </nav>
+
+            <nav aria-label="Informações legais">
+                <h2>Legal</h2>
+                <a href="{% url 'terms' %}">Termos de uso</a>
+                <a href="{% url 'privacy' %}">Política de privacidade</a>
+            </nav>
+        </div>
+        <p class="site-footer__note">Projeto acadêmico da disciplina ENG4021 - Projeto de Software, PUC-Rio. Não há vendas nem entregas reais.</p>
+    </div>
+</footer>
