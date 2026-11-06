@@ -122,7 +122,11 @@
 .catalog-controls-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .catalog-search { grid-column: 1 / -1; }
 .catalog-controls .form-field { min-width: 0; }
-.catalog-controls .form-actions { flex-wrap: wrap; margin-top: 20px; }
+.catalog-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; }
+.catalog-footer .severity-filters { margin-bottom: 0; }
+.catalog-clear { margin: 0 0 8px; text-align: right; font-size: 14px; }
+.catalog-clear a { color: var(--ink); font-weight: 700; text-decoration: none; }
+.catalog-clear a:hover { color: var(--coral); }
 
 /* Sobre e política do protótipo. */
 .about-method, .return-policy { margin-bottom: 36px; }

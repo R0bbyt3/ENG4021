@@ -8,6 +8,10 @@
     <p>Veja o produto, o defeito e o preço de forma transparente.</p>
 </section>
 
+{% if has_controls %}
+<p class="catalog-clear"><a href="{% url 'home' %}">Limpar filtros <i class="bi bi-x-lg" aria-hidden="true"></i></a></p>
+{% endif %}
+
 <form class="catalog-controls panel" action="{% url 'home' %}" method="get" aria-label="Buscar, filtrar e ordenar peças">
     {% if active_band %}<input type="hidden" name="faixa" value="{{ active_band }}">{% endif %}
     <div class="catalog-controls-grid">
@@ -48,18 +52,17 @@
             </select>
         </div>
     </div>
-    <div class="form-actions">
+    {# Severidade à esquerda (links, aplicam na hora) e o botão do formulário à direita. #}
+    <div class="catalog-footer">
+        <nav class="severity-filters" aria-label="Filtrar por severidade do defeito">
+            <span>Severidade:</span>
+            {% for band in band_links %}
+            <a class="filter-chip{% if active_band == band.value %} is-active{% endif %}" href="{% url 'home' %}{% if band.query %}?{{ band.query }}{% endif %}"{% if active_band == band.value %} aria-current="true"{% endif %}>{% if band.value %}<span class="severity-dot severity-dot--{{ band.value }}"></span>{% endif %}{{ band.label }}</a>
+            {% endfor %}
+        </nav>
         <button class="button" type="submit">Aplicar busca e filtros</button>
-        {% if has_controls %}<a class="button button--secondary" href="{% url 'home' %}">Limpar filtros</a>{% endif %}
     </div>
 </form>
-
-<nav class="severity-filters" aria-label="Filtrar por severidade do defeito">
-    <span>Severidade:</span>
-    {% for band in band_links %}
-    <a class="filter-chip{% if active_band == band.value %} is-active{% endif %}" href="{% url 'home' %}{% if band.query %}?{{ band.query }}{% endif %}"{% if active_band == band.value %} aria-current="true"{% endif %}>{% if band.value %}<span class="severity-dot severity-dot--{{ band.value }}"></span>{% endif %}{{ band.label }}</a>
-    {% endfor %}
-</nav>
 
 <div class="section-heading">
     <h2>Produtos disponíveis</h2>
