@@ -164,6 +164,7 @@ Todo app segue este formato:
 | `field.html` | Um campo de formulário |
 | `pagination.html` | Paginação de listas |
 | `logo.html` | Logo |
+| `footer.html` | Rodapé com links para Sobre, Trabalhe conosco, Contato, ajuda, termos e privacidade (já incluído no `base.html`; as telas de login e cadastro não usam o rodapé) |
 
 ### Páginas de erro
 

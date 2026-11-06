@@ -203,7 +203,19 @@
     font-size: 14px;
 }
 
+/* Rodapé: marca, três colunas de links e o aviso de projeto acadêmico. */
+.site-footer { margin-top: 40px; padding: 40px 0 28px; background: var(--white); border-top: 1px solid var(--line); }
+.site-footer__columns { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 28px; }
+.site-footer__brand p { max-width: 260px; margin: 12px 0 0; color: var(--muted); line-height: 1.5; font-size: 14px; }
+.site-footer nav { display: flex; flex-direction: column; gap: 8px; }
+.site-footer h2 { margin: 0 0 4px; color: var(--green); font: 700 12px/1.2 Arial, Helvetica, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
+.site-footer nav a { color: var(--ink); font-size: 14px; text-decoration: none; }
+.site-footer nav a:hover { color: var(--coral); text-decoration: underline; }
+.site-footer__note { margin: 32px 0 0; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+
 @media (max-width: 760px) {
+    .site-footer__columns { grid-template-columns: 1fr 1fr; }
+    .site-footer__brand { grid-column: 1 / -1; }
     .two-columns { grid-template-columns: 1fr; }
     .panel { padding: 22px; }
     .page-heading { padding-top: 32px; }
