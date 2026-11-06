@@ -1,0 +1,85 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Perguntas frequentes | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Central de ajuda</p>
+    <h1>Perguntas frequentes</h1>
+    <p>As dúvidas mais comuns de quem compra e de quem vende na FioFora.</p>
+</header>
+
+<div class="faq">
+    <section class="faq-group" aria-labelledby="faq-buy">
+        <h2 id="faq-buy">Comprar</h2>
+        <details>
+            <summary>Como compro uma peça?</summary>
+            <p>Entre com uma conta de comprador, abra a peça na <a href="{% url 'home' %}">vitrine</a>, clique em "Adicionar ao carrinho" e finalize no carrinho. Você acompanha tudo em "Meus pedidos".</p>
+        </details>
+        <details>
+            <summary>A compra é de verdade?</summary>
+            <p>Não. A FioFora é um protótipo acadêmico: não há cobrança nem entrega real, e os pedidos servem para demonstrar o fluxo.</p>
+        </details>
+        <details>
+            <summary>Posso comprar a minha própria peça?</summary>
+            <p>Não. Quem anuncia uma peça não consegue colocá-la no próprio carrinho.</p>
+        </details>
+        <details>
+            <summary>Como guardo uma peça para ver depois?</summary>
+            <p>Clique no coração da peça. Ela vai para a sua lista de favoritos, que você abre pelo menu.</p>
+        </details>
+        <details>
+            <summary>Posso avaliar o que comprei?</summary>
+            <p>Sim. Dentro do pedido, cada peça comprada pode receber uma nota de 1 a 5 estrelas e um comentário. As notas aparecem na página da peça.</p>
+        </details>
+        <details>
+            <summary>E se a peça não for como eu esperava?</summary>
+            <p>Leia a política de troca e devolução, no fim da página de cada peça.</p>
+        </details>
+    </section>
+
+    <section class="faq-group" aria-labelledby="faq-defect">
+        <h2 id="faq-defect">Defeitos e descontos</h2>
+        <details>
+            <summary>O que é a severidade do defeito?</summary>
+            <p>É uma nota de 1 a 3 calculada pelo tipo do defeito, pela localização e pela extensão. Quanto maior a nota, maior o desconto. A conta completa está na página <a href="{% url 'about' %}">Sobre</a>.</p>
+        </details>
+        <details>
+            <summary>Como o desconto é definido?</summary>
+            <p>Pela severidade: o vendedor informa o preço original e o defeito, e a FioFora calcula o preço final. O vendedor não escolhe o desconto.</p>
+        </details>
+        <details>
+            <summary>Posso testar o desconto antes de comprar ou vender?</summary>
+            <p>Pode. O <a href="{% url 'discount_simulator' %}">simulador</a> mostra o desconto de uma peça sem precisar cadastrá-la.</p>
+        </details>
+    </section>
+
+    <section class="faq-group" aria-labelledby="faq-sell">
+        <h2 id="faq-sell">Vender</h2>
+        <details>
+            <summary>Como vendo uma peça?</summary>
+            <p>Crie uma conta de <a href="{% url 'signup' %}">vendedor ou de marca</a> e use "Cadastrar peça". Informe as fotos, o preço original e o defeito. A peça aparece na vitrine assim que é salva.</p>
+        </details>
+        <details>
+            <summary>Posso pausar ou remover uma peça?</summary>
+            <p>Sim. Em "Minhas peças" você edita, pausa ou remove cada anúncio.</p>
+        </details>
+        <details>
+            <summary>Para que serve a foto do defeito?</summary>
+            <p>O comprador decide pelo que vê. Uma foto de perto mostra o defeito como ele é e evita surpresas.</p>
+        </details>
+    </section>
+
+    <section class="faq-group" aria-labelledby="faq-account">
+        <h2 id="faq-account">Conta</h2>
+        <details>
+            <summary>Esqueci minha senha. E agora?</summary>
+            <p>Na tela de entrada, use <a href="{% url 'password_reset' %}">"Esqueci minha senha"</a>. Você recebe um link para criar uma nova senha, válido por 1 hora.</p>
+        </details>
+        <details>
+            <summary>Qual a diferença entre as contas de comprador, vendedor e marca?</summary>
+            <p>O comprador compra, favorita e avalia. O vendedor e a marca anunciam peças. Cada tipo de conta pede dados diferentes no cadastro.</p>
+        </details>
+    </section>
+</div>
+{% endblock %}
