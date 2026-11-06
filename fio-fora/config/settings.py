@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'orders',
     'favorites',
     'reviews',
+    'seed',  # só o comando popular_banco e os dados de exemplo
 ]
 
 MIDDLEWARE = [

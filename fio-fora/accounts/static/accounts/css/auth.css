@@ -91,6 +91,28 @@
     position: absolute;
     top: 46px;
     right: clamp(38px, 7vw, 130px);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Botão "?" do login: leva à lista de contas de exemplo. */
+.help-button {
+    display: inline-grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.help-button:hover {
+    border-color: var(--green);
+    color: var(--green);
 }
 
 .form-panel__content {

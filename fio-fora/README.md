@@ -70,9 +70,13 @@ python manage.py runserver
 
 ### Contas para testar
 
-- **Usuário comum:** crie pela tela de cadastro (`/cadastro/`). Os usuários
-    criados pelo `popular_banco` não têm senha e servem só como dados de exemplo.
-- **Administrador** (para `/admin/` e `/usuarios/`): `python manage.py createsuperuser`.
+O `popular_banco` cria contas prontas de comprador, vendedor, marca e
+equipe, todas com a senha `fiofora123`. A lista com o que cada conta tem está
+em [seed/README.md](seed/README.md); o botão **?** no canto da tela de login
+leva até ela.
+
+Também dá para criar uma conta nova em `/cadastro/` ou um administrador com
+`python manage.py createsuperuser`.
 
 ### Problemas comuns
 
@@ -80,7 +84,7 @@ python manage.py runserver
 |---|---|
 | `python: command not found` com o `.venv` ativo | O `.venv` foi criado em outra pasta. Apague (`rm -rf .venv`) e crie de novo dentro de `fio-fora`. |
 | `That port is already in use` | Já há um servidor rodando. Pare com `Ctrl+C` ou use `python manage.py runserver 8001`. |
-| Erro de tabela ou migration depois de atualizar | Seu `db.sqlite3` é de uma versão antiga. Apague-o e rode `migrate` e `popular_banco` de novo. |
+| Erro de tabela ou migration depois de atualizar | Seu `db.sqlite3` é de uma versão antiga. Apague-o (e a pasta `media/`) e rode `migrate` e `popular_banco` de novo. |
 
 ---
 
@@ -133,7 +137,9 @@ fio-fora/
 ├── products/               # Catálogo e área do vendedor
 ├── cart/                   # Carrinho
 ├── orders/                 # Checkout e pedidos
-└── favorites/              # Favoritos
+├── favorites/              # Favoritos
+├── reviews/                # Avaliações das peças compradas
+└── seed/                   # Dados de exemplo (comando popular_banco)
 ```
 
 Todo app segue este formato:
@@ -171,6 +177,7 @@ Todo app segue este formato:
 | `cart` | Carrinho do comprador, com validação de estoque | [cart/README.md](cart/README.md) |
 | `orders` | Checkout simulado e histórico de pedidos | [orders/README.md](orders/README.md) |
 | `favorites` | Peças favoritas do usuário | [favorites/README.md](favorites/README.md) |
+| `seed` | Contas, peças com fotos, pedidos e avaliações de exemplo (`popular_banco`) | [seed/README.md](seed/README.md) |
 
 ### Tipos de conta
 
@@ -256,6 +263,6 @@ Regras importantes:
 | `python manage.py makemigrations` | Cria migrations depois de mudar um model |
 | `python manage.py test` | Roda todos os testes |
 | `python manage.py test products` | Roda os testes de um app |
-| `python manage.py popular_banco` | Cria dados de exemplo (pode rodar de novo sem duplicar) |
+| `python manage.py popular_banco` | Cria os dados de exemplo da pasta `seed/` (pode rodar de novo sem duplicar) |
 | `python manage.py createsuperuser` | Cria um administrador |
 | `python manage.py check` | Verifica se há erros de configuração |

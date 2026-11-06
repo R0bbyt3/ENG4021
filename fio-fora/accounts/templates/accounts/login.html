@@ -2,6 +2,13 @@
 
 {% block title %}Entrar | FioFora{% endblock %}
 
+{% block top_action %}
+    <span class="safe-label"><i class="bi bi-shield-check" aria-hidden="true"></i> Ambiente seguro</span>
+    {# Lista das contas criadas pelo popular_banco (fio-fora/seed/README.md). #}
+    <a class="help-button" href="https://github.com/R0bbyt3/ENG4021/blob/main/fio-fora/seed/README.md"
+       target="_blank" rel="noopener" title="Contas de exemplo para testar" aria-label="Contas de exemplo para testar (abre em nova aba)">?</a>
+{% endblock %}
+
 {% block content %}
 <div class="form-card">
     <p class="eyebrow">Boas-vindas de volta</p>

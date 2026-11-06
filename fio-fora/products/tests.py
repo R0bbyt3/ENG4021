@@ -2,14 +2,13 @@ import os
 import shutil
 import tempfile
 from decimal import Decimal
-from io import BytesIO, StringIO
+from io import BytesIO
 from itertools import product as combinations
 from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from django.db.models import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -338,27 +337,7 @@ class PaginaProdutoTests(TestCase):
         self.assertNotContains(response, reverse('cart_add', args=[self.peca.pk]))
 
 
-@override_settings(MEDIA_ROOT=MEDIA_DE_TESTE)
-class PopularBancoTests(TestCase):
-    def test_population_is_repeatable_and_preserves_changes(self):
-        call_command("popular_banco", stdout=StringIO())
-        models = [get_user_model(), UserProfile, Category, Product, ProductImage,
-                  Favorite, Cart, CartItem, Order, OrderItem]
-        counts = [model.objects.count() for model in models]
-        user = get_user_model().objects.get(username="demo_ana")
-        user.first_name = "Nome editado"
-        user.save()
-        product = Product.objects.get(sku="FF-DEMO-001")
-        product.name = "Peça editada"
-        product.save()
-        call_command("popular_banco", stdout=StringIO())
-        self.assertEqual(counts, [model.objects.count() for model in models])
-        user.refresh_from_db()
-        product.refresh_from_db()
-        self.assertEqual(user.first_name, "Nome editado")
-        self.assertEqual(product.name, "Peça editada")
-        self.assertFalse(user.has_usable_password())
-
+class DiscountScenarioTests(TestCase):
     def test_discount_reference_scenarios(self):
         for scores, severity, discount in [((1,1,1), "1.00", 15), ((1,3,2), "1.90", 30), ((2,3,1), "2.15", 35), ((3,3,1), "2.60", 45)]:
             product = Product(original_price=Decimal("100.00"))

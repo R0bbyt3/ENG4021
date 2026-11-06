@@ -60,7 +60,8 @@ O desconto vai de 15% (severidade 1) a 50% (severidade 3), arredondado de 5 em
 | `views.py` | Vitrine, página da peça, simulador e área do vendedor |
 | `templates/products/includes/card_info.html` | Informações comuns aos cards de peça |
 | `templates/products/includes/price.html` | Preço original, preço final e % de desconto |
-| `management/commands/popular_banco.py` | Cria usuários, peças, carrinho e pedido de exemplo |
+
+Os dados de exemplo (peças, fotos e vendedores) ficam no app [`seed`](../seed/README.md).
 
 > **[PRINT]** Tela "Minhas peças" com os botões Editar e Remover.
 

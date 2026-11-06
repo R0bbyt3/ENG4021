@@ -25,11 +25,16 @@ fio-fora/
 ├── products/      # Product, Defeito, vitrine, área do vendedor, simulador
 ├── cart/          # carrinho
 ├── orders/        # checkout e pedidos
-└── favorites/     # favoritos
+├── favorites/     # favoritos
+├── reviews/       # avaliações das peças compradas
+└── seed/          # dados de exemplo (comando popular_banco)
 ```
 
 Todo app tem: `models.py`, `views.py`, `urls.py`, `admin.py`, `tests.py`,
 `migrations/`, `templates/<app>/`, `static/<app>/css/` e um `README.md`.
+A exceção é o `seed/`, que não tem páginas nem models: só o comando
+`popular_banco`, um arquivo por bloco de dados, as fotos em `images/`,
+`tests.py` e `README.md`.
 
 ### Onde colocar cada coisa
 
@@ -39,6 +44,7 @@ Todo app tem: `models.py`, `views.py`, `urls.py`, `admin.py`, `tests.py`,
 | Área nova e independente | Novo app, com a mesma estrutura dos outros |
 | Regra de negócio usada por mais de um app | `<app>/services.py` |
 | Verificação de permissão | `accounts/decorators.py` |
+| Dados de exemplo (contas, peças, fotos, pedidos) | `seed/`, no bloco do assunto |
 | HTML usado por várias áreas | `templates/components/` |
 | HTML de um app usado em outras páginas | `<app>/templates/<app>/includes/` |
 | CSS usado por todas as páginas | `static/css/` (e importar em `site.css`) |

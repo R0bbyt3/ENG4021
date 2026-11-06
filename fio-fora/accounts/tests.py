@@ -1,28 +1,19 @@
-import shutil
-import tempfile
 import re
 from datetime import datetime, timedelta
-from io import StringIO
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from django.core import mail
-from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from .models import UserProfile
+
 OLD_PASSWORD = 'Senha-antiga-524!'
 NEW_PASSWORD = 'Senha-nova-9817!'
-
-# O popular_banco grava fotos de verdade: mande-as para uma pasta temporária.
-MEDIA_DE_TESTE = tempfile.mkdtemp()
-
-
-def tearDownModule():
-    shutil.rmtree(MEDIA_DE_TESTE, ignore_errors=True)
 
 
 class AuthPageTests(TestCase):
@@ -36,6 +27,9 @@ class AuthPageTests(TestCase):
         for url in urls:
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_login_has_help_link_to_example_accounts(self):
+        self.assertContains(self.client.get(reverse('login')), 'fio-fora/seed/README.md')
 
     def test_unknown_account_type_returns_404(self):
         self.assertEqual(self.client.get(reverse('register', args=['outro'])).status_code, 404)
@@ -59,16 +53,21 @@ class AuthPageTests(TestCase):
         self.assertContains(vitrine, 'products/css/products.css')
 
 
-@override_settings(MEDIA_ROOT=MEDIA_DE_TESTE)
 class UserListTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("popular_banco", stdout=StringIO())
+        for username, name, role, store, active in [
+            ("ana", "Ana Silva", "buyer", "", True),
+            ("clara", "Clara Lima", "buyer", "", False),
+            ("fabio", "Fábio Rocha", "brand", "Ateliê Circular", True),
+        ]:
+            user = get_user_model().objects.create_user(username, first_name=name, is_active=active)
+            UserProfile.objects.create(user=user, role=role, store_name=store)
         cls.staff = get_user_model().objects.create_user("equipe", is_staff=True)
 
     def test_list_requires_staff(self):
         self.assertEqual(self.client.get(reverse("user_list")).status_code, 302)
-        self.client.force_login(get_user_model().objects.get(username="demo_ana"))
+        self.client.force_login(get_user_model().objects.get(username="ana"))
         self.assertEqual(self.client.get(reverse("user_list")).status_code, 302)
         self.client.force_login(self.staff)
         response = self.client.get(reverse("user_list"))

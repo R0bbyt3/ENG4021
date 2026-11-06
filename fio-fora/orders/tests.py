@@ -1,34 +1,31 @@
-import shutil
-import tempfile
 from decimal import Decimal
-from io import StringIO
 
-from django.core.management import call_command
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
-from cart.models import CartItem
+from cart.models import Cart, CartItem
 from favorites.models import Favorite
 from products.models import Defeito, Product
 
-from .models import Order
-
-# O popular_banco grava fotos de verdade: mande-as para uma pasta temporária.
-MEDIA_DE_TESTE = tempfile.mkdtemp()
+from .models import Order, OrderItem
 
 
-def tearDownModule():
-    shutil.rmtree(MEDIA_DE_TESTE, ignore_errors=True)
-
-
-@override_settings(MEDIA_ROOT=MEDIA_DE_TESTE)
 class OrderHistoryTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("popular_banco", stdout=StringIO())
+        buyer = get_user_model().objects.create_user("comprador")
+        product = Product.objects.create(name="Vestido floral", description="Botão faltando.",
+                                         original_price=Decimal("160.00"), price=Decimal("104.00"))
+        Defeito.objects.create(product=product, tipo=2, localizacao=3, extensao=1)
+        order = Order.objects.create(user=buyer, reference="FF-TESTE-001")
+        OrderItem.objects.create(order=order, product=product, product_name=product.name,
+                                 unit_price=product.price, quantity=1)
+        Favorite.objects.create(user=buyer, product=product)
+        CartItem.objects.create(cart=Cart.objects.create(user=buyer), product=product)
 
     def test_financial_history_and_database_integrity(self):
-        order = Order.objects.get(reference="FF-DEMO-PEDIDO-001")
+        order = Order.objects.get(reference="FF-TESTE-001")
         self.assertEqual(order.total, Decimal("104.00"))
         product = order.items.get().product
         product.name = "Novo nome"
