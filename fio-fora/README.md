@@ -130,6 +130,7 @@ fio-fora/
 ├── config/                 # Configuração do projeto
 ├── templates/              # HTML compartilhado
 │   ├── base.html           # Layout: <head>, cabeçalho e mensagens
+│   ├── 404.html  500.html  # Páginas de erro com o visual do site
 │   └── components/         # Pedaços reutilizáveis
 ├── static/                 # CSS, js/masks.js, ícones, fontes e logo compartilhados
 │   └── css/site.css        # Importa os CSS gerais
@@ -163,6 +164,16 @@ Todo app segue este formato:
 | `field.html` | Um campo de formulário |
 | `pagination.html` | Paginação de listas |
 | `logo.html` | Logo |
+
+### Páginas de erro
+
+`templates/404.html` (página inexistente) e `templates/500.html` (erro no
+servidor) são os nomes que o Django procura sozinho, sem rota nem view. Elas só
+aparecem com `DEBUG = False`; com `DEBUG = True` o Django mostra a tela técnica.
+A 404 usa o layout completo; a 500 não inclui o cabeçalho, porque o Django a
+mostra sem usuário logado nem mensagens. Ambas levam de volta à vitrine.
+
+> **[PRINT]** Página 404 aberta com `DEBUG = False` (e `ALLOWED_HOSTS = ['*']`).
 
 > **[PRINT]** Cabeçalho do site logado como vendedor, mostrando os links "Minhas peças" e "Cadastrar peça".
 
