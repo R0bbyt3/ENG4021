@@ -188,6 +188,12 @@
 .careers-note { margin-bottom: 60px; }
 .careers-note .form-actions { flex-wrap: wrap; margin-top: 22px; }
 
+/* Contato: dois cards de caminhos e o aviso de projeto acadêmico. */
+.contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; }
+.contact-grid .panel > p { margin: 0 0 14px; }
+.contact-note { margin-bottom: 60px; }
+.contact-note .form-actions { flex-wrap: wrap; margin-top: 22px; }
+
 /* Página Sobre: história, passos, critérios em cards e fórmula. */
 .about-title { margin: 0 0 14px; color: var(--green); font: 400 30px/1.2 Georgia, serif; }
 .about-intro p, .about-lead { color: var(--muted); line-height: 1.6; }
@@ -220,7 +226,7 @@
 
 @media (max-width: 760px) {
     .catalog-controls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .about-intro, .criteria-grid, .about-closing, .careers-grid { grid-template-columns: 1fr; }
+    .about-intro, .criteria-grid, .about-closing, .careers-grid, .contact-grid { grid-template-columns: 1fr; }
     .about-intro { gap: 28px; }
 }
 @media (max-width: 440px) {

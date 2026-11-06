@@ -146,6 +146,16 @@ frequentes. Não há formulário nem model.
 
 > **[PRINT]** Página Trabalhe conosco com os cards das áreas.
 
+## Contato
+
+`/contato/` (`contact`) é pública e só tem texto: manda a pessoa para as
+perguntas frequentes e para a aba "Problemas" do repositório no GitHub, e avisa
+que, por ser um projeto acadêmico, não há atendimento por telefone nem por
+e-mail. Ela é ligada pelas perguntas frequentes e pela página Trabalhe conosco.
+Não há formulário nem model.
+
+> **[PRINT]** Página de contato com os dois caminhos.
+
 ## Sobre e política de troca
 
 `/sobre/` é pública e está ligada ao cabeçalho. Mostra o problema do descarte,
