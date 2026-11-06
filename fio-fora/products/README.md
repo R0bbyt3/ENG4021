@@ -134,10 +134,12 @@ constantes de `models.py`; a página referencia o resumo das oito entrevistas
 da Sprint 2 e explica o caráter exploratório da pesquisa.
 
 A página de cada peça inclui `includes/return_policy.html`, um bloco visível
-sobre trocas e devoluções no **protótipo acadêmico**. O ambiente não realiza
-cobrança ou entrega real; o texto não inventa prazos ou uma política de loja.
-Condições comerciais e canais de atendimento precisam ser definidos antes
-de uma operação real. Não foi criado campo ou migração para políticas por loja.
+com a política de troca e devolução: prazo de arrependimento (7 dias), troca
+quando a peça vem diferente do anúncio, o defeito já informado na ficha como
+parte do preço, como pedir a troca, e quem paga o frete e o reembolso. Os
+prazos são regras de exemplo do **protótipo acadêmico**: o ambiente não realiza
+cobrança ou entrega real e o texto avisa que não é a política de uma loja real.
+Não foi criado campo ou migração para políticas por loja.
 
 ![Sobre a FioFora](../../Sprint%208/prints-membro1/sobre-criterios1.png)
 
