@@ -68,6 +68,15 @@ class OrderConfirmationEmailTests(TestCase):
         for text in [order.reference, 'Vestido floral', '2 x R$', 'Total: R$', f'/pedidos/{order.pk}/', 'protótipo acadêmico']:
             self.assertIn(text, message.body)
 
+    def test_confirmation_has_html_version_with_items_and_link(self):
+        from django.core import mail
+        self.client.post('/checkout/')
+        order = Order.objects.get()
+        html, mimetype = mail.outbox[0].alternatives[0]
+        self.assertEqual(mimetype, 'text/html')
+        for text in [order.reference, 'Vestido floral', 'R$ 208,00', f'/pedidos/{order.pk}/', 'Ver o pedido']:
+            self.assertIn(text, html)
+
     def test_email_failure_keeps_the_order_and_warns(self):
         from unittest import mock
         with mock.patch('orders.services.send_mail', side_effect=OSError('sem rede')):

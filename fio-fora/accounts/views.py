@@ -67,6 +67,7 @@ class PasswordResetRequestView(PasswordResetView):
     """1) O usuário informa o e-mail e recebe o link com o token."""
     template_name = 'accounts/password_reset.html'
     email_template_name = 'accounts/email/password_reset_email.txt'
+    html_email_template_name = 'accounts/email/password_reset_email.html'
     subject_template_name = 'accounts/email/password_reset_subject.txt'
     success_url = reverse_lazy('password_reset_done')
 

@@ -129,6 +129,23 @@ class RecuperarSenhaTests(TestCase):
         self.assertIn('/recuperar-senha/', message.body)
         self.assertIn('60 minutos', message.body)
 
+    def test_email_tem_versao_html_com_botao_e_link(self):
+        self.pedir_link()
+        message = mail.outbox[0]
+        self.assertEqual(message.subject, 'Recuperação de senha - FioFora')
+        self.assertEqual(len(message.alternatives), 1)
+        html, mimetype = message.alternatives[0]
+        self.assertEqual(mimetype, 'text/html')
+        for text in ['Criar nova senha', '/recuperar-senha/', '60 minutos', 'Equipe FioFora']:
+            self.assertIn(text, html)
+
+    def test_falha_no_envio_nao_da_erro_e_fica_no_log(self):
+        # O Django registra a falha no log e mantém a resposta igual, para não revelar quem tem conta.
+        with patch('django.contrib.auth.forms.EmailMultiAlternatives.send', side_effect=OSError('sem rede')):
+            with self.assertLogs('django.contrib.auth', level='ERROR'):
+                response = self.pedir_link()
+        self.assertRedirects(response, reverse('password_reset_done'))
+
     def test_email_desconhecido_tem_a_mesma_resposta_e_nao_envia(self):
         response = self.pedir_link('ninguem@example.com')
         self.assertRedirects(response, reverse('password_reset_done'))

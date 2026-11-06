@@ -47,6 +47,40 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 - Vendedor exige CPF; marca exige CNPJ. Os dois têm os dígitos verificadores conferidos.
 - O link de recuperação de senha vale por 60 minutos. Em desenvolvimento, o
     e-mail aparece no terminal onde o `runserver` está rodando.
+- O e-mail de recuperação tem duas versões, texto e HTML, em
+    `templates/accounts/email/`. O assunto é "Recuperação de senha - FioFora".
+- Se o servidor de e-mail falhar, o erro aparece no log do servidor (o terminal
+    do `runserver`) e a tela continua igual, para não revelar quem tem conta. Por
+    isso, ao testar o envio real, olhe o terminal se o e-mail não chegar.
+
+## Envio real de e-mail
+
+Sem configuração, o e-mail só aparece no terminal. Para enviar de verdade
+(recuperação de senha e confirmação de pedido), defina estas variáveis de
+ambiente **antes** de rodar o servidor. Elas ficam só na sua máquina; nunca
+escreva a senha em arquivo do repositório.
+
+| Variável | Para que serve | Exemplo (Gmail) |
+|---|---|---|
+| `EMAIL_BACKEND` | Liga o envio real | `django.core.mail.backends.smtp.EmailBackend` |
+| `EMAIL_HOST` | Servidor SMTP | `smtp.gmail.com` |
+| `EMAIL_PORT` | Porta | `587` |
+| `EMAIL_USE_TLS` | Conexão segura (`1` liga) | `1` |
+| `EMAIL_HOST_USER` | Conta que envia | `sua.conta@gmail.com` |
+| `EMAIL_HOST_PASSWORD` | Senha de app da conta (não é a senha normal) | gerada na conta Google |
+| `DEFAULT_FROM_EMAIL` | Remetente que aparece | `FioFora <sua.conta@gmail.com>` |
+| `EMAIL_TIMEOUT` | Segundos de espera pelo servidor (padrão 10) | `10` |
+
+Para testar a configuração, sem abrir o site:
+
+```bash
+python manage.py sendtestemail seu.email@exemplo.com
+```
+
+Depois peça uma recuperação de senha em `/recuperar-senha/` com um e-mail
+cadastrado e confira a caixa de entrada (e o spam).
+
+> **[PRINT]** E-mail de recuperação de senha recebido na caixa de entrada.
 
 ## Campos brasileiros (`fields.py`)
 
