@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Página não encontrada | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Erro 404</p>
+    <h1>Página não<br><em>encontrada.</em></h1>
+    <p>O endereço não existe ou a peça foi removida. Confira se digitou certo ou volte para a vitrine.</p>
+</header>
+
+<section class="panel panel--note error-page">
+    <h2>Por onde seguir</h2>
+    <div class="form-actions">
+        <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
+        <a class="button button--secondary" href="{% url 'faq' %}">Perguntas frequentes</a>
+    </div>
+</section>
+{% endblock %}

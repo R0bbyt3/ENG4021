@@ -845,3 +845,26 @@ class TermsAndPrivacyTests(TestCase):
         response = self.client.get(reverse('contact'))
         self.assertContains(response, reverse('terms'))
         self.assertContains(response, reverse('privacy'))
+
+
+class ErrorPagesTests(TestCase):
+    def test_unknown_url_shows_friendly_404(self):
+        response = self.client.get('/uma-pagina-que-nao-existe/')
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Página não', status_code=404)
+        self.assertContains(response, reverse('home'), status_code=404)
+        self.assertContains(response, reverse('faq'), status_code=404)
+
+    def test_missing_product_shows_friendly_404(self):
+        response = self.client.get(reverse('product_detail', args=[99999]))
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Erro 404', status_code=404)
+
+    def test_server_error_page_has_no_header_and_links_home(self):
+        from django.test import RequestFactory
+        from django.views.defaults import server_error
+        response = server_error(RequestFactory().get('/'))
+        self.assertEqual(response.status_code, 500)
+        html = response.content.decode()
+        self.assertIn('Algo deu', html)
+        self.assertIn(reverse('home'), html)

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{# O Django mostra esta página sem usuário nem mensagens; por isso ela não inclui o cabeçalho. #}
+{% block title %}Algo deu errado | FioFora{% endblock %}
+
+{% block body %}
+<main class="container">
+    <header class="page-heading">
+        <p class="eyebrow">Erro 500</p>
+        <h1>Algo deu<br><em>errado.</em></h1>
+        <p>O erro foi nosso, não seu. Tente de novo em instantes ou volte para a vitrine.</p>
+    </header>
+
+    <section class="panel panel--note error-page">
+        <h2>Por onde seguir</h2>
+        <div class="form-actions">
+            <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
+        </div>
+    </section>
+</main>
+{% endblock %}
