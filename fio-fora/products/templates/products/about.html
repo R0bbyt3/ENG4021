@@ -9,43 +9,68 @@
     <p>Moda com pequenos defeitos, preço justo e informação para você decidir.</p>
 </header>
 
-<div class="two-columns">
+<section class="about-intro">
+    <div>
+        <h2 class="about-title">Por que a FioFora existe?</h2>
+        <p>Uma mancha, uma costura fora do lugar ou um botão faltando podem afastar uma roupa do circuito de venda convencional, e peças que ainda têm utilidade acabam desperdiçadas.</p>
+        <p>A FioFora aproxima compradores de lojas e marcas com essas peças. Em vez de uma promoção sem contexto, cada anúncio explica o defeito e liga a gravidade dele ao desconto.</p>
+    </div>
+    <ol class="about-steps">
+        <li><strong>O vendedor descreve o defeito</strong> Tipo, localização e extensão, com uma foto de perto.</li>
+        <li><strong>A FioFora calcula a severidade</strong> Uma nota de 1 a 3, com os pesos explicados abaixo.</li>
+        <li><strong>A severidade define o desconto</strong> De {{ discount_min }}% a {{ discount_max }}% sobre o preço original.</li>
+    </ol>
+</section>
+
+<section class="about-section" aria-labelledby="criteria-title">
+    <h2 class="about-title" id="criteria-title">Como classificamos o defeito</h2>
+    <p class="about-lead">Cada critério recebe uma nota de 1 a 3. Os pesos são os mesmos que calculam o desconto no cadastro de peças e no simulador.</p>
+
+    <div class="criteria-grid">
+        {% for criterion in criteria %}
+        <article class="criteria-card">
+            <p class="eyebrow">Peso {{ criterion.weight|floatformat:2 }}</p>
+            <h3>{{ criterion.name }}</h3>
+            <ol class="criteria-levels">
+                {% for choice, description in criterion.levels %}
+                <li>
+                    <span class="criteria-score">{{ choice.0 }}</span>
+                    <div><strong>{{ choice.1 }}</strong><p>{{ description }}</p></div>
+                </li>
+                {% endfor %}
+            </ol>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="formula">
+        <p class="formula-text">
+            Severidade =
+            {% for criterion in criteria %}{{ criterion.weight|floatformat:2 }} × {{ criterion.name }}{% if not forloop.last %} + {% endif %}{% endfor %}
+        </p>
+        <ul class="formula-bands">
+            <li><span class="severity-dot"></span> <strong>Leve</strong> até {{ limit_light|floatformat:2 }}</li>
+            <li><span class="severity-dot severity-dot--moderada"></span> <strong>Moderada</strong> até {{ limit_moderate|floatformat:2 }}</li>
+            <li><span class="severity-dot severity-dot--alta"></span> <strong>Alta</strong> acima de {{ limit_moderate|floatformat:2 }}</li>
+        </ul>
+    </div>
+</section>
+
+<div class="about-closing">
     <section class="panel">
-        <h2>Por que a FioFora existe?</h2>
-        <p>Uma mancha, uma costura fora do lugar ou um botão faltando podem afastar uma roupa do circuito de venda convencional. Isso pode gerar desperdício de peças que ainda têm utilidade.</p>
-        <p>A FioFora aproxima compradores de lojas e marcas com essas peças. A proposta é explicar o defeito e relacionar sua gravidade ao desconto, em vez de mostrar apenas uma promoção sem contexto.</p>
+        <h2>De onde vieram os pesos?</h2>
+        <p>A equipe fez oito entrevistas com usuários, comparando situações de defeito e os descontos mínimos que eles aceitariam. O tipo do defeito pesou mais, seguido da localização e da extensão.</p>
+        <p>É uma pesquisa exploratória: orienta o protótipo, mas não representa todo o mercado. A nota organiza a informação; as fotos e a descrição continuam essenciais.</p>
+        <a class="about-link" href="https://github.com/R0bbyt3/ENG4021/blob/main/Sprint%202/S2_ResumoEntrevistas_M.pdf">Ler o resumo das oito entrevistas <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
     </section>
     <section class="panel panel--note">
         <h2>Um projeto acadêmico</h2>
-        <p>Somos a equipe FioFora, da disciplina ENG4021 - Projeto de Software, da PUC-Rio. Este ambiente é um protótipo acadêmico para demonstrar e testar a proposta com usuários.</p>
-        <p>Cadastros e pedidos fazem parte da demonstração. Não há cobrança ou entrega real de produtos neste ambiente.</p>
-        <a class="button button--secondary" href="{% url 'home' %}">Conhecer as peças</a>
+        <p>Somos a equipe FioFora, da disciplina ENG4021 - Projeto de Software, da PUC-Rio. Este site é um protótipo acadêmico para demonstrar e testar a proposta com usuários.</p>
+        <p>Cadastros e pedidos fazem parte da demonstração: não há cobrança nem entrega real.</p>
+        <div class="form-actions">
+            <a class="button" href="{% url 'home' %}">Conhecer as peças</a>
+            <a class="button button--secondary" href="{% url 'discount_simulator' %}">Testar o simulador</a>
+        </div>
     </section>
 </div>
-
-<section class="panel about-method" aria-labelledby="criteria-title">
-    <h2 id="criteria-title">Como classificamos o defeito</h2>
-    <p>Cada critério recebe uma nota de 1 a 3. Os pesos em uso vêm do mesmo modelo que calcula a severidade e o desconto no cadastro e no simulador.</p>
-    <div class="criteria-table-wrapper" role="region" aria-label="Tabela de critérios do defeito" tabindex="0">
-        <table class="criteria-table">
-            <caption>Três critérios, seus pesos e a definição de cada nível</caption>
-            <thead><tr><th scope="col">Critério e peso</th><th scope="col">Nota</th><th scope="col">Nível</th><th scope="col">Definição</th></tr></thead>
-            <tbody>
-                {% for criterion in criteria %}
-                    {% for choice, description in criterion.levels %}
-                    <tr>
-                        {% if forloop.first %}<th scope="rowgroup" rowspan="3">{{ criterion.name }}<span class="field-help">Peso {{ criterion.weight|floatformat:2 }}</span></th>{% endif %}
-                        <td>{{ choice.0 }}</td><th scope="row">{{ choice.1 }}</th><td>{{ description }}</td>
-                    </tr>
-                    {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <h3>De onde vieram os pesos?</h3>
-    <p>A equipe realizou oito entrevistas com usuários, comparando situações de defeito e os descontos mínimos que aceitariam. O resumo das entrevistas, seção 4, registra a calibração: tipo tem maior peso, seguido de localização e extensão.</p>
-    <p>Essa pesquisa é exploratória: oito entrevistas orientam o protótipo, mas não representam todo o mercado. A nota organiza a informação; fotos e descrição continuam essenciais para avaliar a peça.</p>
-    <p><a href="https://github.com/R0bbyt3/ENG4021/blob/main/Sprint%202/S2_ResumoEntrevistas_M.pdf">Ler o resumo das oito entrevistas</a></p>
-    <a class="button" href="{% url 'discount_simulator' %}">Experimentar o simulador</a>
-</section>
 {% endblock %}

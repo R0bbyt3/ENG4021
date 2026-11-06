@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -9,8 +11,8 @@ from reviews.services import product_reviews, rating_summary, store_reviews
 
 from .forms import DiscountSimulationForm, ProductForm
 from .models import (
-    FAIXAS_SEVERIDADE, PESO_EXTENSAO, PESO_LOCALIZACAO, PESO_TIPO,
-    Category, Defeito, Product,
+    FAIXAS_SEVERIDADE, LIMITE_LEVE, LIMITE_MODERADA, PESO_EXTENSAO, PESO_LOCALIZACAO, PESO_TIPO,
+    Category, Defeito, Product, desconto_sugerido,
 )
 
 
@@ -103,7 +105,14 @@ def about(request):
             'Defeito com medida acima de 10 cm.',
         ))},
     ]
-    return render(request, 'products/about.html', {'criteria': criteria})
+    # Faixas e descontos vêm das mesmas constantes do model, para a página nunca desatualizar.
+    return render(request, 'products/about.html', {
+        'criteria': criteria,
+        'limit_light': LIMITE_LEVE,
+        'limit_moderate': LIMITE_MODERADA,
+        'discount_min': desconto_sugerido(Decimal(1)),
+        'discount_max': desconto_sugerido(Decimal(3)),
+    })
 
 
 def product_detail(request, product_id):

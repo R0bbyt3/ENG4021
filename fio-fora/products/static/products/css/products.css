@@ -164,19 +164,42 @@
 .catalog-clear a:hover { color: var(--coral); }
 
 /* Sobre e política do protótipo. */
-.about-method, .return-policy { margin-bottom: 36px; }
-.criteria-table-wrapper { overflow-x: auto; margin: 24px 0; }
-.criteria-table-wrapper:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
-.criteria-table { width: 100%; min-width: 550px; border-collapse: collapse; text-align: left; }
-.criteria-table caption { margin-bottom: 12px; text-align: left; color: var(--muted); }
-.criteria-table :is(th, td) { padding: 12px; border: 1px solid var(--line); vertical-align: top; }
-.criteria-table thead { color: var(--white); background: var(--green); }
-.criteria-table tbody th { font-weight: 600; }
-.criteria-table th .field-help { display: block; margin-top: 8px; }
-.criteria-table tbody tr:nth-child(even) { background: var(--paper); }
+.return-policy { margin-bottom: 36px; }
+
+/* Página Sobre: história, passos, critérios em cards e fórmula. */
+.about-title { margin: 0 0 14px; color: var(--green); font: 400 30px/1.2 Georgia, serif; }
+.about-intro p, .about-lead { color: var(--muted); line-height: 1.6; }
+.about-lead { max-width: 680px; margin: 0 0 24px; }
+
+.about-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; margin-bottom: 64px; }
+.about-steps { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.about-steps li { position: relative; padding: 18px 20px 18px 70px; color: var(--muted); background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-medium); counter-increment: step; }
+.about-steps li::before { content: counter(step); position: absolute; top: 18px; left: 20px; display: grid; place-items: center; width: 34px; height: 34px; color: var(--white); background: var(--green); border-radius: 50%; font-weight: 700; }
+.about-steps strong { display: block; margin-bottom: 4px; color: var(--ink); }
+
+.about-section { margin-bottom: 64px; }
+.criteria-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.criteria-card { padding: 26px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-medium); }
+.criteria-card .eyebrow { margin: 0; }
+.criteria-card h3 { margin: 6px 0 18px; color: var(--green); font: 400 26px/1.2 Georgia, serif; }
+.criteria-levels { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.criteria-levels li { display: flex; gap: 12px; }
+.criteria-levels p { margin: 4px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.criteria-score { display: grid; flex: none; place-items: center; width: 26px; height: 26px; color: var(--green); background: #e7eddf; border-radius: 50%; font-size: 13px; font-weight: 700; }
+
+.formula { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; margin-top: 18px; padding: 22px 26px; background: #edece3; border-radius: var(--radius-medium); }
+.formula-text { margin: 0; font: 400 20px/1.4 Georgia, serif; }
+.formula-bands { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; padding: 0; color: var(--muted); font-size: 14px; list-style: none; }
+.formula-bands strong { color: var(--ink); }
+
+.about-closing { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; padding-bottom: 60px; }
+.about-closing .form-actions { flex-wrap: wrap; margin-top: 22px; }
+.about-link { font-weight: 700; }
 
 @media (max-width: 760px) {
     .catalog-controls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .about-intro, .criteria-grid, .about-closing { grid-template-columns: 1fr; }
+    .about-intro { gap: 28px; }
 }
 @media (max-width: 440px) {
     .catalog-controls-grid { grid-template-columns: 1fr; }
