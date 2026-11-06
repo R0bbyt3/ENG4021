@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block styles %}{% endblock %}
+    {# Único script do site: formata CPF, CNPJ e telefone enquanto a pessoa digita. #}
+    <script src="{% static 'js/masks.js' %}" defer></script>
 </head>
 <body>
     {% block body %}

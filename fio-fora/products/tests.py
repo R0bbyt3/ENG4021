@@ -84,6 +84,11 @@ class SellerWorkflowTests(TestCase):
         self.assertContains(response, reverse('product_update', args=[saved.pk]))
         self.assertNotContains(response, 'Peça de outro vendedor')
 
+    def test_size_is_saved_in_uppercase_without_spaces(self):
+        self.client.force_login(self.seller)
+        self.client.post(reverse('product_create'), self.data(size=' gg '))
+        self.assertEqual(Product.objects.get(name='Camisa de linho').size, 'GG')
+
     def test_invalid_or_empty_posts_never_create_products(self):
         self.client.force_login(self.seller)
         count = Product.objects.count()

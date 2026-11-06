@@ -71,7 +71,8 @@
                 </div>
                 <div class="account-fields account-fields--business">
                     {% include 'components/field.html' with field=form.store_name %}
-                    {% include 'components/field.html' with field=form.location %}
+                    {% include 'components/field.html' with field=form.city %}
+                    {% include 'components/field.html' with field=form.state %}
                 </div>
             </section>
             {% endif %}

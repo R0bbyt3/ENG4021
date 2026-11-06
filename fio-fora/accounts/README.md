@@ -33,6 +33,7 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 | Arquivo | O que tem |
 |---|---|
 | `forms.py` | Login por e-mail, cadastro de cada tipo de conta e perfil |
+| `fields.py` | Campos brasileiros: CPF, CNPJ, telefone, estado, cidade e site/Instagram |
 | `views.py` | Login, cadastro, perfil, recuperação de senha e lista de usuários |
 | `decorators.py` | `buyer_required`, `seller_required`, `is_buyer`, `is_seller` |
 | `context_processors.py` | Coloca `is_buyer` e `is_seller` em todos os templates |
@@ -43,9 +44,26 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 
 - O cadastro cria o `User` e o `UserProfile` juntos.
 - O e-mail também vira o nome de usuário.
-- Vendedor exige CPF (11 dígitos); marca exige CNPJ (14 dígitos).
+- Vendedor exige CPF; marca exige CNPJ. Os dois têm os dígitos verificadores conferidos.
 - O link de recuperação de senha vale por 60 minutos. Em desenvolvimento, o
     e-mail aparece no terminal onde o `runserver` está rodando.
+
+## Campos brasileiros (`fields.py`)
+
+O app é só para o Brasil. Cada campo mostra o formato esperado, abre o teclado
+certo no celular, formata enquanto a pessoa digita (`static/js/masks.js`) e é
+conferido de novo no servidor. No banco ficam só os números; a formatação volta
+na hora de mostrar.
+
+| Campo | Aceita | Guarda | Mostra |
+|---|---|---|---|
+| `CPFField` | `123.456.789-09` ou só números; confere os 2 dígitos verificadores | `12345678909` | `123.456.789-09` |
+| `CNPJField` | Numérico ou com letras (novo, desde 2026); confere os 2 dígitos verificadores | `12ABC34501DE35` | `12.ABC.345/01DE-35` |
+| `PhoneField` | Celular (11 números, começa com 9) ou fixo (10 números); DDD sem zero; tira o `+55` | `21999998888` | `(21) 99999-8888` |
+| `CityField` + `StateField` | Cidade escrita e estado escolhido na lista das 27 UFs | `Rio de Janeiro, RJ` em `location` | Os dois campos separados |
+| `SocialField` | `@perfil` ou site; link do Instagram vira `@perfil` | `@sualoja` | Igual |
+
+Para usar em outro formulário: `phone = PhoneField(required=False)`.
 
 ## Como proteger uma view
 

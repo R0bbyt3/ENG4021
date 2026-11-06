@@ -9,26 +9,28 @@ from accounts.models import UserProfile
 
 PASSWORD = 'fiofora123'
 
+# Telefone e documento ficam só com números, como o cadastro do site salva
+# (a formatação é feita na hora de mostrar; ver accounts/fields.py).
 # Os compradores e a Julia vêm das personas do projeto.
 USERS = [
     {'email': 'rafael@fiofora.com', 'name': 'Rafael Moreira', 'role': 'buyer',
-     'phone': '(11) 98888-1001'},
+     'phone': '11988881001'},
     {'email': 'gabriel@fiofora.com', 'name': 'Gabriel Nunes', 'role': 'buyer',
-     'phone': '(21) 98888-1002'},
+     'phone': '21988881002'},
     {'email': 'julia@fiofora.com', 'name': 'Julia Prado', 'role': 'seller',
-     'phone': '(11) 98888-2001', 'store_name': 'Brechó Segunda Volta',
+     'phone': '11988882001', 'store_name': 'Brechó Segunda Volta',
      'document': '12345678909', 'location': 'São Paulo, SP'},
     {'email': 'diego@fiofora.com', 'name': 'Diego Souza', 'role': 'seller',
-     'phone': '(21) 98888-2002', 'store_name': 'Reuso Carioca',
+     'phone': '21988882002', 'store_name': 'Reuso Carioca',
      'document': '98765432100', 'location': 'Rio de Janeiro, RJ'},
     {'email': 'fabio@fiofora.com', 'name': 'Fábio Rocha', 'role': 'brand',
-     'phone': '(11) 3333-3001', 'store_name': 'Ateliê Circular',
-     'document': '12345678000190', 'location': 'São Paulo, SP',
+     'phone': '1133333001', 'store_name': 'Ateliê Circular',
+     'document': '12345678000195', 'location': 'São Paulo, SP',
      'legal_name': 'Ateliê Circular Confecções Ltda.', 'segment': 'moda',
      'social': '@ateliecircular'},
     {'email': 'gabriela@fiofora.com', 'name': 'Gabriela Melo', 'role': 'brand',
-     'phone': '(21) 3333-3002', 'store_name': 'Fios do Rio',
-     'document': '98765432000110', 'location': 'Rio de Janeiro, RJ',
+     'phone': '2133333002', 'store_name': 'Fios do Rio',
+     'document': '98765432000198', 'location': 'Rio de Janeiro, RJ',
      'legal_name': 'Fios do Rio Moda Ltda.', 'segment': 'moda',
      'social': 'fiosdorio.com.br'},
 ]

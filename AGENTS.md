@@ -10,7 +10,8 @@ padrão de um arquivo vizinho do mesmo app.
 - Público dos textos e do código: estudantes. Prefira **soluções simples**:
     views em função, ModelForm, templates com herança e include, CSS puro.
 - Não adicione bibliotecas, JavaScript, frameworks de CSS, class-based views
-    novas ou abstrações sem necessidade.
+    novas ou abstrações sem necessidade. O único JavaScript é
+    `static/js/masks.js`, que formata CPF, CNPJ e telefone enquanto a pessoa digita.
 - Pastas `Sprint N/` são só para entregas que **não são código**. Nunca coloque
     código nelas.
 
@@ -44,6 +45,7 @@ A exceção é o `seed/`, que não tem páginas nem models: só o comando
 | Área nova e independente | Novo app, com a mesma estrutura dos outros |
 | Regra de negócio usada por mais de um app | `<app>/services.py` |
 | Verificação de permissão | `accounts/decorators.py` |
+| Campo de dado brasileiro (CPF, CNPJ, telefone, UF) | `accounts/fields.py` |
 | Dados de exemplo (contas, peças, fotos, pedidos) | `seed/`, no bloco do assunto |
 | HTML usado por várias áreas | `templates/components/` |
 | HTML de um app usado em outras páginas | `<app>/templates/<app>/includes/` |
@@ -103,7 +105,9 @@ def product_update(request, product_id):
 - Use `ModelForm` quando o form salva um model.
 - **Não coloque classes CSS nos widgets** (`attrs={'class': ...}`). O CSS estiliza
     os campos dentro de `.form-field`. Atributos de comportamento
-    (`autocomplete`, `min`, `autofocus`) podem ser usados.
+    (`autocomplete`, `min`, `autofocus`, `placeholder`, `inputmode`) podem ser usados.
+- Para CPF, CNPJ, telefone, cidade/estado e site/Instagram, use os campos de
+    `accounts/fields.py` (`CPFField`, `PhoneField`...) em vez de `CharField`.
 
 ## Templates
 

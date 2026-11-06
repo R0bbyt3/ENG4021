@@ -5,11 +5,13 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from .fields import CNPJField, CPFField, PhoneField, SocialField, split_location
 from .models import UserProfile
 
 OLD_PASSWORD = 'Senha-antiga-524!'
@@ -198,3 +200,113 @@ class RecuperarSenhaTests(TestCase):
 
     def test_login_tem_link_para_recuperar_senha(self):
         self.assertContains(self.client.get(reverse('login')), reverse('password_reset'))
+
+
+class BrazilianFieldsTests(TestCase):
+    """Campos de accounts/fields.py: aceitam com ou sem pontuação e guardam só o que importa."""
+
+    def test_cpf(self):
+        field = CPFField()
+        self.assertEqual(field.clean('123.456.789-09'), '12345678909')
+        self.assertEqual(field.clean('12345678909'), '12345678909')
+        for wrong in ['123.456.789-00', '111.111.111-11', '1234567890']:
+            with self.subTest(cpf=wrong), self.assertRaises(ValidationError):
+                field.clean(wrong)
+        self.assertEqual(field.prepare_value('12345678909'), '123.456.789-09')
+
+    def test_cnpj_numeric_and_alphanumeric(self):
+        field = CNPJField()
+        self.assertEqual(field.clean('11.222.333/0001-81'), '11222333000181')
+        # Exemplo oficial do CNPJ com letras (Serpro), aceito também em minúsculas.
+        self.assertEqual(field.clean('12.abc.345/01de-35'), '12ABC34501DE35')
+        for wrong in ['11.222.333/0001-80', '00.000.000/0000-00', '12.ABC.345/01DE-3X']:
+            with self.subTest(cnpj=wrong), self.assertRaises(ValidationError):
+                field.clean(wrong)
+        self.assertEqual(field.prepare_value('12ABC34501DE35'), '12.ABC.345/01DE-35')
+
+    def test_phone_mobile_landline_and_country_code(self):
+        field = PhoneField()
+        self.assertEqual(field.clean('(21) 99999-8888'), '21999998888')
+        self.assertEqual(field.clean('(11) 3333-4444'), '1133334444')
+        self.assertEqual(field.clean('+55 21 99999-8888'), '21999998888')
+        for wrong in ['(21) 89999-8888', '(01) 99999-8888', '99999-8888', '(11) 7333-4444']:
+            with self.subTest(phone=wrong), self.assertRaises(ValidationError):
+                field.clean(wrong)
+        self.assertEqual(field.prepare_value('1133334444'), '(11) 3333-4444')
+
+    def test_social(self):
+        field = SocialField(required=False)
+        self.assertEqual(field.clean('https://www.instagram.com/fios.do_rio/'), '@fios.do_rio')
+        self.assertEqual(field.clean('fiosdorio.com.br'), 'fiosdorio.com.br')
+        for wrong in ['@fios do rio', 'fiosdorio']:
+            with self.subTest(social=wrong), self.assertRaises(ValidationError):
+                field.clean(wrong)
+
+    def test_split_location(self):
+        self.assertEqual(split_location('Rio de Janeiro, RJ'), ('Rio de Janeiro', 'RJ'))
+        # Texto antigo, fora do padrão "Cidade, UF", vai inteiro para a cidade.
+        self.assertEqual(split_location('Niterói'), ('Niterói', ''))
+
+
+class RegistrationFieldsTests(TestCase):
+    def post_register(self, role, **overrides):
+        data = {'name': 'Julia Prado', 'email': 'julia@example.com', 'phone': '(11) 98888-2001',
+                'store_name': 'Segunda Volta', 'document': '123.456.789-09',
+                'city': 'São Paulo', 'state': 'SP',
+                'password1': 'Senha-forte-524!', 'password2': 'Senha-forte-524!', 'terms': 'on'}
+        data.update(overrides)
+        return self.client.post(reverse('register', args=[role]), data)
+
+    def test_seller_profile_saves_only_digits_and_joins_location(self):
+        self.assertRedirects(self.post_register('vendedor'), reverse('login'))
+        profile = UserProfile.objects.get(user__email='julia@example.com')
+        self.assertEqual(profile.document, '12345678909')
+        self.assertEqual(profile.phone, '11988882001')
+        self.assertEqual(profile.location, 'São Paulo, SP')
+
+    def test_invalid_cpf_or_state_keeps_the_form_with_errors(self):
+        for overrides in [{'document': '123.456.789-00'}, {'state': 'XX'}, {'phone': '9999-8888'}]:
+            with self.subTest(overrides=overrides):
+                response = self.post_register('vendedor', **overrides)
+                self.assertEqual(response.status_code, 200)
+                self.assertFalse(UserProfile.objects.exists())
+
+    def test_brand_accepts_alphanumeric_cnpj_and_instagram_link(self):
+        response = self.post_register('marca', document='12.ABC.345/01DE-35', legal_name='Segunda Volta Ltda.',
+                                      segment='moda', social='instagram.com/segundavolta')
+        self.assertRedirects(response, reverse('login'))
+        profile = UserProfile.objects.get(user__email='julia@example.com')
+        self.assertEqual(profile.document, '12ABC34501DE35')
+        self.assertEqual(profile.social, '@segundavolta')
+
+    def test_register_page_shows_formats(self):
+        response = self.client.get(reverse('register', args=['vendedor']))
+        self.assertContains(response, 'placeholder="000.000.000-00"')
+        self.assertContains(response, 'data-mask="phone"')
+        self.assertContains(response, '<option value="RJ">Rio de Janeiro</option>', html=True)
+
+
+class AccountPageFieldsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user('julia@example.com', email='julia@example.com',
+                                                         first_name='Julia Prado')
+        UserProfile.objects.create(user=self.user, role='seller', phone='11988882001',
+                                   location='São Paulo, SP')
+        self.client.force_login(self.user)
+
+    def test_shows_saved_values_formatted(self):
+        response = self.client.get(reverse('account'))
+        self.assertContains(response, 'value="(11) 98888-2001"')
+        self.assertContains(response, 'value="São Paulo"')
+        self.assertContains(response, '<option value="SP" selected>São Paulo</option>', html=True)
+
+    def test_saves_city_and_state_together(self):
+        data = {'name': 'Julia Prado', 'email': 'julia@example.com', 'phone': '(21) 3333-4444',
+                'store_name': 'Segunda Volta', 'city': 'Niterói', 'state': 'RJ'}
+        self.assertRedirects(self.client.post(reverse('account'), data), reverse('account'))
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.location, 'Niterói, RJ')
+        self.assertEqual(self.user.profile.phone, '2133334444')
+
+        response = self.client.post(reverse('account'), {**data, 'state': ''})
+        self.assertContains(response, 'Preencha a cidade e o estado juntos.')

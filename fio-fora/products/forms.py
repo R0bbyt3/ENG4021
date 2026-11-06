@@ -105,10 +105,16 @@ class ProductForm(DefectFieldsMixin, forms.ModelForm):
         self.fields['defect_measure_cm'].widget.attrs['min'] = '0'
         self.fields['stock'].min_value = 1
         self.fields['stock'].widget.attrs['min'] = '1'
+        self.fields['size'].widget.attrs['placeholder'] = 'Ex.: P, M, G ou 38'
+        self.fields['measurements'].widget.attrs['placeholder'] = 'Ex.: Busto 100 cm · Comprimento 70 cm'
         defeito = getattr(self.instance, 'defeito', None)
         if defeito is not None:
             self.initial.update(defect_type=defeito.tipo, defect_location=defeito.localizacao,
                                 defect_extent=defeito.extensao)
+
+    def clean_size(self):
+        # "m", " M " e "M" viram o mesmo tamanho, e o filtro da vitrine não repete opções.
+        return self.cleaned_data['size'].strip().upper()
 
     def clean_stock(self):
         stock = self.cleaned_data['stock']

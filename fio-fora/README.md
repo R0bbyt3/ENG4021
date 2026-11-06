@@ -131,7 +131,7 @@ fio-fora/
 ├── templates/              # HTML compartilhado
 │   ├── base.html           # Layout: <head>, cabeçalho e mensagens
 │   └── components/         # Pedaços reutilizáveis
-├── static/                 # CSS, ícones, fontes e logo compartilhados
+├── static/                 # CSS, js/masks.js, ícones, fontes e logo compartilhados
 │   └── css/site.css        # Importa os CSS gerais
 ├── accounts/               # Contas e permissões
 ├── products/               # Catálogo e área do vendedor
