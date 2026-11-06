@@ -122,9 +122,9 @@ def product_update(request, product_id):
 | Campos de formulário | `{% include 'components/form_fields.html' %}` |
 | Um campo só | `{% include 'components/field.html' with field=form.nome %}` |
 | Paginação | `{% include 'components/pagination.html' %}` (filtros: `with query=...`) |
-| Card de peça | `{% include 'products/includes/card_info.html' %}` |
+| Card de peça | `{% include 'products/includes/card_info.html' %}` (coração sobre a foto: `with show_favorite=True is_favorite=...`) |
 | Preço | `{% include 'products/includes/price.html' %}` |
-| Favoritar | `{% include 'favorites/includes/favorite_button.html' with is_favorite=... %}` |
+| Favoritar | `{% include 'favorites/includes/favorite_button.html' with is_favorite=... %}` (só o coração: `compact=True`) |
 | Adicionar ao carrinho | `{% include 'cart/includes/add_button.html' %}` |
 
 - Para mostrar algo conforme o tipo de conta, use `{% if is_buyer %}` ou

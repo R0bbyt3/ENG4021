@@ -205,12 +205,15 @@ class CartPageTests(CartTestCase):
         response = self.client.get(reverse('cart'))
         self.assertContains(response, 'Seu carrinho está vazio')
 
-    def test_storefront_offers_add_to_cart_to_logged_buyers(self):
+    def test_product_page_offers_add_to_cart_to_logged_buyers(self):
+        # O botão fica na página da peça; o card da vitrine só leva até ela.
+        url = reverse('product_detail', args=[self.shirt.pk])
         self.client.force_login(self.buyer)
-        response = self.client.get(reverse('home'))
+        response = self.client.get(url)
         self.assertContains(response, reverse('cart_add', args=[self.shirt.pk]))
         self.assertContains(response, 'Adicionar ao carrinho')
+        self.assertNotContains(self.client.get(reverse('home')), reverse('cart_add', args=[self.shirt.pk]))
         self.client.logout()
-        response = self.client.get(reverse('home'))
+        response = self.client.get(url)
         self.assertContains(response, 'Entrar para comprar')
         self.assertNotContains(response, reverse('cart_add', args=[self.shirt.pk]))

@@ -1,25 +1,54 @@
 /* Catálogo: cards da vitrine, página da peça e área do vendedor. */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 32px 20px;
     padding-bottom: 50px;
 }
 
+/* Card de peça: foto em destaque e só o essencial embaixo. */
 .product-card {
+    position: relative;
     display: flex;
     flex-direction: column;
+    gap: 4px;
     min-width: 0;
-    padding: 24px;
     overflow-wrap: anywhere;
-    background: var(--white);
-    border: 1px solid var(--line);
+}
+
+.product-card p { margin: 0; color: var(--muted); }
+.product-card .eyebrow { font-size: 11px; }
+.product-card h3 { margin: 0; font-size: 16px; line-height: 1.3; }
+
+/* O link do nome cobre o card inteiro: clicar em qualquer lugar abre a peça. */
+.product-card-link { color: inherit; text-decoration: none; }
+.product-card-link::after { content: ""; position: absolute; inset: 0; }
+.product-card-link:hover { text-decoration: underline; }
+
+/* Coração e ações ficam acima do link que cobre o card, para continuarem clicáveis. */
+.product-card-favorite,
+.product-card .card-actions { position: relative; z-index: 1; }
+
+.product-card-media {
+    position: relative;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: var(--paper);
     border-radius: var(--radius-medium);
 }
 
-.product-card h3 { margin: 0 0 10px; }
-.product-card .severity-badge { align-self: flex-start; }
-.product-card p { color: var(--muted); }
+.product-card-media img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform 0.25s; }
+.product-card:hover .product-card-media img { transform: scale(1.03); }
+.product-card-media--empty { display: grid; place-items: center; aspect-ratio: 4 / 5; color: var(--muted); font-size: 13px; }
+.product-card-media .severity-badge { position: absolute; top: 10px; left: 10px; padding: 5px 9px; font-size: 12px; }
+.product-card-favorite { position: absolute; top: 8px; right: 8px; }
+.product-card-soldout { position: absolute; right: 0; bottom: 0; left: 0; padding: 8px; color: var(--white); background: rgba(37, 39, 33, 0.75); font-size: 13px; font-weight: 700; text-align: center; }
+
+.product-card-size { font-size: 13px; }
+.product-card-price { display: flex; align-items: baseline; gap: 8px; margin-top: 4px !important; }
+.product-card-price .price { font-size: 18px; }
+.product-card-price .original-price { color: var(--muted); font-size: 13px; }
+.product-card-discount { margin-left: auto; color: var(--coral); font-size: 13px; font-weight: 700; }
 
 .card-actions {
     display: flex;
@@ -53,6 +82,18 @@
     color: #b0413e;
 }
 
+/* Só o coração, num círculo sobre a foto do card. */
+.favorite-button--icon {
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--ink);
+    background: rgba(255, 253, 248, 0.92);
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+}
+
 .piece-status { margin: 0 0 14px; font-size: 12px; }
 
 /* Simulador de desconto. */
@@ -74,9 +115,6 @@
 .price-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .price-row .original-price { color: var(--muted); }
 .discount-tag { color: var(--coral); font-size: 13px; font-weight: 700; }
-.product-card .eyebrow { margin: 0 0 6px; }
-.product-card-link { color: inherit; text-decoration: none; }
-.product-card-link:hover { text-decoration: underline; }
 
 /* Filtro da vitrine por faixa de severidade. */
 .severity-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 26px; color: var(--muted); font-size: 14px; }
@@ -86,9 +124,6 @@
 
 /* Página da peça. */
 .product-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; padding-bottom: 60px; }
-.product-card-photo { margin: 0 0 12px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-medium); }
-.product-card-photo img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
-.product-card-photo--empty { display: grid; place-items: center; aspect-ratio: 4 / 5; color: var(--muted); background: var(--paper); font-size: 13px; }
 
 .product-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .product-photo { position: relative; margin: 0; overflow: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-medium); }

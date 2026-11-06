@@ -118,6 +118,11 @@ class Product(models.Model):
         return self.severity_label.lower()
 
     @property
+    def defect_label(self):
+        """Texto do selo do card. "Defeito" é masculino: leve, moderado, alto."""
+        return {"leve": "Defeito leve", "moderada": "Defeito moderado", "alta": "Defeito alto"}[self.severity_band]
+
+    @property
     def discount_percent(self):
         """Desconto real do anúncio, comparando o preço final com o original."""
         if not self.original_price or self.original_price <= self.price:

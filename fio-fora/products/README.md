@@ -58,7 +58,7 @@ O desconto vai de 15% (severidade 1) a 50% (severidade 3), arredondado de 5 em
 | `models.py` | Models, fórmula de severidade e o filtro `Product.objects.with_severity_band()` |
 | `forms.py` | `ProductForm` (cadastrar e editar) e `DiscountSimulationForm` |
 | `views.py` | Vitrine, página da peça, simulador e área do vendedor |
-| `templates/products/includes/card_info.html` | Informações comuns aos cards de peça |
+| `templates/products/includes/card_info.html` | Card de peça (vitrine, favoritos e minhas peças): foto com o selo do defeito, marca, nome, tamanho e preço. O card inteiro leva à página da peça, onde ficam a descrição do defeito e o botão de carrinho |
 | `templates/products/includes/price.html` | Preço original, preço final e % de desconto |
 
 Os dados de exemplo (peças, fotos e vendedores) ficam no app [`seed`](../seed/README.md).

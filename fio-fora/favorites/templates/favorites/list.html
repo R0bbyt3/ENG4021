@@ -18,11 +18,8 @@
     {% for favorite in favorites %}
     {% with product=favorite.product %}
     <article class="product-card">
-        {% include 'products/includes/card_info.html' %}
+        {% include 'products/includes/card_info.html' with show_favorite=True is_favorite=True %}
         {% if not product.is_active %}<p class="field-help">Esta peça saiu da vitrine.</p>{% endif %}
-        <div class="card-actions">
-            {% include 'favorites/includes/favorite_button.html' with is_favorite=True %}
-        </div>
     </article>
     {% endwith %}
     {% endfor %}
@@ -30,7 +27,7 @@
 {% else %}
 <section class="empty-state">
     <h2>Você ainda não favoritou nenhuma peça</h2>
-    <p>Na vitrine, toque em "Favoritar" nas peças que gostar e elas aparecem aqui.</p>
+    <p>Na vitrine, toque no coração das peças que gostar e elas aparecem aqui.</p>
     <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
 </section>
 {% endif %}

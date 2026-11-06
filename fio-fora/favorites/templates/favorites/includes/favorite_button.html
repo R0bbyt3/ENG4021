@@ -1,12 +1,15 @@
-{% comment %}Botão de favoritar/desfavoritar. Espera product e is_favorite; volta para a página atual.{% endcomment %}
+{% comment %}
+Botão de favoritar/desfavoritar. Espera product e is_favorite; volta para a página atual.
+Com compact=True vira só o coração (usado sobre a foto do card).
+{% endcomment %}
 {% if user.is_authenticated %}
 <form action="{% if is_favorite %}{% url 'favorite_remove' product.id %}{% else %}{% url 'favorite_add' product.id %}{% endif %}" method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.get_full_path }}">
     {% if is_favorite %}
-    <button class="favorite-button is-active" type="submit" aria-label="Remover {{ product.name }} dos favoritos"><i class="bi bi-heart-fill" aria-hidden="true"></i> Favoritada</button>
+    <button class="favorite-button{% if compact %} favorite-button--icon{% endif %} is-active" type="submit" aria-label="Remover {{ product.name }} dos favoritos"><i class="bi bi-heart-fill" aria-hidden="true"></i> <span{% if compact %} class="visually-hidden"{% endif %}>Favoritada</span></button>
     {% else %}
-    <button class="favorite-button" type="submit" aria-label="Adicionar {{ product.name }} aos favoritos"><i class="bi bi-heart" aria-hidden="true"></i> Favoritar</button>
+    <button class="favorite-button{% if compact %} favorite-button--icon{% endif %}" type="submit" aria-label="Adicionar {{ product.name }} aos favoritos"><i class="bi bi-heart" aria-hidden="true"></i> <span{% if compact %} class="visually-hidden"{% endif %}>Favoritar</span></button>
     {% endif %}
 </form>
 {% endif %}

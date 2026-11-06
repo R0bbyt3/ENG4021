@@ -342,6 +342,30 @@ class PaginaProdutoTests(TestCase):
         self.assertNotContains(response, reverse('cart_add', args=[self.peca.pk]))
 
 
+class ProductCardTests(TestCase):
+    """Card da vitrine: só foto, selo, marca, nome, tamanho e preço."""
+
+    def test_card_is_short_and_links_to_the_product(self):
+        product = Product.objects.create(name='Saia midi', description='Texto longo que só aparece na página da peça.',
+                                         size='M', price=Decimal('70.00'), original_price=Decimal('100.00'))
+        Defeito.objects.create(product=product, tipo=2, localizacao=2, extensao=2)
+        response = self.client.get(reverse('home'))
+        for text in ['Defeito moderado', 'Tam. M', 'R$ 70,00', 'R$ 100,00', '-30%',
+                     reverse('product_detail', args=[product.pk])]:
+            self.assertContains(response, text)
+        self.assertNotContains(response, 'Texto longo')
+
+    def test_sold_out_piece_shows_overlay(self):
+        Product.objects.create(name='Saia midi', description='-', price=Decimal('70.00'), stock=0)
+        self.assertContains(self.client.get(reverse('home')), 'Esgotada')
+
+    def test_defect_label_uses_masculine_form(self):
+        for scores, label in [((1, 1, 1), 'Defeito leve'), ((2, 2, 2), 'Defeito moderado'), ((3, 3, 3), 'Defeito alto')]:
+            product = Product()
+            product.defeito = Defeito(tipo=scores[0], localizacao=scores[1], extensao=scores[2])
+            self.assertEqual(product.defect_label, label)
+
+
 class DiscountScenarioTests(TestCase):
     def test_discount_reference_scenarios(self):
         for scores, severity, discount in [((1,1,1), "1.00", 15), ((1,3,2), "1.90", 30), ((2,3,1), "2.15", 35), ((3,3,1), "2.60", 45)]:
@@ -716,7 +740,7 @@ class CatalogControlsTests(TestCase):
         saved = next(product for product in response.context['products'] if product.pk == self.first.pk)
         self.assertTrue(saved.is_favorite)
         self.assertContains(response, reverse('favorite_remove', args=[self.first.pk]))
-        self.assertContains(response, reverse('cart_add', args=[self.first.pk]))
+        self.assertContains(response, reverse('product_detail', args=[self.first.pk]))
 
 
 class AboutAndPolicyTests(TestCase):

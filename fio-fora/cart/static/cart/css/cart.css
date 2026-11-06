@@ -1,14 +1,5 @@
 /* Carrinho do comprador e botão "Adicionar ao carrinho". */
 
-.product-card .cart-add {
-    margin-top: 14px;
-}
-
-.product-card .cart-add .button,
-.product-card .cart-add .stock-out {
-    width: 100%;
-}
-
 .cart-add form,
 .cart-add .stock-out {
     margin: 0;

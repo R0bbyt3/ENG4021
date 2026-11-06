@@ -34,6 +34,6 @@ Carrinho do comprador.
 |---|---|
 | `services.py` | Validação de quantidade e estoque e cálculo do total. Também é usado pelo checkout (`orders`). |
 | `views.py` | Ver, adicionar, alterar e remover itens |
-| `templates/cart/includes/add_button.html` | Botão "Adicionar ao carrinho", usado na vitrine e na página da peça |
+| `templates/cart/includes/add_button.html` | Botão "Adicionar ao carrinho", usado na página da peça |
 
 > **[PRINT]** Carrinho com um item indisponível destacado.

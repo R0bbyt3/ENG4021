@@ -20,7 +20,7 @@
     <article class="product-card">
         <p class="piece-status">{% if product.is_active %}Na vitrine{% else %}Inativa{% endif %}</p>
         {% include 'products/includes/card_info.html' %}
-        <p class="field-help">{% if product.size %}Tamanho {{ product.size }} · {% endif %}estoque: {{ product.stock }}</p>
+        <p class="field-help">Estoque: {{ product.stock }}</p>
         <div class="card-actions">
             <a href="{% url 'product_update' product.id %}">Editar</a>
             <a class="danger-link" href="{% url 'product_delete' product.id %}">Remover</a>

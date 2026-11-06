@@ -1,11 +1,25 @@
-{% comment %}Informações da peça comuns a todos os cards (vitrine, favoritos, minhas peças).{% endcomment %}
-{% if product.cover_image %}
-<figure class="product-card-photo"><img src="{{ product.cover_image.image.url }}" alt="{{ product.cover_image.alt_text }}" loading="lazy"></figure>
-{% else %}
-<div class="product-card-photo product-card-photo--empty">Sem foto da peça</div>
-{% endif %}
+{% comment %}
+Card de peça (vitrine, favoritos, minhas peças): foto com selo do defeito e,
+embaixo, marca, nome, tamanho e preço. O card inteiro leva à página da peça.
+Para mostrar o coração sobre a foto: with show_favorite=True is_favorite=...
+{% endcomment %}
+<div class="product-card-media">
+    {% if product.cover_image %}
+    <img src="{{ product.cover_image.image.url }}" alt="{{ product.cover_image.alt_text }}" loading="lazy">
+    {% else %}
+    <div class="product-card-media--empty">Sem foto da peça</div>
+    {% endif %}
+    {% if product.defeito %}<span class="severity-badge severity-badge--{{ product.severity_band }}">{{ product.defect_label }}</span>{% endif %}
+    {% if product.stock < 1 %}<span class="product-card-soldout">Esgotada</span>{% endif %}
+    {% if show_favorite %}<div class="product-card-favorite">{% include 'favorites/includes/favorite_button.html' with compact=True %}</div>{% endif %}
+</div>
 <p class="eyebrow">{{ product.brand|default:'Marca não informada' }}</p>
 <h3>{% if product.is_active %}<a class="product-card-link" href="{% url 'product_detail' product.id %}">{{ product.name }}</a>{% else %}{{ product.name }}{% endif %}</h3>
-{% if product.defeito %}<span class="severity-badge severity-badge--{{ product.severity_band }}">{{ product.severity_label }}</span>{% endif %}
-<p><strong>Defeito:</strong> {{ product.description|truncatechars:140 }}</p>
-{% include 'products/includes/price.html' %}
+{% if product.size %}<p class="product-card-size">Tam. {{ product.size }}</p>{% endif %}
+<p class="product-card-price">
+    <span class="price">R$ {{ product.price|floatformat:2 }}</span>
+    {% if product.discount_percent %}
+    <span class="original-price">R$ {{ product.original_price|floatformat:2 }}</span>
+    <span class="product-card-discount">-{{ product.discount_percent }}%</span>
+    {% endif %}
+</p>

@@ -73,11 +73,7 @@
 <section class="product-grid">
     {% for product in products %}
     <article class="product-card">
-        {% include 'products/includes/card_info.html' %}
-        <div class="card-actions">
-            {% include 'favorites/includes/favorite_button.html' with is_favorite=product.is_favorite %}
-        </div>
-        {% include 'cart/includes/add_button.html' %}
+        {% include 'products/includes/card_info.html' with show_favorite=True is_favorite=product.is_favorite %}
     </article>
     {% endfor %}
 </section>
