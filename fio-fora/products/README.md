@@ -10,6 +10,7 @@ Vitrine, página da peça, cadastro de peças pelo vendedor e simulador de desco
 |---|---|---|
 | `/vitrine/` | Vitrine com filtros combináveis, busca e ordenação | Todos |
 | `/sobre/` | Proposta, critérios, origem dos pesos e caráter acadêmico | Todos |
+| `/termos/` e `/privacidade/` | Termos de uso e política de privacidade | Todos |
 | `/produtos/<id>/` | Página da peça | Todos |
 | `/simulador/` | Simulador de desconto | Todos |
 | `/minhas-pecas/` | Peças do vendedor logado | Vendedor e marca |
@@ -155,6 +156,18 @@ e-mail. Ela é ligada pelas perguntas frequentes e pela página Trabalhe conosco
 Não há formulário nem model.
 
 > **[PRINT]** Página de contato com os dois caminhos.
+
+## Termos de uso e privacidade
+
+`/termos/` (`terms`) e `/privacidade/` (`privacy`) são públicas e só têm
+texto: não consultam o banco. Os termos resumem as regras de conta, de compra,
+de venda e o que não pode; a privacidade lista os dados que o site guarda
+(os mesmos dos models de conta, pedidos, favoritos e avaliações), para que
+servem, que só há cookies de sessão e de segurança, e que não há pagamento.
+Ambas avisam que são textos de exemplo de um **protótipo acadêmico**. Uma
+liga na outra e as duas são ligadas pela página de contato. Não há model.
+
+> **[PRINT]** Página de termos de uso e página de política de privacidade.
 
 ## Sobre e política de troca
 

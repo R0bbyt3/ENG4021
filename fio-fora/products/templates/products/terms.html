@@ -1,0 +1,59 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Termos de uso | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Termos de uso</p>
+    <h1>Regras para usar<br><em>a FioFora.</em></h1>
+    <p>Um resumo claro do que se espera de quem compra e de quem vende no site.</p>
+</header>
+
+<div class="legal">
+    <section class="panel panel--note">
+        <h2>Um projeto acadêmico</h2>
+        <p>A FioFora é um protótipo feito por estudantes da disciplina ENG4021 - Projeto de Software, da PUC-Rio. Não há cobrança, entrega nem loja real: os pedidos servem para demonstrar o fluxo. Estes termos são regras de exemplo e não substituem um contrato de verdade.</p>
+    </section>
+
+    <section class="panel">
+        <h2>1. Sua conta</h2>
+        <ul>
+            <li>Use dados verdadeiros no cadastro e mantenha a sua senha em segredo.</li>
+            <li>Cada conta é de comprador, de vendedor ou de marca. Quem anuncia não pode comprar a própria peça.</li>
+            <li>Você é responsável pelo que acontece na sua conta. Se perder o acesso, use "Esqueci minha senha".</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>2. Para quem compra</h2>
+        <ul>
+            <li>Leia a ficha da peça: o defeito informado faz parte do preço e do desconto.</li>
+            <li>Vale a <a href="{% url 'about' %}">política de troca e devolução</a> mostrada na página de cada peça.</li>
+            <li>Avaliações devem contar a sua experiência de forma honesta e respeitosa.</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>3. Para quem vende</h2>
+        <ul>
+            <li>Descreva o defeito com transparência, com fotos que mostrem a peça como ela é.</li>
+            <li>O desconto vem da severidade do defeito, não de um valor escolhido por você.</li>
+            <li>Anuncie só peças que você pode vender.</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>4. O que não pode</h2>
+        <ul>
+            <li>Anunciar ou enviar conteúdo falso, ofensivo ou que não seja seu.</li>
+            <li>Tentar acessar contas, pedidos ou dados de outras pessoas.</li>
+            <li>Usar o site de um jeito que atrapalhe os outros usuários.</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>5. Mudanças e dúvidas</h2>
+        <p>Como o projeto está em desenvolvimento, estes termos podem mudar. Para esclarecer uma dúvida, veja as <a href="{% url 'faq' %}">perguntas frequentes</a> ou a página de <a href="{% url 'contact' %}">contato</a>. O tratamento dos seus dados está na <a href="{% url 'privacy' %}">política de privacidade</a>.</p>
+    </section>
+</div>
+{% endblock %}
