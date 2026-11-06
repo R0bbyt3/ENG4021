@@ -29,13 +29,18 @@ Todas as páginas são só para compradores.
 - Ao confirmar, o estoque é conferido de novo e descontado, tudo de uma vez
     (se um item falhar, nada é gravado).
 - O carrinho é esvaziado depois do pedido.
+- Depois de confirmar, o comprador recebe um e-mail com a referência, as peças,
+    o total e o link do pedido (`send_order_confirmation()`). Se o envio falhar, o
+    pedido continua salvo e a tela avisa. O envio usa a mesma configuração de
+    e-mail da recuperação de senha: por padrão aparece no terminal do servidor.
 - O histórico não muda se a peça for alterada ou apagada depois.
 
 ## Arquivos principais
 
 | Arquivo | O que tem |
 |---|---|
-| `services.py` | `checkout_cart()`: cria o pedido e desconta o estoque |
+| `services.py` | `checkout_cart()`: cria o pedido e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação |
 | `views.py` | Checkout, lista e detalhe dos pedidos |
+| `templates/orders/email/` | Assunto e texto do e-mail de confirmação |
 
 > **[PRINT]** Página de detalhe de um pedido confirmado.
