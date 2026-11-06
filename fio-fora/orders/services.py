@@ -1,7 +1,9 @@
 from uuid import uuid4
 
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import F
+from django.template.loader import render_to_string
 
 from cart.models import Cart
 from cart.services import unavailable_reason
@@ -48,3 +50,22 @@ def checkout_cart(user):
 
     cart.items.filter(pk__in=[item.pk for item in items]).delete()
     return order
+
+
+def send_order_confirmation(order, order_url):
+    """Envia ao comprador o e-mail de confirmação do pedido.
+
+    Devolve True se o e-mail foi entregue ao servidor de envio. Uma falha no
+    e-mail nunca desfaz o pedido, por isso o erro não sobe: quem chama decide
+    o que avisar na tela.
+    """
+    if not order.user.email:
+        return False
+    context = {'order': order, 'items': order.items.all(), 'order_url': order_url}
+    subject = render_to_string('orders/email/order_confirmation_subject.txt', context).strip()
+    body = render_to_string('orders/email/order_confirmation.txt', context)
+    try:
+        send_mail(subject, body, None, [order.user.email])
+    except OSError:
+        return False
+    return True

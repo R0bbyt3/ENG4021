@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_http_methods
 
 from accounts.decorators import buyer_required
@@ -8,7 +9,7 @@ from cart.services import build_cart_summary
 from reviews.services import attach_review_forms
 
 from .models import Order
-from .services import CheckoutError, checkout_cart
+from .services import CheckoutError, checkout_cart, send_order_confirmation
 
 
 @require_http_methods(['GET', 'POST'])
@@ -21,6 +22,9 @@ def checkout(request):
             messages.error(request, str(error))
             return redirect('cart')
         messages.success(request, 'Pedido confirmado! Sua compra demonstrativa foi registrada.')
+        order_url = request.build_absolute_uri(reverse('order_detail', args=[order.pk]))
+        if not send_order_confirmation(order, order_url):
+            messages.warning(request, 'Não foi possível enviar o e-mail de confirmação, mas o pedido está salvo.')
         return redirect('order_detail', order_id=order.pk)
 
     summary = build_cart_summary(request.user)
