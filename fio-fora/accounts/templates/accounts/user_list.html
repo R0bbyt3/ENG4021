@@ -7,10 +7,10 @@
   <p class="eyebrow">Área da equipe · <a href="{% url 'admin:index' %}">Administração</a></p>
   <div class="users-title"><div><h1>Quem faz parte<br><em>da FioFora.</em></h1><p>Consulte os compradores, vendedores e marcas da plataforma.</p></div><span class="users-count">{{ total }} conta{{ total|pluralize:"s" }} encontrada{{ total|pluralize:"s" }}</span></div>
   <form method="get" class="users-filters" role="search">
-    <div class="search-field"><label for="search">Buscar usuário</label><input id="search" name="q" type="search" maxlength="120" value="{{ q }}" placeholder="Nome, e-mail, usuário ou loja"></div>
-    <div><label for="role">Tipo de conta</label><select id="role" name="role"><option value="">Todos os tipos</option>{% for value, label in roles %}<option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}<option value="unassigned" {% if role == 'unassigned' %}selected{% endif %}>Sem perfil</option></select></div>
-    <div><label for="status">Situação</label><select id="status" name="status"><option value="">Todas</option><option value="active" {% if status == 'active' %}selected{% endif %}>Ativo</option><option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativo</option></select></div>
-    <button type="submit">Aplicar filtros</button><a class="clear-filters" href="{% url 'user_list' %}">Limpar</a>
+    <div class="form-field search-field"><label class="field-label" for="search">Buscar usuário</label><input id="search" name="q" type="search" maxlength="120" value="{{ q }}" placeholder="Nome, e-mail, usuário ou loja"></div>
+    <div class="form-field"><label class="field-label" for="role">Tipo de conta</label><select id="role" name="role"><option value="">Todos os tipos</option>{% for value, label in roles %}<option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}<option value="unassigned" {% if role == 'unassigned' %}selected{% endif %}>Sem perfil</option></select></div>
+    <div class="form-field"><label class="field-label" for="status">Situação</label><select id="status" name="status"><option value="">Todas</option><option value="active" {% if status == 'active' %}selected{% endif %}>Ativo</option><option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativo</option></select></div>
+    <button class="button" type="submit">Aplicar filtros</button><a class="clear-filters" href="{% url 'user_list' %}">Limpar</a>
   </form>
   <section class="users-panel" aria-label="Usuários cadastrados">
   <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela de usuários, deslize horizontalmente em telas pequenas">

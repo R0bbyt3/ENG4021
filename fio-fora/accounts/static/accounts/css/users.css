@@ -6,11 +6,9 @@
 .users-title p { color: var(--muted); font-size: 14px; line-height: 1.6; }
 .users-count { white-space: nowrap; color: var(--muted); font-size: 12px; padding-bottom: 4px; }
 .users-filters { display: flex; align-items: flex-end; gap: 14px; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 26px; }
-.users-filters label { display: block; font-size: 12px; margin-bottom: 9px; }
-.users-filters input, .users-filters select { height: 44px; border: 1px solid var(--line); border-radius: 4px; padding: 0 12px; background: var(--white); color: var(--ink); width: 100%; font-size: 13px; }
 .users-filters .search-field { flex: 1; min-width: 200px; }
-.users-filters button { height: 44px; padding: 0 20px; white-space: nowrap; background: var(--green); color: var(--white); border: 0; border-radius: 4px; font-size: 13px; cursor: pointer; }
-.users-filters button:hover { background: #354632; }
+/* Campos e botão vêm de controls.css; aqui só alinhamos a altura do botão à dos campos. */
+.users-filters .button { min-height: 52px; white-space: nowrap; }
 .clear-filters { padding: 14px 0; color: var(--green); font-size: 12px; }
 .users-panel { background: var(--white); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
 .table-scroll { overflow-x: auto; }
