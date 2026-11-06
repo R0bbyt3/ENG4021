@@ -1,0 +1,33 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Contato | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Contato</p>
+    <h1>Fale com a<br><em>equipe FioFora.</em></h1>
+    <p>Dúvida, sugestão ou problema no site? Veja por onde falar com a gente.</p>
+</header>
+
+<div class="contact-grid">
+    <section class="panel">
+        <h2>Antes de escrever</h2>
+        <p>A resposta pode já estar nas <a href="{% url 'faq' %}">perguntas frequentes</a>, que explicam como comprar, vender, recuperar a senha e trocar uma peça.</p>
+    </section>
+
+    <section class="panel">
+        <h2>Pelo repositório</h2>
+        <p>O código e a documentação da FioFora ficam no GitHub. Para avisar de um erro ou sugerir uma melhoria, abra um chamado na aba "Problemas" do repositório.</p>
+        <a class="about-link" href="https://github.com/R0bbyt3/ENG4021">Abrir o repositório <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+    </section>
+</div>
+
+<section class="panel panel--note contact-note">
+    <h2>Um projeto acadêmico</h2>
+    <p>A FioFora é um protótipo feito por estudantes da disciplina ENG4021 - Projeto de Software, da PUC-Rio. Por isso não há atendimento por telefone nem por e-mail: os canais acima são os que a equipe acompanha.</p>
+    <div class="form-actions">
+        <a class="button" href="{% url 'about' %}">Conhecer a FioFora</a>
+        <a class="button button--secondary" href="{% url 'careers' %}">Trabalhe conosco</a>
+    </div>
+</section>
+{% endblock %}

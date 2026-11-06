@@ -36,6 +36,11 @@ def careers(request):
     return render(request, 'products/careers.html', {'openings': openings})
 
 
+def contact(request):
+    """Contato: página pública e só de texto, sem formulário nem e-mail inventado."""
+    return render(request, 'products/contact.html')
+
+
 def home(request):
     """Todos os controles da vitrine compartilham a mesma URL por GET."""
     band = request.GET.get('faixa', '').strip()

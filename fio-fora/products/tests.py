@@ -808,3 +808,17 @@ class CareersTests(TestCase):
     def test_about_and_faq_link_to_careers(self):
         self.assertContains(self.client.get(reverse('about')), reverse('careers'))
         self.assertContains(self.client.get(reverse('faq')), reverse('careers'))
+
+
+class ContactTests(TestCase):
+    def test_contact_is_public_and_points_to_faq_and_repository(self):
+        response = self.client.get(reverse('contact'))
+        self.assertEqual(response.status_code, 200)
+        for text in ['Fale com a', 'Antes de escrever', 'https://github.com/R0bbyt3/ENG4021',
+                     'não há atendimento por telefone nem por e-mail']:
+            self.assertContains(response, text)
+        self.assertContains(response, reverse('faq'))
+
+    def test_faq_and_careers_link_to_contact(self):
+        self.assertContains(self.client.get(reverse('faq')), reverse('contact'))
+        self.assertContains(self.client.get(reverse('careers')), reverse('contact'))
