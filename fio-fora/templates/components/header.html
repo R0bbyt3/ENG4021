@@ -11,6 +11,7 @@
             <a href="{% url 'about' %}"{% if current == 'about' %} aria-current="page"{% endif %}>Sobre</a>
             {% if is_seller %}
             <a href="{% url 'my_products' %}"{% if current == 'my_products' %} aria-current="page"{% endif %}>Minhas peças</a>
+            <a href="{% url 'sales_list' %}"{% if current == 'sales_list' %} aria-current="page"{% endif %}>Minhas vendas</a>
             {% endif %}
         </nav>
 
