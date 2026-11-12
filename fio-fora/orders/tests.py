@@ -213,3 +213,284 @@ class CheckoutAddressAndShippingTests(TestCase):
         self.assertIn('Rua da Assembleia, 10 - sala 2', mail.outbox[0].body)
         self.assertIn('Frete: R$ 19,90', mail.outbox[0].body)
         self.assertIn('Total: R$ 227,90', mail.outbox[0].body)
+
+
+class CheckoutTestCase(TestCase):
+    """Base dos testes de compra: um comprador, um vendedor e uma peça com 5 unidades."""
+
+    def setUp(self):
+        from accounts.models import UserProfile
+        User = get_user_model()
+        self.buyer = User.objects.create_user('comprador', 'ana@example.com', 'senha-segura-1')
+        UserProfile.objects.create(user=self.buyer, role='buyer')
+        self.other_buyer = User.objects.create_user('outra', 'bia@example.com', 'senha-segura-1')
+        UserProfile.objects.create(user=self.other_buyer, role='buyer')
+        self.seller = User.objects.create_user('vendedor', 'loja@example.com', 'senha-segura-1')
+        UserProfile.objects.create(user=self.seller, role='seller')
+        self.dress = Product.objects.create(seller=self.seller, name='Vestido floral', description='Botão faltando.',
+                                            original_price=Decimal('160.00'), price=Decimal('104.00'), stock=5)
+        self.shirt = Product.objects.create(seller=self.seller, name='Camisa de linho', description='Mancha na barra.',
+                                            original_price=Decimal('100.00'), price=Decimal('85.00'), stock=2)
+        self.client.force_login(self.buyer)
+
+    def put_in_cart(self, product, quantity=1, user=None):
+        """Coloca a peça direto no carrinho, sem passar pelas regras do carrinho."""
+        cart, _ = Cart.objects.get_or_create(user=user or self.buyer)
+        return CartItem.objects.create(cart=cart, product=product, quantity=quantity)
+
+    def buy(self, **extra):
+        return self.client.post('/checkout/', {**ADDRESS, **extra})
+
+    def stock_of(self, product):
+        product.refresh_from_db()
+        return product.stock
+
+    def assertNothingWasBought(self, *products_and_stock):
+        """Nenhum pedido, estoque como estava e carrinho intacto."""
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(OrderItem.objects.count(), 0)
+        for product, stock in products_and_stock:
+            self.assertEqual(self.stock_of(product), stock)
+        self.assertTrue(CartItem.objects.filter(cart__user=self.buyer).exists())
+
+
+class CheckoutStockTests(CheckoutTestCase):
+    def test_purchase_takes_the_bought_quantity_out_of_stock(self):
+        self.put_in_cart(self.dress, 2)
+        self.buy()
+        self.assertEqual(self.stock_of(self.dress), 3)
+
+    def test_buying_the_last_units_leaves_the_piece_sold_out(self):
+        self.put_in_cart(self.shirt, 2)
+        self.assertRedirects(self.buy(), f'/pedidos/{Order.objects.get().pk}/')
+        self.assertEqual(self.stock_of(self.shirt), 0)
+        # Sem estoque, ninguém mais consegue pôr a peça no carrinho.
+        self.client.force_login(self.other_buyer)
+        self.client.post(f'/carrinho/adicionar/{self.shirt.pk}/', {'quantity': '1'})
+        self.assertFalse(CartItem.objects.filter(cart__user=self.other_buyer).exists())
+
+    def test_every_item_is_recorded_with_name_price_and_quantity(self):
+        self.put_in_cart(self.dress, 2)
+        self.put_in_cart(self.shirt, 1)
+        self.buy()
+        items = {item.product_name: item for item in Order.objects.get().items.all()}
+        self.assertEqual(set(items), {'Vestido floral', 'Camisa de linho'})
+        self.assertEqual((items['Vestido floral'].unit_price, items['Vestido floral'].quantity), (Decimal('104.00'), 2))
+        self.assertEqual((items['Camisa de linho'].unit_price, items['Camisa de linho'].quantity), (Decimal('85.00'), 1))
+        self.assertEqual(Order.objects.get().subtotal, Decimal('293.00'))
+        self.assertEqual(Order.objects.get().total, Decimal('312.90'))
+        self.assertEqual(self.stock_of(self.dress), 3)
+        self.assertEqual(self.stock_of(self.shirt), 1)
+
+    def test_cart_is_emptied_after_the_purchase(self):
+        self.put_in_cart(self.dress, 1)
+        self.buy()
+        self.assertFalse(CartItem.objects.filter(cart__user=self.buyer).exists())
+
+    def test_new_order_starts_pending_with_a_reference(self):
+        self.put_in_cart(self.dress)
+        self.buy()
+        order = Order.objects.get()
+        self.assertEqual(order.status, Order.Status.PENDING)
+        self.assertEqual(order.user, self.buyer)
+        self.assertRegex(order.reference, r'^FF-[0-9A-F]{12}$')
+
+    def test_price_is_the_one_in_the_database_when_buying(self):
+        self.put_in_cart(self.dress, 1)
+        Product.objects.filter(pk=self.dress.pk).update(price=Decimal('90.00'))
+        self.buy()
+        self.assertEqual(Order.objects.get().items.get().unit_price, Decimal('90.00'))
+        self.assertEqual(Order.objects.get().total, Decimal('109.90'))
+
+    def test_insufficient_stock_blocks_the_purchase(self):
+        self.put_in_cart(self.dress, 4)
+        Product.objects.filter(pk=self.dress.pk).update(stock=3)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertRedirects(response, '/carrinho/')
+        self.assertContains(response, 'Não foi possível finalizar “Vestido floral”. Só há 3 unidades em estoque')
+        self.assertNothingWasBought((self.dress, 3))
+
+    def test_sold_out_piece_blocks_the_purchase(self):
+        self.put_in_cart(self.dress, 1)
+        Product.objects.filter(pk=self.dress.pk).update(stock=0)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'Não foi possível finalizar “Vestido floral”. Peça esgotada')
+        self.assertNothingWasBought((self.dress, 0))
+
+    def test_one_bad_item_cancels_the_whole_purchase(self):
+        self.put_in_cart(self.dress, 1)
+        self.put_in_cart(self.shirt, 2)
+        Product.objects.filter(pk=self.shirt.pk).update(stock=1)
+        self.buy()
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.stock_of(self.dress), 5)
+        self.assertEqual(self.stock_of(self.shirt), 1)
+        self.assertEqual(CartItem.objects.filter(cart__user=self.buyer).count(), 2)
+
+    def test_stock_that_changes_during_the_purchase_rolls_everything_back(self):
+        from unittest import mock
+        # Simula outra compra que levou o estoque depois da conferência do carrinho.
+        self.put_in_cart(self.dress, 1)
+        self.put_in_cart(self.shirt, 2)
+        Product.objects.filter(pk=self.shirt.pk).update(stock=1)
+        with mock.patch('orders.services.unavailable_reason', return_value=None):
+            response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'O estoque mudou')
+        self.assertNothingWasBought((self.dress, 5), (self.shirt, 1))
+
+    def test_double_submit_buys_only_once(self):
+        self.put_in_cart(self.dress, 2)
+        self.buy()
+        second = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertRedirects(second, '/carrinho/')
+        self.assertContains(second, 'Seu carrinho está vazio')
+        self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(self.stock_of(self.dress), 3)
+
+
+class CheckoutBlockedCartTests(CheckoutTestCase):
+    def test_empty_cart_cannot_check_out(self):
+        for response in [self.client.get('/checkout/', follow=True),
+                         self.client.post('/checkout/', ADDRESS, follow=True)]:
+            self.assertRedirects(response, '/carrinho/')
+            self.assertContains(response, 'Seu carrinho está vazio')
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_cart_that_exists_but_has_no_items_cannot_check_out(self):
+        Cart.objects.create(user=self.buyer)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'Seu carrinho está vazio')
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_buyer_cannot_buy_their_own_piece(self):
+        own = Product.objects.create(seller=self.buyer, name='Minha blusa', description='Fio puxado.',
+                                     original_price=Decimal('60.00'), price=Decimal('40.00'), stock=3)
+        self.put_in_cart(own, 1)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'Você não pode comprar a sua própria peça')
+        self.assertNothingWasBought((own, 3))
+
+    def test_own_piece_blocks_the_whole_cart(self):
+        own = Product.objects.create(seller=self.buyer, name='Minha blusa', description='Fio puxado.',
+                                     original_price=Decimal('60.00'), price=Decimal('40.00'), stock=3)
+        self.put_in_cart(self.dress, 1)
+        self.put_in_cart(own, 1)
+        self.buy()
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.stock_of(self.dress), 5)
+
+    def test_inactive_piece_blocks_the_purchase(self):
+        self.put_in_cart(self.dress, 1)
+        Product.objects.filter(pk=self.dress.pk).update(is_active=False)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'Não foi possível finalizar “Vestido floral”. Esta peça não está mais à venda')
+        self.assertNothingWasBought((self.dress, 5))
+
+    def test_checkout_page_blocks_the_button_when_an_item_is_unavailable(self):
+        self.put_in_cart(self.dress, 1)
+        Product.objects.filter(pk=self.dress.pk).update(is_active=False)
+        response = self.client.get('/checkout/')
+        self.assertTrue(response.context['has_unavailable'])
+        self.assertContains(response, 'Ajuste os itens indisponíveis')
+        self.assertContains(response, 'disabled>Finalizar pedido simulado')
+
+    def test_unavailable_item_does_not_count_in_the_checkout_total(self):
+        self.put_in_cart(self.dress, 1)
+        self.put_in_cart(self.shirt, 1)
+        Product.objects.filter(pk=self.shirt.pk).update(is_active=False)
+        payment = self.client.get('/checkout/').context['payment']
+        self.assertEqual(payment['subtotal'], Decimal('104.00'))
+        self.assertEqual(payment['total'], Decimal('123.90'))
+
+
+class CheckoutAccessTests(CheckoutTestCase):
+    def test_anonymous_visitor_is_sent_to_login(self):
+        self.client.logout()
+        for url in ['/checkout/', '/pedidos/', '/pedidos/1/']:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 302)
+                self.assertIn('/?next=', response['Location'])
+        self.assertEqual(self.client.post('/checkout/', ADDRESS).status_code, 302)
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_seller_cannot_use_checkout_or_orders(self):
+        self.client.force_login(self.seller)
+        self.put_in_cart(self.dress, 1, user=self.seller)
+        self.assertEqual(self.client.get('/checkout/').status_code, 403)
+        self.assertEqual(self.client.post('/checkout/', ADDRESS).status_code, 403)
+        self.assertEqual(self.client.get('/pedidos/').status_code, 403)
+        self.assertEqual(Order.objects.count(), 0)
+
+    def test_checkout_does_not_accept_other_methods(self):
+        self.put_in_cart(self.dress, 1)
+        self.assertEqual(self.client.put('/checkout/').status_code, 405)
+        self.assertEqual(self.client.delete('/checkout/').status_code, 405)
+
+    def test_checkout_only_uses_the_cart_of_the_logged_buyer(self):
+        self.put_in_cart(self.dress, 1, user=self.other_buyer)
+        response = self.client.post('/checkout/', ADDRESS, follow=True)
+        self.assertContains(response, 'Seu carrinho está vazio')
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.stock_of(self.dress), 5)
+        self.assertTrue(CartItem.objects.filter(cart__user=self.other_buyer).exists())
+
+
+class OrderScreensTests(CheckoutTestCase):
+    def make_order(self, user, reference, product=None, **extra):
+        product = product or self.dress
+        order = Order.objects.create(user=user, reference=reference, shipping_cost=Decimal('19.90'), **extra)
+        OrderItem.objects.create(order=order, product=product, product_name=product.name,
+                                 unit_price=product.price, quantity=1)
+        return order
+
+    def test_order_of_another_person_is_a_404(self):
+        theirs = self.make_order(self.other_buyer, 'FF-DA-BIA')
+        self.assertEqual(self.client.get(f'/pedidos/{theirs.pk}/').status_code, 404)
+
+    def test_missing_order_is_a_404(self):
+        self.assertEqual(self.client.get('/pedidos/9999/').status_code, 404)
+
+    def test_buyer_sees_own_order_with_items_address_shipping_and_total(self):
+        mine = self.make_order(self.buyer, 'FF-DA-ANA', shipping_cep='20040020', shipping_street='Rua da Assembleia',
+                               shipping_number='10', shipping_district='Centro',
+                               shipping_location='Rio de Janeiro, RJ')
+        response = self.client.get(f'/pedidos/{mine.pk}/')
+        self.assertEqual(response.status_code, 200)
+        for text in ['FF-DA-ANA', 'Vestido floral', 'Rua da Assembleia, 10', 'CEP 20040-020',
+                     'R$ 104,00', 'R$ 19,90', 'R$ 123,90']:
+            self.assertContains(response, text)
+
+    def test_old_order_without_address_still_opens(self):
+        old = self.make_order(self.buyer, 'FF-ANTIGO')
+        response = self.client.get(f'/pedidos/{old.pk}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Endereço de entrega')
+
+    def test_order_list_shows_only_my_orders_with_the_total_including_shipping(self):
+        self.make_order(self.buyer, 'FF-DA-ANA')
+        self.make_order(self.other_buyer, 'FF-DA-BIA')
+        response = self.client.get('/pedidos/')
+        self.assertContains(response, 'FF-DA-ANA')
+        self.assertContains(response, 'R$ 123,90')
+        self.assertNotContains(response, 'FF-DA-BIA')
+
+    def test_new_order_shows_up_in_the_history(self):
+        self.put_in_cart(self.dress, 1)
+        self.buy()
+        self.assertContains(self.client.get('/pedidos/'), Order.objects.get().reference)
+
+    def test_order_list_without_orders_shows_the_empty_state(self):
+        self.assertContains(self.client.get('/pedidos/'), 'Você ainda não fez nenhum pedido')
+
+    def test_order_screens_do_not_accept_post(self):
+        mine = self.make_order(self.buyer, 'FF-DA-ANA')
+        self.assertEqual(self.client.post(f'/pedidos/{mine.pk}/').status_code, 405)
+        self.assertEqual(self.client.post('/pedidos/').status_code, 405)
+
+    def test_order_survives_when_the_piece_is_deleted(self):
+        mine = self.make_order(self.buyer, 'FF-DA-ANA')
+        self.dress.delete()
+        response = self.client.get(f'/pedidos/{mine.pk}/')
+        self.assertContains(response, 'Vestido floral')
+        self.assertContains(response, 'R$ 123,90')
