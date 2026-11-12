@@ -54,9 +54,15 @@
         <h2>Resumo</h2>
         <dl>
             <div><dt>Peças</dt><dd>{{ pieces }}</dd></div>
-            <div><dt>Subtotal</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
-            <div class="cart-summary__total"><dt>Total</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
+            <div><dt>Subtotal</dt><dd>R$ {{ payment.subtotal|floatformat:2 }}</dd></div>
+            <div><dt>Frete</dt><dd>R$ {{ payment.shipping|floatformat:2 }}</dd></div>
+            <div class="cart-summary__total"><dt>Total</dt><dd>R$ {{ payment.total|floatformat:2 }}</dd></div>
         </dl>
+        {% if pieces %}
+        <p class="payment-info">
+            {% if payment.installments > 1 %}Em até <strong>{{ payment.installments }}x de R$ {{ payment.installment_value|floatformat:2 }}</strong> sem juros{% else %}Pagamento à vista, sem juros{% endif %}
+        </p>
+        {% endif %}
         {% if has_unavailable %}
         <p class="field-help">Itens indisponíveis ficam de fora do total. Ajuste a quantidade ou remova-os.</p>
         {% endif %}

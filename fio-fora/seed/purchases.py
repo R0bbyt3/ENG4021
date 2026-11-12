@@ -1,4 +1,5 @@
 """Bloco 4: pedidos (um de cada status) e avaliações das peças compradas."""
+from cart.services import SHIPPING_COST
 from orders.models import Order, OrderItem
 from reviews.models import Review
 
@@ -22,10 +23,25 @@ REVIEWS = {
 }
 
 
+def shipping_data(user):
+    """Frete e endereço do pedido: uma cópia do endereço que está no perfil do comprador."""
+    profile = user.profile
+    return {
+        'shipping_cost': SHIPPING_COST,
+        'shipping_cep': profile.address_cep,
+        'shipping_street': profile.address_street,
+        'shipping_number': profile.address_number,
+        'shipping_complement': profile.address_complement,
+        'shipping_district': profile.address_district,
+        'shipping_location': profile.address_location,
+    }
+
+
 def create_purchases(users, products):
     for data in ORDERS:
+        buyer = users[data['buyer']]
         order, _ = Order.objects.get_or_create(reference=data['reference'], defaults={
-            'user': users[data['buyer']], 'status': data['status']})
+            'user': buyer, 'status': data['status'], **shipping_data(buyer)})
         # Itens só entram em pedido novo, para não mexer em um histórico que já existe.
         if order.items.exists():
             continue

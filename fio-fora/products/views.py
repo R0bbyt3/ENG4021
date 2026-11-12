@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import seller_required
+from cart.services import purchase_summary
 from favorites.models import mark_favorites
 from reviews.services import product_reviews, rating_summary, store_reviews
 
@@ -157,6 +158,7 @@ def product_detail(request, product_id):
     reviews = product_reviews(product)
     return render(request, 'products/detail.html', {
         'product': product,
+        'payment': purchase_summary(product.price),
         'rating': rating_summary(reviews),
         'reviews': reviews[:10],  # só as mais recentes
         'store_rating': rating_summary(store_reviews(product.seller)) if product.seller else None,

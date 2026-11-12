@@ -7,8 +7,9 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .fields import (
-    CityField, CNPJField, CPFField, PhoneField, SocialField, StateField, join_location, split_location,
+    CEPField, CityField, CNPJField, CPFField, PhoneField, SocialField, StateField, join_location, split_location,
 )
+from .decorators import is_buyer
 from .models import UserProfile
 
 
@@ -122,7 +123,66 @@ class BrandRegistrationForm(SellerRegistrationForm):
         ]
 
 
-class AccountProfileForm(forms.Form):
+# Partes do endereço de entrega. No perfil e no pedido os campos têm o mesmo
+# final de nome: `address_cep` / `shipping_cep`, `address_street` / `shipping_street`...
+ADDRESS_KEYS = ['cep', 'street', 'number', 'complement', 'district', 'location']
+
+
+class AddressFieldsMixin(forms.Form):
+    """Campos do endereço de entrega, usados no perfil e no checkout.
+
+    Com `address_required = True` (checkout) o endereço é obrigatório; sem isso
+    (perfil) ele é opcional, mas não pode ficar pela metade.
+    """
+
+    address_required = False
+    required_keys = ['cep', 'street', 'number', 'district', 'address_city', 'address_state']
+    address_fields = required_keys + ['complement']
+
+    cep = CEPField()
+    street = forms.CharField(label='Rua', max_length=150)
+    number = forms.CharField(label='Número', max_length=10)
+    complement = forms.CharField(label='Complemento', max_length=80, required=False)
+    district = forms.CharField(label='Bairro', max_length=100)
+    address_city = CityField()
+    address_state = StateField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in self.required_keys:
+            self.fields[name].required = self.address_required
+        autocomplete = {'street': 'address-line1', 'number': 'off', 'complement': 'address-line2',
+                        'district': 'address-level3'}
+        for name, value in autocomplete.items():
+            self.fields[name].widget.attrs['autocomplete'] = value
+
+    def fill_address_from(self, profile):
+        """Preenche o formulário (ainda sem dados enviados) com o endereço salvo no perfil."""
+        if profile is None:
+            return
+        for key in ('cep', 'street', 'number', 'complement', 'district'):
+            self.initial.setdefault(key, getattr(profile, f'address_{key}'))
+        city, state = split_location(profile.address_location)
+        self.initial.setdefault('address_city', city)
+        self.initial.setdefault('address_state', state)
+
+    def check_address_is_complete(self):
+        """No perfil, o endereço opcional só vale completo: ou tudo, ou nada."""
+        filled = [bool(self.cleaned_data.get(name)) for name in self.required_keys]
+        if any(filled) and not all(filled):
+            raise forms.ValidationError('Preencha o endereço completo: CEP, rua, número, bairro, cidade e estado.')
+
+    def address_data(self):
+        """O endereço limpo, com as chaves de ADDRESS_KEYS."""
+        data = self.cleaned_data
+        return {
+            'cep': data['cep'], 'street': data['street'].strip(), 'number': data['number'].strip(),
+            'complement': data['complement'].strip(), 'district': data['district'].strip(),
+            'location': join_location(data['address_city'].strip(), data['address_state']),
+        }
+
+
+class AccountProfileForm(AddressFieldsMixin):
     name = forms.CharField(label='Nome completo', max_length=150)
     email = forms.EmailField(label='E-mail', max_length=150)
     phone = PhoneField(required=False)
@@ -147,8 +207,15 @@ class AccountProfileForm(forms.Form):
         city, state = split_location(self.profile.location if self.profile else '')
         self.initial.setdefault('city', city)
         self.initial.setdefault('state', state)
-        for field in self.fields.values():
-            field.widget.attrs['autocomplete'] = 'off'
+        # Vendedores e marcas não recebem pedidos em casa: o endereço é só do comprador.
+        if is_buyer(user):
+            self.fill_address_from(self.profile)
+        else:
+            for name in self.address_fields:
+                del self.fields[name]
+        for name, field in self.fields.items():
+            if name not in self.address_fields:
+                field.widget.attrs['autocomplete'] = 'off'
         self.fields['name'].widget.attrs['autocomplete'] = 'name'
         self.fields['email'].widget.attrs['autocomplete'] = 'email'
         self.fields['phone'].widget.attrs['autocomplete'] = 'tel'
@@ -170,6 +237,8 @@ class AccountProfileForm(forms.Form):
         # Cidade e estado andam juntos: os dois preenchidos ou os dois vazios.
         if bool(cleaned_data.get('city')) != bool(cleaned_data.get('state')):
             raise forms.ValidationError('Preencha a cidade e o estado juntos.')
+        if 'cep' in self.fields:
+            self.check_address_is_complete()
         return cleaned_data
 
     def clean_password(self):
@@ -192,5 +261,12 @@ class AccountProfileForm(forms.Form):
         self.profile.phone = self.cleaned_data['phone']
         self.profile.store_name = self.cleaned_data['store_name'].strip()
         self.profile.location = join_location(self.cleaned_data['city'].strip(), self.cleaned_data['state'])
+        if 'cep' in self.fields:
+            if self.cleaned_data['cep']:
+                address = self.address_data()
+            else:
+                address = dict.fromkeys(ADDRESS_KEYS, '')
+            for key, value in address.items():
+                setattr(self.profile, f'address_{key}', value)
         self.profile.save()
         return self.user

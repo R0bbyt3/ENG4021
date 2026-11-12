@@ -42,6 +42,14 @@
     border-radius: var(--radius-large);
 }
 
+.order-address-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
 .order-card h2 {
     margin: 0 0 18px;
     font-family: Georgia, 'Times New Roman', serif;
@@ -221,6 +229,10 @@
 }
 
 @media (max-width: 520px) {
+    .order-address-fields {
+        grid-template-columns: 1fr;
+    }
+
     .order-card {
         padding: 18px;
     }

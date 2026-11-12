@@ -12,6 +12,13 @@
 
 <p class="order-notice"><strong>Compra demonstrativa.</strong> Nenhum pagamento foi realizado e não haverá entrega.</p>
 
+{% if order.shipping_address_lines %}
+<section class="order-card order-receipt" aria-labelledby="address-heading">
+    <h2 id="address-heading">Endereço de entrega</h2>
+    {% for line in order.shipping_address_lines %}<p>{{ line }}</p>{% endfor %}
+</section>
+{% endif %}
+
 <section class="order-card order-receipt" aria-labelledby="items-heading">
     <h2 id="items-heading">Resumo da compra</h2>
     {% for item in items %}
@@ -25,6 +32,8 @@
     {% include 'reviews/includes/item_review.html' %}
     {% endfor %}
     <dl class="order-totals">
+        <div><dt>Subtotal</dt><dd>R$ {{ order.subtotal|floatformat:2 }}</dd></div>
+        <div><dt>Frete</dt><dd>R$ {{ order.shipping_cost|floatformat:2 }}</dd></div>
         <div class="order-total"><dt>Total do pedido</dt><dd>R$ {{ order.total|floatformat:2 }}</dd></div>
     </dl>
 </section>

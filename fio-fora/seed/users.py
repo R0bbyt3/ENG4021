@@ -14,9 +14,12 @@ PASSWORD = 'fiofora123'
 # Os compradores e a Julia vêm das personas do projeto.
 USERS = [
     {'email': 'rafael@fiofora.com', 'name': 'Rafael Moreira', 'role': 'buyer',
-     'phone': '11988881001'},
+     'phone': '11988881001', 'address_cep': '01310100', 'address_street': 'Avenida Paulista',
+     'address_number': '1000', 'address_complement': 'apto 52', 'address_district': 'Bela Vista',
+     'address_location': 'São Paulo, SP'},
     {'email': 'gabriel@fiofora.com', 'name': 'Gabriel Nunes', 'role': 'buyer',
-     'phone': '21988881002'},
+     'phone': '21988881002', 'address_cep': '22041001', 'address_street': 'Rua Barata Ribeiro',
+     'address_number': '200', 'address_district': 'Copacabana', 'address_location': 'Rio de Janeiro, RJ'},
     {'email': 'julia@fiofora.com', 'name': 'Julia Prado', 'role': 'seller',
      'phone': '11988882001', 'store_name': 'Brechó Segunda Volta',
      'document': '12345678909', 'location': 'São Paulo, SP'},
