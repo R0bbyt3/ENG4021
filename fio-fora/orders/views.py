@@ -1,16 +1,21 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from accounts.decorators import buyer_required
+from accounts.decorators import buyer_required, seller_required
 from cart.services import build_cart_summary
 from reviews.services import attach_review_forms
 
 from .forms import CheckoutAddressForm
-from .models import Order
-from .services import CheckoutError, checkout_cart, send_order_confirmation
+from .models import Order, OrderItem
+from .services import (
+    CheckoutError, OrderCancellationError, OrderStatusError, advance_sale, can_cancel_order,
+    cancel_order, checkout_cart, next_sale_status,
+    send_order_confirmation,
+)
 
 
 @require_http_methods(['GET', 'POST'])
@@ -57,4 +62,45 @@ def order_detail(request, order_id):
         Order.objects.prefetch_related('items'), pk=order_id, user=request.user,
     )
     items = attach_review_forms(list(order.items.all()))
-    return render(request, 'orders/detail.html', {'order': order, 'items': items})
+    return render(request, 'orders/detail.html', {
+        'order': order, 'items': items, 'can_cancel': can_cancel_order(order, items),
+    })
+
+
+@require_POST
+@buyer_required
+def order_cancel(request, order_id):
+    try:
+        cancel_order(order_id, request.user)
+    except OrderCancellationError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(request, 'Pedido cancelado. O estoque das peças foi atualizado.')
+    return redirect('order_detail', order_id=order_id)
+
+
+@require_GET
+@seller_required
+def sales_list(request):
+    seller_items = OrderItem.objects.filter(product__seller=request.user).order_by('pk')
+    orders = (
+        Order.objects.filter(pk__in=seller_items.values('order_id'))
+        .select_related('user').prefetch_related(Prefetch('items', queryset=seller_items, to_attr='seller_items'))
+        .order_by('-created_at', '-pk')
+    )
+    page = Paginator(orders, 10).get_page(request.GET.get('page'))
+    for order in page:
+        order.next_sale_status = next_sale_status(order.seller_items)
+    return render(request, 'orders/sales.html', {'page_obj': page})
+
+
+@require_POST
+@seller_required
+def sale_status_update(request, order_id):
+    try:
+        advance_sale(order_id, request.user, request.POST.get('status'))
+    except OrderStatusError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(request, 'Status da venda atualizado.')
+    return redirect('sales_list')

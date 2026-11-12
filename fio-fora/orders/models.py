@@ -12,6 +12,7 @@ class Order(models.Model):
         PENDING = "pending", "Pendente"
         PAID = "paid", "Pago"
         SHIPPED = "shipped", "Enviado"
+        DELIVERED = "delivered", "Entregue"
         CANCELLED = "cancelled", "Cancelado"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders")
@@ -51,7 +52,7 @@ class Order(models.Model):
         verbose_name = "pedido"
         verbose_name_plural = "pedidos"
         constraints = [
-            models.CheckConstraint(condition=models.Q(status__in=["pending", "paid", "shipped", "cancelled"]), name="order_valid_status"),
+            models.CheckConstraint(condition=models.Q(status__in=["pending", "paid", "shipped", "delivered", "cancelled"]), name="order_valid_status"),
             models.CheckConstraint(condition=models.Q(shipping_cost__gte=0), name="order_shipping_not_negative"),
         ]
 
@@ -66,6 +67,18 @@ class OrderItem(models.Model):
     product_name = models.CharField(max_length=120)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    # Sem status próprio, o item acompanha o status já registrado no pedido.
+    fulfillment_status = models.CharField(
+        max_length=12, null=True, blank=True,
+        choices=[(value, label) for value, label in Order.Status.choices if value != Order.Status.CANCELLED],
+        verbose_name="status da venda",
+    )
+
+    @property
+    def sale_status(self):
+        if self.order.status == Order.Status.CANCELLED:
+            return Order.Status.CANCELLED
+        return Order.Status(self.fulfillment_status or self.order.status)
 
     @property
     def subtotal(self):
@@ -75,6 +88,11 @@ class OrderItem(models.Model):
         verbose_name = "item do pedido"
         verbose_name_plural = "itens do pedido"
         constraints = [
+            models.CheckConstraint(
+                condition=models.Q(fulfillment_status__in=["pending", "paid", "shipped", "delivered"])
+                | models.Q(fulfillment_status__isnull=True),
+                name="order_item_valid_fulfillment_status",
+            ),
             models.CheckConstraint(condition=models.Q(quantity__gte=1), name="order_quantity_positive"),
             models.CheckConstraint(condition=models.Q(unit_price__gt=0), name="order_unit_price_positive"),
         ]
