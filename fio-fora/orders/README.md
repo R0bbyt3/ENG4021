@@ -48,6 +48,20 @@ Todas as páginas são só para compradores.
     e-mail da recuperação de senha: por padrão aparece no terminal do servidor.
 - O histórico não muda se a peça for alterada ou apagada depois.
 
+## Testes
+
+`python manage.py test orders` cobre, em `tests.py`:
+
+- **Estoque**: desconta a quantidade comprada, deixa a peça esgotada, bloqueia
+    estoque insuficiente ou zerado, e cancela a compra inteira se um item falha.
+- **Carrinho bloqueado**: carrinho vazio, peça própria, peça inativa e item
+    indisponível (botão desabilitado).
+- **Endereço e frete**: obrigatoriedade de cada campo, CEP inválido, frete e
+    total calculados no servidor, endereço do perfil e cópia no pedido.
+- **Acesso**: visitante vai para o login, vendedor recebe 403, e o pedido de
+    outra pessoa dá 404.
+- **E-mail de confirmação** com endereço e frete.
+
 ## Arquivos principais
 
 | Arquivo | O que tem |
