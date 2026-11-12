@@ -11,7 +11,8 @@ from reviews.services import attach_review_forms
 
 from .models import Order, OrderItem
 from .services import (
-    CheckoutError, OrderStatusError, advance_sale, checkout_cart, next_sale_status,
+    CheckoutError, OrderCancellationError, OrderStatusError, advance_sale, can_cancel_order,
+    cancel_order, checkout_cart, next_sale_status,
     send_order_confirmation,
 )
 
@@ -53,7 +54,21 @@ def order_detail(request, order_id):
         Order.objects.prefetch_related('items'), pk=order_id, user=request.user,
     )
     items = attach_review_forms(list(order.items.all()))
-    return render(request, 'orders/detail.html', {'order': order, 'items': items})
+    return render(request, 'orders/detail.html', {
+        'order': order, 'items': items, 'can_cancel': can_cancel_order(order, items),
+    })
+
+
+@require_POST
+@buyer_required
+def order_cancel(request, order_id):
+    try:
+        cancel_order(order_id, request.user)
+    except OrderCancellationError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(request, 'Pedido cancelado. O estoque das peças foi atualizado.')
+    return redirect('order_detail', order_id=order_id)
 
 
 @require_GET
