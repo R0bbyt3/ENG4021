@@ -1,4 +1,4 @@
-// Máscaras dos campos brasileiros: CPF, CNPJ e telefone.
+// Máscaras dos campos brasileiros: CPF, CNPJ, telefone e CEP.
 // O campo escolhe a máscara pelo atributo data-mask (ver accounts/fields.py).
 // Aqui só formatamos enquanto a pessoa digita: quem valida é o servidor.
 
@@ -31,6 +31,11 @@ const MASKS = {
         // Desde 2026 o CNPJ pode ter letras nas 12 primeiras posições.
         const chars = value.toUpperCase().replace(/[^0-9A-Z]/g, '');
         return applyPattern(chars, '##.###.###/####-##');
+    },
+
+    cep(value) {
+        const digits = value.replace(/\D/g, '');
+        return applyPattern(digits, '#####-###');
     },
 
     phone(value) {

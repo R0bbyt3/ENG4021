@@ -1,0 +1,8 @@
+{% comment %}
+Frete fixo e parcelamento. Use com `payment` (vem de cart.services.purchase_summary):
+{% include 'cart/includes/payment_info.html' with payment=payment %}
+{% endcomment %}
+<p class="payment-info">Frete fixo de <strong>R$ {{ payment.shipping|floatformat:2 }}</strong> · total com frete <strong>R$ {{ payment.total|floatformat:2 }}</strong></p>
+<p class="payment-info">
+    {% if payment.installments > 1 %}Em até <strong>{{ payment.installments }}x de R$ {{ payment.installment_value|floatformat:2 }}</strong> sem juros{% else %}Pagamento à vista, sem juros{% endif %}
+</p>

@@ -17,6 +17,13 @@ class UserProfile(models.Model):
     legal_name = models.CharField('razão social', max_length=150, blank=True)
     segment = models.CharField('atividade principal', max_length=20, blank=True)
     social = models.CharField('site ou Instagram', max_length=200, blank=True)
+    # Endereço de entrega padrão do comprador (o checkout vem preenchido com ele).
+    address_cep = models.CharField('CEP', max_length=8, blank=True)
+    address_street = models.CharField('rua', max_length=150, blank=True)
+    address_number = models.CharField('número', max_length=10, blank=True)
+    address_complement = models.CharField('complemento', max_length=80, blank=True)
+    address_district = models.CharField('bairro', max_length=100, blank=True)
+    address_location = models.CharField('cidade e estado da entrega', max_length=120, blank=True)
     terms_accepted_at = models.DateTimeField('aceite dos termos', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

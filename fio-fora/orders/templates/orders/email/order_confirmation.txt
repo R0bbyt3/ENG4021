@@ -5,8 +5,12 @@ Recebemos o seu pedido {{ order.reference }} na FioFora.
 Peças do pedido:
 {% for item in items %}- {{ item.product_name }}: {{ item.quantity }} x R$ {{ item.unit_price|floatformat:2 }} = R$ {{ item.subtotal|floatformat:2 }}
 {% endfor %}
+Frete: R$ {{ order.shipping_cost|floatformat:2 }}
 Total: R$ {{ order.total|floatformat:2 }}
-
+{% if address_lines %}
+Entrega em:
+{% for line in address_lines %}{{ line }}
+{% endfor %}{% endif %}
 Para ver o pedido, abra o link abaixo:
 
 {{ order_url }}

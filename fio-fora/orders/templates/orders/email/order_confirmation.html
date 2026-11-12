@@ -18,11 +18,21 @@
                         </tr>
                         {% endfor %}
                         <tr>
+                            <td style="padding:10px 0;">Frete</td>
+                            <td align="right" style="padding:10px 0;">R$ {{ order.shipping_cost|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
                             <td style="padding:12px 0; font-weight:bold;">Total</td>
                             <td align="right" style="padding:12px 0; font-weight:bold;">R$ {{ order.total|floatformat:2 }}</td>
                         </tr>
                     </table>
                 </td></tr>
+                {% if address_lines %}
+                <tr><td style="padding:4px 32px 8px; font-size:14px; line-height:1.6; color:#6f736b;">
+                    <strong style="color:#242820;">Entrega em:</strong><br>
+                    {% for line in address_lines %}{{ line }}<br>{% endfor %}
+                </td></tr>
+                {% endif %}
                 <tr><td style="padding:10px 32px 22px;">
                     <a href="{{ order_url }}" style="display:inline-block; padding:13px 24px; background:#242820; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:6px;">Ver o pedido</a>
                 </td></tr>

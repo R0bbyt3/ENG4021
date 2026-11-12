@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import uuid4
 
 from django.core.mail import send_mail
@@ -5,8 +6,9 @@ from django.db import transaction
 from django.db.models import F
 from django.template.loader import render_to_string
 
+from accounts.forms import ADDRESS_KEYS
 from cart.models import Cart
-from cart.services import unavailable_reason
+from cart.services import purchase_summary, unavailable_reason
 from products.models import Product
 
 from .models import Order, OrderItem
@@ -16,8 +18,20 @@ class CheckoutError(ValueError):
     pass
 
 
+# Partes do endereço sem as quais não dá para entregar (o complemento é opcional).
+REQUIRED_ADDRESS_KEYS = ['cep', 'street', 'number', 'district', 'location']
+
+
 @transaction.atomic
-def checkout_cart(user):
+def checkout_cart(user, address):
+    """Cria o pedido com o endereço e o frete, e desconta o estoque.
+
+    `address` tem as chaves de accounts.forms.ADDRESS_KEYS. O frete e o total
+    são calculados aqui, no servidor, a partir dos preços do banco.
+    """
+    if not address or not all(address.get(key) for key in REQUIRED_ADDRESS_KEYS):
+        raise CheckoutError('Informe o endereço de entrega completo.')
+
     cart = Cart.objects.select_for_update().filter(user=user).first()
     if cart is None:
         raise CheckoutError('Seu carrinho está vazio.')
@@ -33,7 +47,13 @@ def checkout_cart(user):
         if problem:
             raise CheckoutError(f'Não foi possível finalizar “{item.product.name}”. {problem}')
 
-    order = Order.objects.create(user=user, reference=f'FF-{uuid4().hex[:12].upper()}')
+    subtotal = sum((item.product.price * item.quantity for item in items), Decimal('0.00'))
+    order = Order.objects.create(
+        user=user,
+        reference=f'FF-{uuid4().hex[:12].upper()}',
+        shipping_cost=purchase_summary(subtotal)['shipping'],
+        **{f'shipping_{key}': address.get(key, '') for key in ADDRESS_KEYS},
+    )
     for item in items:
         updated = Product.objects.filter(
             pk=item.product_id, is_active=True, stock__gte=item.quantity,
@@ -61,7 +81,8 @@ def send_order_confirmation(order, order_url):
     """
     if not order.user.email:
         return False
-    context = {'order': order, 'items': order.items.all(), 'order_url': order_url}
+    context = {'order': order, 'items': order.items.all(), 'order_url': order_url,
+               'address_lines': order.shipping_address_lines}
     subject = render_to_string('orders/email/order_confirmation_subject.txt', context).strip()
     body = render_to_string('orders/email/order_confirmation.txt', context)
     html = render_to_string('orders/email/order_confirmation.html', context)

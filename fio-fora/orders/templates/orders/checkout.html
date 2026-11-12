@@ -6,18 +6,33 @@
 <section class="hero order-heading">
     <a class="order-back" href="{% url 'cart' %}">Voltar ao carrinho</a>
     <h1>Checkout simulado</h1>
-    <p>Confira suas peças antes de confirmar o pedido.</p>
+    <p>Informe o endereço de entrega e confira suas peças antes de confirmar o pedido.</p>
 </section>
 
 <p class="order-notice"><strong>Ambiente de demonstração.</strong> Nenhum pagamento será processado e não haverá entrega.</p>
 
-<div class="order-layout">
+<form class="order-layout" method="post" novalidate>
+    {% csrf_token %}
     <div class="order-sections">
         <section class="order-card" aria-labelledby="buyer-heading">
             <h2 id="buyer-heading">Dados do comprador</h2>
             <p>{{ request.user.get_full_name|default:request.user.username }}</p>
             <p class="order-muted">{{ request.user.email }}</p>
             <a href="{% url 'account' %}">Editar meus dados</a>
+        </section>
+        <section class="order-card" aria-labelledby="address-heading">
+            <h2 id="address-heading">Endereço de entrega</h2>
+            {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="order-address-fields">
+                {% include 'components/field.html' with field=form.cep %}
+                {% include 'components/field.html' with field=form.street %}
+                {% include 'components/field.html' with field=form.number %}
+                {% include 'components/field.html' with field=form.complement %}
+                {% include 'components/field.html' with field=form.district %}
+                {% include 'components/field.html' with field=form.address_city %}
+                {% include 'components/field.html' with field=form.address_state %}
+            </div>
+            {% include 'components/field.html' with field=form.save_to_profile %}
         </section>
         <section class="order-card" aria-labelledby="items-heading">
             <h2 id="items-heading">Suas peças</h2>
@@ -38,18 +53,16 @@
         <h2 id="summary-heading">Resumo</h2>
         <dl class="order-totals">
             <div><dt>Peças disponíveis</dt><dd>{{ pieces }}</dd></div>
-            <div><dt>Subtotal</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
-            <div><dt>Frete</dt><dd>Não se aplica</dd></div>
-            <div class="order-total"><dt>Total</dt><dd>R$ {{ total|floatformat:2 }}</dd></div>
+            <div><dt>Subtotal</dt><dd>R$ {{ payment.subtotal|floatformat:2 }}</dd></div>
+            <div><dt>Frete</dt><dd>R$ {{ payment.shipping|floatformat:2 }}</dd></div>
+            <div class="order-total"><dt>Total</dt><dd>R$ {{ payment.total|floatformat:2 }}</dd></div>
         </dl>
+        {% include 'cart/includes/payment_info.html' %}
         {% if has_unavailable %}
         <p class="form-errors" role="alert">Ajuste os itens indisponíveis no carrinho antes de finalizar.</p>
         {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            <button class="button button--full" type="submit"{% if has_unavailable %} disabled{% endif %}>Finalizar pedido simulado</button>
-        </form>
+        <button class="button button--full" type="submit"{% if has_unavailable %} disabled{% endif %}>Finalizar pedido simulado</button>
         <p class="field-help">Os valores e a disponibilidade são conferidos ao confirmar.</p>
     </aside>
-</div>
+</form>
 {% endblock %}

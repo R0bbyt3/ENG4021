@@ -87,6 +87,10 @@ def format_phone(phone):
     return phone
 
 
+def format_cep(cep):
+    return apply_pattern(cep, '#####-###') if len(cep) == 8 else cep
+
+
 # ---------------------------------------------------------------------------
 # Campos de formulário
 # ---------------------------------------------------------------------------
@@ -176,6 +180,26 @@ class PhoneField(BrazilianField):
 
     def display(self, value):
         return format_phone(value)
+
+
+class CEPField(BrazilianField):
+    mask = 'cep'
+    placeholder = '00000-000'
+    default_error_messages = {'invalid': 'CEP inválido. Informe os 8 números.'}
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('label', 'CEP')
+        super().__init__(**kwargs)
+        self.widget.attrs['autocomplete'] = 'postal-code'
+
+    def normalize(self, value):
+        return only_digits(value)
+
+    def is_valid(self, value):
+        return len(value) == 8 and value != '0' * 8
+
+    def display(self, value):
+        return format_cep(value)
 
 
 STATES = [

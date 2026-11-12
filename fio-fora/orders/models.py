@@ -18,15 +18,42 @@ class Order(models.Model):
     reference = models.CharField(max_length=40, unique=True)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Cópia do endereço e do frete no momento da compra: mudar o perfil depois não altera o pedido.
+    shipping_cost = models.DecimalField("frete", max_digits=8, decimal_places=2, default=Decimal("0.00"),
+                                        validators=[MinValueValidator(Decimal("0.00"))])
+    shipping_cep = models.CharField("CEP", max_length=8, blank=True)
+    shipping_street = models.CharField("rua", max_length=150, blank=True)
+    shipping_number = models.CharField("número", max_length=10, blank=True)
+    shipping_complement = models.CharField("complemento", max_length=80, blank=True)
+    shipping_district = models.CharField("bairro", max_length=100, blank=True)
+    shipping_location = models.CharField("cidade e estado", max_length=120, blank=True)
+
+    @property
+    def subtotal(self):
+        return sum((item.unit_price * item.quantity for item in self.items.all()), Decimal("0.00"))
 
     @property
     def total(self):
-        return sum((item.unit_price * item.quantity for item in self.items.all()), Decimal("0.00"))
+        return self.subtotal + self.shipping_cost
+
+    @property
+    def shipping_address_lines(self):
+        """O endereço em duas linhas para mostrar na tela e no e-mail (vazio em pedidos antigos)."""
+        if not self.shipping_street:
+            return []
+        street = f"{self.shipping_street}, {self.shipping_number}"
+        if self.shipping_complement:
+            street += f" - {self.shipping_complement}"
+        cep = f"{self.shipping_cep[:5]}-{self.shipping_cep[5:]}" if len(self.shipping_cep) == 8 else self.shipping_cep
+        return [street, f"{self.shipping_district} · {self.shipping_location} · CEP {cep}"]
 
     class Meta:
         verbose_name = "pedido"
         verbose_name_plural = "pedidos"
-        constraints = [models.CheckConstraint(condition=models.Q(status__in=["pending", "paid", "shipped", "cancelled"]), name="order_valid_status")]
+        constraints = [
+            models.CheckConstraint(condition=models.Q(status__in=["pending", "paid", "shipped", "cancelled"]), name="order_valid_status"),
+            models.CheckConstraint(condition=models.Q(shipping_cost__gte=0), name="order_shipping_not_negative"),
+        ]
 
     def __str__(self):
         return self.reference
