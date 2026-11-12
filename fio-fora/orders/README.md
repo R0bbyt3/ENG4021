@@ -11,20 +11,25 @@ Finalização da compra (simulada) e histórico de pedidos.
 | `/checkout/` | Informar o endereço de entrega, revisar o carrinho e confirmar o pedido |
 | `/pedidos/` | Histórico de pedidos do comprador |
 | `/pedidos/<id>/` | Detalhe de um pedido |
+| `/pedidos/<id>/cancelar/` | Ação POST para cancelar um pedido próprio ainda não enviado |
+| `/minhas-vendas/` | Painel de pedidos com peças do vendedor ou da marca logada |
 
-Todas as páginas são só para compradores.
+Checkout e histórico são áreas do comprador. Cada vendedor ou marca vê apenas
+os próprios itens em Minhas vendas; tentar alterar um pedido sem itens próprios
+retorna 404.
 
 > **[PRINT]** Tela de checkout com o resumo do pedido.
 
 ## Models
 
 - **`Order`**: pedido, com código de referência, status (pendente, pago,
-    enviado, cancelado), **frete** (`shipping_cost`) e uma **cópia do endereço de
-    entrega** (`shipping_cep`, `shipping_street`, `shipping_number`,
+    enviado, entregue, cancelado), **frete** (`shipping_cost`) e uma **cópia do
+    endereço de entrega** (`shipping_cep`, `shipping_street`, `shipping_number`,
     `shipping_complement`, `shipping_district`, `shipping_location`).
     `subtotal` soma as peças e `total` é o subtotal mais o frete.
 - **`OrderItem`**: item do pedido, com uma **cópia** do nome e do preço da peça
-    no momento da compra.
+    no momento da compra. O status do item acompanha o do pedido até que o
+    vendedor atualize a venda.
 
 ## Regras
 
@@ -46,15 +51,22 @@ Todas as páginas são só para compradores.
     o total e o link do pedido, em texto e em HTML (`send_order_confirmation()`). Se o envio falhar, o
     pedido continua salvo e a tela avisa. O envio usa a mesma configuração de
     e-mail da recuperação de senha: por padrão aparece no terminal do servidor.
-- O histórico não muda se a peça for alterada ou apagada depois.
+- O histórico do comprador conserva o nome e o preço mesmo se a peça for
+    alterada ou apagada. O painel do vendedor usa o vínculo com a peça cadastrada.
+- O vendedor pode avançar os status das próprias peças na ordem: pendente,
+    pago, enviado e entregue. Em pedidos de várias lojas, o status geral indica
+    a etapa alcançada por todas; o comprador também vê o status de cada item.
+- O comprador pode cancelar um pedido próprio pendente ou pago até o
+    primeiro envio. O pedido fica cancelado e as peças ainda cadastradas
+    voltam ao estoque uma única vez, na mesma transação.
 
 ## Arquivos principais
 
 | Arquivo | O que tem |
 |---|---|
 | `forms.py` | `CheckoutAddressForm`: endereço de entrega do checkout |
-| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação |
-| `views.py` | Checkout, lista e detalhe dos pedidos |
+| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação; `advance_sale()`: avança os itens do vendedor; `cancel_order()`: cancela e repõe o estoque |
+| `views.py` | Checkout, lista e detalhe dos pedidos e painel de vendas |
 | `templates/orders/email/` | Assunto, texto e versão HTML do e-mail de confirmação |
 
 > **[PRINT]** Página de detalhe de um pedido confirmado.

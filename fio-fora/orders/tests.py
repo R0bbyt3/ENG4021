@@ -213,3 +213,185 @@ class CheckoutAddressAndShippingTests(TestCase):
         self.assertIn('Rua da Assembleia, 10 - sala 2', mail.outbox[0].body)
         self.assertIn('Frete: R$ 19,90', mail.outbox[0].body)
         self.assertIn('Total: R$ 227,90', mail.outbox[0].body)
+
+
+class SellerSalesTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from accounts.models import UserProfile
+
+        def make_user(name, role, **fields):
+            user = get_user_model().objects.create_user(name, **fields)
+            UserProfile.objects.create(user=user, role=role)
+            return user
+
+        cls.buyer = make_user('comprador-painel', 'buyer', first_name='Joana')
+        cls.seller = make_user('vendedor-painel', 'seller')
+        cls.brand = make_user('marca-painel', 'brand')
+        cls.outsider = make_user('outra-loja', 'seller')
+        cls.order = Order.objects.create(user=cls.buyer, reference='FF-PAINEL', status=Order.Status.PAID)
+        cls.other_order = Order.objects.create(user=cls.buyer, reference='FF-OUTRO')
+
+        def add_item(order, seller, name):
+            product = Product.objects.create(
+                seller=seller, name=name, original_price=Decimal('60.00'),
+                price=Decimal('50.00'), stock=3,
+            )
+            return OrderItem.objects.create(
+                order=order, product=product, product_name=name, unit_price=product.price,
+            )
+
+        cls.seller_item = add_item(cls.order, cls.seller, 'Peça da primeira loja')
+        cls.brand_item = add_item(cls.order, cls.brand, 'Peça da segunda loja')
+        cls.other_item = add_item(cls.other_order, cls.outsider, 'Peça do outro pedido')
+
+    def setUp(self):
+        self.sales_url = '/minhas-vendas/'
+        self.status_url = f'{self.sales_url}{self.order.pk}/status/'
+
+    def test_panel_shows_buyer_and_only_owned_items(self):
+        self.client.force_login(self.seller)
+        response = self.client.get(self.sales_url)
+        for text in ['Minhas vendas', 'FF-PAINEL', 'Joana', 'Peça da primeira loja', 'Marcar como enviado']:
+            self.assertContains(response, text)
+        for text in ['Peça da segunda loja', 'FF-OUTRO']:
+            self.assertNotContains(response, text)
+
+    def test_unrelated_seller_cannot_change_order(self):
+        self.client.force_login(self.outsider)
+        self.assertEqual(self.client.post(self.status_url, {'status': 'shipped'}).status_code, 404)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PAID)
+
+    def test_panel_requires_seller_or_brand(self):
+        self.assertEqual(self.client.get(self.sales_url).status_code, 302)
+        self.client.force_login(self.buyer)
+        self.assertEqual(self.client.get(self.sales_url).status_code, 403)
+        self.assertEqual(self.client.post(self.status_url, {'status': 'shipped'}).status_code, 403)
+        self.client.force_login(self.brand)
+        self.assertContains(self.client.get(self.sales_url), 'Peça da segunda loja')
+
+    def test_status_changes_only_by_post_and_cannot_skip_or_go_back(self):
+        self.client.force_login(self.seller)
+        self.assertEqual(self.client.get(self.status_url).status_code, 405)
+        for invalid in ['delivered', 'pending', 'cancelled', 'desconhecido', '']:
+            response = self.client.post(self.status_url, {'status': invalid}, follow=True)
+            self.assertContains(response, 'Essa mudança de status não está disponível')
+        self.seller_item.refresh_from_db()
+        self.assertEqual(self.seller_item.sale_status, Order.Status.PAID)
+
+    def test_buyer_sees_each_item_and_general_status_follows_both_sellers(self):
+        self.client.force_login(self.seller)
+        self.assertRedirects(self.client.post(self.status_url, {'status': 'shipped'}), self.sales_url)
+        self.client.post(self.status_url, {'status': 'delivered'})
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.PAID)
+        self.brand_item.refresh_from_db()
+        self.assertEqual(self.brand_item.sale_status, Order.Status.PAID)
+
+        self.client.force_login(self.buyer)
+        response = self.client.get(f'/pedidos/{self.order.pk}/')
+        self.assertContains(response, 'Status da peça: Entregue')
+        self.assertContains(response, 'Status da peça: Pago')
+
+        self.client.force_login(self.brand)
+        for status in [Order.Status.SHIPPED, Order.Status.DELIVERED]:
+            self.client.post(self.status_url, {'status': status})
+            self.order.refresh_from_db()
+            self.assertEqual(self.order.status, status)
+
+    def test_pending_order_can_advance_to_paid(self):
+        self.client.force_login(self.outsider)
+        self.client.post(f'{self.sales_url}{self.other_order.pk}/status/', {'status': 'paid'})
+        self.other_order.refresh_from_db()
+        self.assertEqual(self.other_order.status, Order.Status.PAID)
+
+
+class OrderCancellationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        from accounts.models import UserProfile
+
+        cls.buyer = get_user_model().objects.create_user('comprador-cancelamento')
+        cls.other_buyer = get_user_model().objects.create_user('outro-comprador')
+        for user in [cls.buyer, cls.other_buyer]:
+            UserProfile.objects.create(user=user, role='buyer')
+        cls.product = Product.objects.create(
+            name='Peça cancelável', original_price=Decimal('60.00'),
+            price=Decimal('50.00'), stock=3,
+        )
+        cls.other_product = Product.objects.create(
+            name='Outra peça cancelável', original_price=Decimal('80.00'),
+            price=Decimal('60.00'), stock=4,
+        )
+        cls.order = Order.objects.create(
+            user=cls.buyer, reference='FF-CANCELAR', status=Order.Status.PAID,
+        )
+        cls.item = OrderItem.objects.create(
+            order=cls.order, product=cls.product, product_name=cls.product.name,
+            unit_price=cls.product.price, quantity=2,
+        )
+        cls.other_item = OrderItem.objects.create(
+            order=cls.order, product=cls.other_product, product_name=cls.other_product.name,
+            unit_price=cls.other_product.price, quantity=1,
+        )
+
+    def setUp(self):
+        self.detail_url = f'/pedidos/{self.order.pk}/'
+        self.cancel_url = f'{self.detail_url}cancelar/'
+        self.client.force_login(self.buyer)
+
+    def assert_order_and_stock(self, status, first_stock=3, second_stock=4):
+        self.order.refresh_from_db()
+        self.product.refresh_from_db()
+        self.other_product.refresh_from_db()
+        self.assertEqual(self.order.status, status)
+        self.assertEqual(self.product.stock, first_stock)
+        self.assertEqual(self.other_product.stock, second_stock)
+
+    def test_cancellation_restores_every_item_only_once(self):
+        self.assertContains(self.client.get(self.detail_url), 'Confirmar cancelamento')
+        response = self.client.post(self.cancel_url, follow=True)
+        self.assertRedirects(response, self.detail_url)
+        self.assertContains(response, 'Pedido cancelado.')
+        self.assertNotContains(response, 'Confirmar cancelamento')
+        self.assert_order_and_stock(Order.Status.CANCELLED, 5, 5)
+        self.client.post(self.cancel_url)
+        self.assert_order_and_stock(Order.Status.CANCELLED, 5, 5)
+
+    def test_pending_order_can_be_cancelled(self):
+        Order.objects.filter(pk=self.order.pk).update(status=Order.Status.PENDING)
+        self.client.post(self.cancel_url)
+        self.assert_order_and_stock(Order.Status.CANCELLED, 5, 5)
+
+    def test_another_buyer_cannot_cancel(self):
+        self.client.force_login(self.other_buyer)
+        self.assertEqual(self.client.post(self.cancel_url).status_code, 404)
+        self.assert_order_and_stock(Order.Status.PAID)
+
+    def test_cancellation_requires_post(self):
+        self.assertEqual(self.client.get(self.cancel_url).status_code, 405)
+        self.assert_order_and_stock(Order.Status.PAID)
+
+    def test_shipped_or_delivered_order_cannot_be_cancelled(self):
+        for status in [Order.Status.SHIPPED, Order.Status.DELIVERED]:
+            with self.subTest(status=status):
+                Order.objects.filter(pk=self.order.pk).update(status=status)
+                self.assertNotContains(self.client.get(self.detail_url), 'Confirmar cancelamento')
+                self.client.post(self.cancel_url)
+                self.assert_order_and_stock(status)
+
+    def test_partial_dispatch_blocks_cancellation_and_preserves_stock(self):
+        OrderItem.objects.filter(pk=self.other_item.pk).update(fulfillment_status=Order.Status.SHIPPED)
+        self.assertNotContains(self.client.get(self.detail_url), 'Confirmar cancelamento')
+        response = self.client.post(self.cancel_url, follow=True)
+        self.assertContains(response, 'uma peça já foi enviada')
+        self.assert_order_and_stock(Order.Status.PAID)
+
+    def test_deleted_product_does_not_prevent_cancellation(self):
+        self.product.delete()
+        self.client.post(self.cancel_url)
+        self.order.refresh_from_db()
+        self.other_product.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.CANCELLED)
+        self.assertEqual(self.other_product.stock, 5)

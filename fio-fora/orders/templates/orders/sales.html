@@ -1,0 +1,48 @@
+{% extends 'orders/base.html' %}
+
+{% block title %}Minhas vendas | FioFora{% endblock %}
+
+{% block content %}
+<section class="hero order-heading">
+    <h1>Minhas vendas</h1>
+    <p>Acompanhe os pedidos que incluem suas peças.</p>
+</section>
+<p class="order-notice"><strong>Vendas demonstrativas.</strong> Os status não representam cobranças nem entregas reais.</p>
+
+{% if page_obj %}
+<section class="order-history" aria-label="Suas vendas">
+    {% for order in page_obj %}
+    <article class="order-card">
+        <div class="order-card-heading">
+            <div>
+                <h2 class="order-reference">{{ order.reference }}</h2>
+                <p class="order-muted">Comprador: {{ order.user.get_full_name|default:order.user.get_username }} · {{ order.created_at|date:'d/m/Y' }}</p>
+            </div>
+        </div>
+        {% for item in order.seller_items %}
+        <div class="order-item">
+            <div>
+                <h3>{{ item.product_name }}</h3>
+                <p>{{ item.quantity }} unidade{{ item.quantity|pluralize:'s' }} · R$ {{ item.subtotal|floatformat:2 }}</p>
+            </div>
+            <span class="order-status">{{ item.sale_status.label }}</span>
+        </div>
+        {% endfor %}
+        {% if order.next_sale_status %}
+        <form class="order-actions" action="{% url 'sale_status_update' order.pk %}" method="post">
+            {% csrf_token %}
+            <button class="button" type="submit" name="status" value="{{ order.next_sale_status }}">Marcar como {{ order.next_sale_status.label|lower }}</button>
+        </form>
+        {% endif %}
+    </article>
+    {% endfor %}
+</section>
+{% include 'components/pagination.html' %}
+{% else %}
+<section class="empty-state order-empty">
+    <h2>Você ainda não fez vendas</h2>
+    <p>Quando uma peça sua for comprada, ela aparecerá aqui.</p>
+    <a class="button" href="{% url 'my_products' %}">Ver minhas peças</a>
+</section>
+{% endif %}
+{% endblock %}
