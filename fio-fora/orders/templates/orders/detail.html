@@ -29,6 +29,16 @@
         <div class="order-total"><dt>Total do pedido</dt><dd>R$ {{ order.total|floatformat:2 }}</dd></div>
     </dl>
 </section>
+{% if can_cancel %}
+<section class="order-card order-receipt" aria-labelledby="cancel-heading">
+    <h2 id="cancel-heading">Cancelar pedido</h2>
+    <p>Ao confirmar, o pedido será cancelado e as peças voltarão ao estoque.</p>
+    <form class="order-actions" method="post" action="{% url 'order_cancel' order.pk %}">
+        {% csrf_token %}
+        <button class="button button--danger" type="submit">Confirmar cancelamento</button>
+    </form>
+</section>
+{% endif %}
 <div class="order-actions">
     <a class="button" href="{% url 'order_list' %}">Ver meus pedidos</a>
     <a href="{% url 'home' %}">Continuar comprando</a>
