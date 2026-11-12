@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.core.mail import send_mail
+from django.http import Http404
 from django.db import transaction
 from django.db.models import F
 from django.template.loader import render_to_string
@@ -70,3 +71,40 @@ def send_order_confirmation(order, order_url):
     except OSError:
         return False
     return True
+
+
+class OrderStatusError(ValueError):
+    pass
+
+
+STATUS_STEPS = (Order.Status.PENDING, Order.Status.PAID, Order.Status.SHIPPED, Order.Status.DELIVERED)
+NEXT_SALE_STATUS = dict(zip(STATUS_STEPS, STATUS_STEPS[1:]))
+
+
+def next_sale_status(items):
+    statuses = {item.sale_status for item in items}
+    if len(statuses) == 1:
+        return NEXT_SALE_STATUS.get(statuses.pop())
+    return None
+
+
+@transaction.atomic
+def advance_sale(order_id, seller, requested_status):
+    # Serializa mudanças no mesmo pedido, inclusive no SQLite.
+    owned_items = OrderItem.objects.filter(product__seller=seller, order_id=order_id)
+    if not Order.objects.filter(pk=order_id, pk__in=owned_items.values('order_id')).update(status=F('status')):
+        raise Http404
+    order = Order.objects.prefetch_related('items__product').get(pk=order_id)
+    items = list(order.items.all())
+    seller_items = [item for item in items if item.product and item.product.seller_id == seller.pk]
+    if not seller_items:
+        raise Http404
+    target = next_sale_status(seller_items)
+    if target is None or requested_status != target:
+        raise OrderStatusError('Essa mudança de status não está disponível. Confira o andamento da venda.')
+    # Fixa o status anterior de itens legados antes de recalcular o pedido.
+    order.items.filter(fulfillment_status__isnull=True).update(fulfillment_status=order.status)
+    owned_items.update(fulfillment_status=target)
+    statuses = set(order.items.values_list('fulfillment_status', flat=True))
+    order.status = next(step for step in STATUS_STEPS if step in statuses)
+    order.save(update_fields=['status'])
