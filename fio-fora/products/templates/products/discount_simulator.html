@@ -21,7 +21,7 @@
     <section class="panel panel--note" aria-live="polite" aria-label="Resultado da simulação">
         {% if result %}
         <p class="eyebrow">Sua simulação</p>
-        <span class="severity-badge">Severidade {{ result.severity_label }}</span>
+        <span class="severity-badge severity-badge--{{ result.severity_band }}">Severidade {{ result.severity_label }}</span>
         <h2 class="discount-value">{{ result.discount }}% <span>de desconto</span></h2>
         <dl class="price-breakdown">
             <div><dt>Preço original</dt><dd>R$ {{ result.original_price|floatformat:2 }}</dd></div>
@@ -37,4 +37,50 @@
         <a href="{% url 'product_create' %}">Cadastrar uma peça →</a>
     </section>
 </div>
+
+{% if result %}
+<section class="panel calculation" aria-labelledby="calculation-heading">
+    <h2 id="calculation-heading">Como chegamos nesse desconto</h2>
+    <p>A nota de severidade é a soma dos três critérios, cada um com o seu peso:</p>
+    <p class="formula">nota =
+        {% for row in result.breakdown %}{{ row.peso|floatformat:2 }} × {{ row.criterio|lower }}{% if not forloop.last %} + {% endif %}{% endfor %}
+    </p>
+    <table class="calculation-table">
+        <caption class="visually-hidden">Quanto cada critério somou na nota de severidade</caption>
+        <thead>
+            <tr>
+                <th scope="col">Critério</th>
+                <th scope="col">O que foi escolhido</th>
+                <th scope="col">Nota (1 a 3)</th>
+                <th scope="col">Peso</th>
+                <th scope="col">Somou na nota</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result.breakdown %}
+            <tr>
+                <th scope="row">{{ row.criterio }}</th>
+                <td>{{ row.escolha }}</td>
+                <td>{{ row.nota }}</td>
+                <td>{{ row.peso|floatformat:2 }}</td>
+                <td>{{ row.soma|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th scope="row" colspan="4">Nota de severidade</th>
+                <td>{{ result.severity|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    <p>Até {{ result.limit_leve|floatformat:2 }} a severidade é leve; até
+        {{ result.limit_moderada|floatformat:2 }} é moderada; acima disso é alta. A nota
+        {{ result.severity|floatformat:2 }} ficou na faixa <strong>{{ result.severity_label|lower }}</strong>,
+        que dá <strong>{{ result.discount }}% de desconto</strong> — de
+        R$ {{ result.original_price|floatformat:2 }} para R$ {{ result.final_price|floatformat:2 }}.</p>
+    <p class="field-help">O desconto sobe de 15% a 50% conforme a nota e é arredondado
+        para múltiplos de 5, para o preço não ficar com quebrado estranho.</p>
+</section>
+{% endif %}
 {% endblock %}

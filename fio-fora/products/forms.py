@@ -1,9 +1,11 @@
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django import forms
 
 from . import services
-from .models import Defeito, Product, ProductImage
+from .models import (LIMITE_LEVE, LIMITE_MODERADA, Defeito, Product, ProductImage,
+                     detalhar_severidade)
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -38,9 +40,14 @@ def discount_preview(original_price, tipo, localizacao, extensao):
     return {
         'severity': product.severity,
         'severity_label': product.severity_label,
+        'severity_band': product.severity_band,
         'discount': product.suggested_discount,
         'original_price': product.original_price,
         'final_price': product.suggested_price,
+        # Quanto cada critério somou na nota, para a tela mostrar a conta aberta.
+        'breakdown': detalhar_severidade(tipo, localizacao, extensao),
+        'limit_leve': LIMITE_LEVE,
+        'limit_moderada': LIMITE_MODERADA,
     }
 
 
@@ -54,6 +61,37 @@ class DefectFieldsMixin(forms.Form):
 class DiscountSimulationForm(DefectFieldsMixin):
     original_price = Product._meta.get_field('original_price').formfield(required=True, min_value=Decimal('0.01'))
     field_order = ['original_price', 'defect_type', 'defect_location', 'defect_extent']
+
+    # Nome na URL (português, como todo caminho do site) -> campo do formulário (inglês).
+    QUERY_PARAMS = {
+        'tipo': 'defect_type',
+        'local': 'defect_location',
+        'extensao': 'defect_extent',
+        'preco': 'original_price',
+    }
+
+    @classmethod
+    def from_query(cls, params):
+        """Formulário vindo de /simulador/?tipo=&local=&extensao=&preco=.
+
+        Sem nenhum desses parâmetros o formulário fica vazio (sem erros em
+        vermelho antes de a pessoa preencher qualquer coisa).
+        """
+        data = {campo: params[chave] for chave, campo in cls.QUERY_PARAMS.items() if params.get(chave)}
+        return cls(data or None)
+
+    @classmethod
+    def query_for(cls, product):
+        """Query string do link “Entender o desconto” que a página da peça mostra."""
+        defeito = getattr(product, 'defeito', None)
+        if defeito is None:
+            return ''
+        return urlencode({
+            'tipo': defeito.tipo,
+            'local': defeito.localizacao,
+            'extensao': defeito.extensao,
+            'preco': product.original_price or product.price,
+        })
 
     def preview(self):
         data = self.cleaned_data
