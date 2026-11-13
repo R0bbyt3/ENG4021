@@ -8,6 +8,14 @@
     <p>Veja o produto, o defeito e o preço de forma transparente.</p>
 </section>
 
+{% if category_links|length > 1 %}
+<nav class="category-tabs" aria-label="Filtrar por categoria">
+    {% for item in category_links %}
+    <a class="category-tab{% if selected_category == item.value %} is-active{% endif %}" href="{% url 'home' %}{% if item.query %}?{{ item.query }}{% endif %}"{% if selected_category == item.value %} aria-current="true"{% endif %}>{{ item.label }}</a>
+    {% endfor %}
+</nav>
+{% endif %}
+
 {% if has_controls %}
 <p class="catalog-clear"><a href="{% url 'home' %}">Limpar filtros <i class="bi bi-x-lg" aria-hidden="true"></i></a></p>
 {% endif %}
@@ -77,6 +85,7 @@
     </article>
     {% endfor %}
 </section>
+{% include 'components/pagination.html' with query=filters_query %}
 {% elif has_filters %}
 <section class="empty-state">
     <h2>{% if active_band %}Nenhuma peça nessa faixa{% else %}Nenhuma peça encontrada{% endif %}</h2>

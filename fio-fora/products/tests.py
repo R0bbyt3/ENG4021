@@ -1044,3 +1044,107 @@ class PaginaDaMarcaTests(TestCase):
     def test_loja_sem_avaliacao_diz_que_nao_tem(self):
         resposta = self.client.get(reverse('store_detail', args=[self.marca.pk]))
         self.assertContains(resposta, 'Loja ainda sem avaliações')
+
+
+class AbasDeCategoriaEPaginacaoTests(TestCase):
+    """Atalhos de categoria no topo da vitrine e paginação que não perde filtros."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.vestidos = Category.objects.create(name='Vestidos', slug='vestidos')
+        cls.acessorios = Category.objects.create(name='Acessórios', slug='acessorios')
+        cls.vazia = Category.objects.create(name='Sem peças', slug='sem-pecas')
+        cls.vestido = criar_peca('Vestido longo', brand='Circular', size='M',
+                                 category=cls.vestidos)
+        cls.colar = criar_peca('Colar de contas', brand='Circular', size='U',
+                               category=cls.acessorios)
+
+    def abas(self, resposta):
+        return {item['label']: item['query'] for item in resposta.context['category_links']}
+
+    def test_abas_listam_todas_e_as_categorias_com_peca(self):
+        abas = self.abas(self.client.get(reverse('home')))
+        self.assertEqual(set(abas), {'Todas', 'Vestidos', 'Acessórios'})
+
+    def test_categoria_sem_peca_ativa_nao_vira_aba(self):
+        criar_peca('Peça guardada', category=self.vazia, is_active=False)
+        self.assertNotIn('Sem peças', self.abas(self.client.get(reverse('home'))))
+
+    def test_clicar_na_aba_filtra_a_vitrine(self):
+        resposta = self.client.get(reverse('home'), {'categoria': 'vestidos'})
+        nomes = [peca.name for peca in resposta.context['products']]
+        self.assertEqual(nomes, ['Vestido longo'])
+
+    def test_aba_mantem_busca_filtros_e_ordem(self):
+        from urllib.parse import parse_qs
+        controles = {'marca': 'Circular', 'tamanho': 'M', 'faixa': 'leve',
+                     'q': 'vestido & cia', 'ordem': 'preco'}
+        resposta = self.client.get(reverse('home'), controles)
+        for item in resposta.context['category_links']:
+            esperado = {chave: [valor] for chave, valor in controles.items()}
+            if item['value']:
+                esperado['categoria'] = [item['value']]
+            self.assertEqual(parse_qs(item['query']), esperado)
+
+    def test_aba_ativa_fica_marcada(self):
+        resposta = self.client.get(reverse('home'), {'categoria': 'vestidos'})
+        self.assertContains(resposta, 'category-tab is-active')
+        self.assertContains(resposta, 'aria-current="true"')
+
+    def test_vitrine_sem_categoria_nenhuma_nao_mostra_a_barra_de_abas(self):
+        Product.objects.all().update(category=None)
+        self.assertNotContains(self.client.get(reverse('home')), 'category-tabs')
+
+
+class PaginacaoDaVitrineTests(TestCase):
+    """A vitrine pagina de 12 em 12 sem perder busca, filtros e ordem."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.categoria = Category.objects.create(name='Camisetas', slug='camisetas')
+        # 15 peças da mesma categoria: duas páginas.
+        for numero in range(15):
+            criar_peca(f'Camiseta {numero:02}', brand='Circular', size='M',
+                       category=cls.categoria, original_price=Decimal('100'),
+                       price=Decimal(100 - numero))
+        criar_peca('Calça de outra categoria', brand='Outra', size='G')
+
+    def test_primeira_pagina_traz_doze_pecas_e_o_total_completo(self):
+        resposta = self.client.get(reverse('home'))
+        self.assertEqual(len(resposta.context['products']), 12)
+        self.assertEqual(resposta.context['result_count'], 16)
+        self.assertContains(resposta, 'Próxima')
+
+    def test_segunda_pagina_traz_o_resto(self):
+        resposta = self.client.get(reverse('home'), {'page': 2})
+        self.assertEqual(len(resposta.context['products']), 4)
+        self.assertContains(resposta, 'Anterior')
+
+    def test_segunda_pagina_mantem_busca_filtros_e_ordem(self):
+        controles = {'categoria': 'camisetas', 'marca': 'Circular', 'tamanho': 'M',
+                     'q': 'camiseta', 'ordem': 'preco'}
+        resposta = self.client.get(reverse('home'), {**controles, 'page': 2})
+        self.assertEqual(resposta.context['result_count'], 15)
+        nomes = [peca.name for peca in resposta.context['products']]
+        self.assertEqual(nomes, ['Camiseta 02', 'Camiseta 01', 'Camiseta 00'])
+        for chave, valor in controles.items():
+            self.assertIn(chave, resposta.context['filters_query'])
+            self.assertIn(valor.replace(' ', '+'), resposta.context['filters_query'])
+        self.assertNotIn('page', resposta.context['filters_query'])
+
+    def test_link_da_proxima_pagina_carrega_os_filtros(self):
+        resposta = self.client.get(reverse('home'), {'categoria': 'camisetas', 'ordem': 'preco'})
+        self.assertContains(resposta, 'categoria=camisetas')
+        self.assertContains(resposta, 'ordem=preco&amp;page=2')
+
+    def test_pagina_invalida_cai_na_ultima(self):
+        resposta = self.client.get(reverse('home'), {'page': '99'})
+        self.assertEqual(resposta.context['page_obj'].number, 2)
+
+    def test_pagina_que_nao_e_numero_cai_na_primeira(self):
+        resposta = self.client.get(reverse('home'), {'page': 'abc'})
+        self.assertEqual(resposta.context['page_obj'].number, 1)
+
+    def test_vitrine_curta_nao_mostra_paginacao(self):
+        Product.objects.exclude(name='Camiseta 00').delete()
+        self.assertNotContains(self.client.get(reverse('home')), 'Paginação')
