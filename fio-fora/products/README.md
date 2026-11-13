@@ -75,7 +75,7 @@ parâmetros válidos o resultado já vem calculado; faltando ou errando algum, a
 tela pede a correção em vez de calcular.
 
 O resultado mostra a conta aberta: a fórmula, o peso de cada critério e quanto
-cada um somou na nota (`detalhar_severidade()` em `models.py`, que usa as mesmas
+cada um somou na nota (`severity_breakdown()` em `models.py`, que usa as mesmas
 constantes da fórmula).
 
 ## Arquivos principais

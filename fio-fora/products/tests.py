@@ -22,7 +22,7 @@ from reviews.models import Review
 
 from . import services
 from .forms import DiscountSimulationForm, ProductForm
-from .models import (Category, Defeito, Product, ProductImage, detalhar_severidade,
+from .models import (Category, Defeito, Product, ProductImage, severity_breakdown,
                      severidade)
 
 
@@ -934,10 +934,10 @@ class SimuladorLigadoAPecaTests(TestCase):
     def test_a_soma_dos_criterios_e_a_propria_nota_nas_27_combinacoes(self):
         for tipo, local, extensao in combinations((1, 2, 3), repeat=3):
             with self.subTest(notas=(tipo, local, extensao)):
-                linhas = detalhar_severidade(tipo, local, extensao)
-                self.assertEqual(sum(linha['soma'] for linha in linhas),
+                linhas = severity_breakdown(tipo, local, extensao)
+                self.assertEqual(sum(linha['points'] for linha in linhas),
                                  severidade(tipo, local, extensao))
-                self.assertEqual([linha['nota'] for linha in linhas], [tipo, local, extensao])
+                self.assertEqual([linha['score'] for linha in linhas], [tipo, local, extensao])
 
     def test_simulador_sem_parametros_abre_vazio_e_sem_erro(self):
         response = self.client.get(reverse('discount_simulator'))

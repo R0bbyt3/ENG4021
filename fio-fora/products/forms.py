@@ -5,7 +5,7 @@ from django import forms
 
 from . import services
 from .models import (LIMITE_LEVE, LIMITE_MODERADA, Defeito, Product, ProductImage,
-                     detalhar_severidade)
+                     severity_breakdown)
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -45,7 +45,7 @@ def discount_preview(original_price, tipo, localizacao, extensao):
         'original_price': product.original_price,
         'final_price': product.suggested_price,
         # Quanto cada critério somou na nota, para a tela mostrar a conta aberta.
-        'breakdown': detalhar_severidade(tipo, localizacao, extensao),
+        'breakdown': severity_breakdown(tipo, localizacao, extensao),
         'limit_leve': LIMITE_LEVE,
         'limit_moderada': LIMITE_MODERADA,
     }
@@ -77,19 +77,19 @@ class DiscountSimulationForm(DefectFieldsMixin):
         Sem nenhum desses parâmetros o formulário fica vazio (sem erros em
         vermelho antes de a pessoa preencher qualquer coisa).
         """
-        data = {campo: params[chave] for chave, campo in cls.QUERY_PARAMS.items() if params.get(chave)}
+        data = {field: params[key] for key, field in cls.QUERY_PARAMS.items() if params.get(key)}
         return cls(data or None)
 
     @classmethod
     def query_for(cls, product):
         """Query string do link “Entender o desconto” que a página da peça mostra."""
-        defeito = getattr(product, 'defeito', None)
-        if defeito is None:
+        defect = getattr(product, 'defeito', None)
+        if defect is None:
             return ''
         return urlencode({
-            'tipo': defeito.tipo,
-            'local': defeito.localizacao,
-            'extensao': defeito.extensao,
+            'tipo': defect.tipo,
+            'local': defect.localizacao,
+            'extensao': defect.extensao,
             'preco': product.original_price or product.price,
         })
 
