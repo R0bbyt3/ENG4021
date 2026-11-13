@@ -288,6 +288,7 @@ class PaginaProdutoTests(TestCase):
         UserProfile.objects.create(user=self.vendedor, role=UserProfile.Role.BRAND,
                                    store_name='Ateliê Linha', location='Rio de Janeiro, RJ')
         self.comprador = User.objects.create_user('ana@example.com', password='Strong-test-524!')
+        UserProfile.objects.create(user=self.comprador, role='buyer')
         self.peca = criar_peca('Calça de linho', 2, 2, 2, price=Decimal('130'), original_price=Decimal('200'),
                                seller=self.vendedor, brand='Ateliê Linha', size='38', condition='Nova com defeito',
                                defect_measure_cm=Decimal('4'), visible_when_worn=True)

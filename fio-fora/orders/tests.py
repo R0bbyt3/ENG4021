@@ -417,9 +417,10 @@ class CheckoutAccessTests(CheckoutTestCase):
     def test_seller_cannot_use_checkout_or_orders(self):
         self.client.force_login(self.seller)
         self.put_in_cart(self.dress, 1, user=self.seller)
-        self.assertEqual(self.client.get('/checkout/').status_code, 403)
-        self.assertEqual(self.client.post('/checkout/', ADDRESS).status_code, 403)
-        self.assertEqual(self.client.get('/pedidos/').status_code, 403)
+        # Vendedor volta para a vitrine com a explicação, sem tela de erro.
+        self.assertRedirects(self.client.get('/checkout/'), '/vitrine/')
+        self.assertRedirects(self.client.post('/checkout/', ADDRESS), '/vitrine/')
+        self.assertRedirects(self.client.get('/pedidos/'), '/vitrine/')
         self.assertEqual(Order.objects.count(), 0)
 
     def test_checkout_does_not_accept_other_methods(self):

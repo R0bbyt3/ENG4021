@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from accounts.decorators import buyer_required
 from products.models import Product
 
 from .models import Favorite
@@ -20,7 +20,7 @@ def _redirect_back(request):
     return redirect(reverse('favorites'))
 
 
-@login_required
+@buyer_required
 def favorites_list(request):
     favorites = (
         Favorite.objects.filter(user=request.user)
@@ -30,7 +30,7 @@ def favorites_list(request):
     return render(request, 'favorites/list.html', {'favorites': favorites})
 
 
-@login_required
+@buyer_required
 @require_POST
 def favorite_add(request, product_id):
     # Só peças ativas na vitrine podem ser favoritadas.
@@ -43,7 +43,7 @@ def favorite_add(request, product_id):
     return _redirect_back(request)
 
 
-@login_required
+@buyer_required
 @require_POST
 def favorite_remove(request, product_id):
     # Remove só o favorito do próprio usuário; se já não existir, nada acontece.

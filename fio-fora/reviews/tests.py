@@ -55,7 +55,7 @@ class SaveReviewTests(ReviewTestCase):
 
     def test_seller_cannot_review(self):
         self.client.force_login(self.seller)
-        self.assertEqual(self.review(self.shirt_item).status_code, 403)
+        self.assertRedirects(self.review(self.shirt_item), reverse('home'))
         self.assertEqual(Review.objects.count(), 0)
 
     def test_anonymous_user_is_sent_to_login(self):

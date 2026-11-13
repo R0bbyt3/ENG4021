@@ -12,7 +12,9 @@ Peças que o usuário guardou para ver depois.
 | `/favoritos/adicionar/<id>/` | Favoritar (POST) |
 | `/favoritos/remover/<id>/` | Desfavoritar (POST) |
 
-Exige login. Depois de favoritar, o usuário volta para a página onde estava.
+Só para contas de comprador. Vendedor e marca não veem o coração nem o link
+no menu; se abrirem uma dessas páginas, voltam para a vitrine com uma mensagem.
+Depois de favoritar, o comprador volta para a página onde estava.
 
 > **[PRINT]** Página de favoritos com algumas peças.
 

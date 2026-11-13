@@ -9,7 +9,7 @@ Carrinho do comprador.
 | URL | Ação |
 |---|---|
 | `/carrinho/` | Ver o carrinho |
-| `/carrinho/adicionar/<id>/` | Adicionar peça (POST, só comprador) |
+| `/carrinho/adicionar/<id>/` | Adicionar peça (POST) |
 | `/carrinho/itens/<id>/quantidade/` | Mudar a quantidade (POST) |
 | `/carrinho/itens/<id>/remover/` | Remover item (POST) |
 
@@ -22,7 +22,10 @@ Carrinho do comprador.
 
 ## Regras
 
-- Só contas de comprador adicionam peças. Ninguém compra a própria peça.
+- O carrinho inteiro é só de comprador. Vendedor e marca não veem o botão
+    "Adicionar ao carrinho" nem o link do carrinho no menu; se abrirem uma
+    dessas páginas, voltam para a vitrine com uma mensagem (`buyer_required`).
+- Ninguém compra a própria peça.
 - Estoque e disponibilidade são conferidos no servidor a cada ação.
 - Preços e total vêm sempre do banco; o navegador envia só a quantidade.
 - Itens indisponíveis continuam visíveis, mas ficam fora do total.

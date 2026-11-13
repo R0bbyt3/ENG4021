@@ -18,8 +18,10 @@
 
         <div class="site-actions">
             {% if user.is_authenticated %}
+            {% if is_buyer %}
             <a class="icon-link" href="{% url 'favorites' %}"{% if current == 'favorites' %} aria-current="page"{% endif %}><i class="bi bi-heart" aria-hidden="true"></i><span>Favoritos</span></a>
             <a class="icon-link" href="{% url 'cart' %}"{% if current == 'cart' %} aria-current="page"{% endif %}><i class="bi bi-bag" aria-hidden="true"></i><span>Carrinho</span></a>
+            {% endif %}
             <a class="icon-link" href="{% url 'account' %}"{% if current == 'account' %} aria-current="page"{% endif %}><i class="bi bi-person" aria-hidden="true"></i><span>Minha conta</span></a>
             <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
