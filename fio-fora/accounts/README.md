@@ -43,7 +43,7 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 | `decorators.py` | `buyer_required`, `seller_required`, `is_buyer`, `is_seller` |
 | `context_processors.py` | Coloca `is_buyer` e `is_seller` em todos os templates |
 | `backends.py` | Permite entrar com o e-mail no lugar do nome de usuário |
-| `templates/accounts/auth_base.html` | Layout das telas de entrada (imagem à esquerda, formulário à direita) |
+| `templates/accounts/auth_base.html` | Layout das telas de entrada (imagem à esquerda, formulário à direita), com o rodapé do site embaixo |
 
 ## Regras
 

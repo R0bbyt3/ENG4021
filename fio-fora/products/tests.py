@@ -891,6 +891,15 @@ class FooterTests(TestCase):
                          'password_reset', 'terms', 'privacy']:
                 self.assertContains(response, f'href="{reverse(name)}"', status_code=response.status_code)
 
+    def test_login_and_signup_pages_also_have_the_footer(self):
+        urls = [reverse('login'), reverse('signup'), reverse('register', args=['comprador']),
+                reverse('password_reset')]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, 'class="site-footer"')
+                self.assertContains(response, f'href="{reverse("faq")}"')
+
     def test_footer_is_visible_when_logged_in(self):
         user = get_user_model().objects.create_user('comprador@example.com', 'comprador@example.com', 'Senha-forte-524!')
         self.client.force_login(user)
