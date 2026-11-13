@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .fields import CNPJField, CPFField, PhoneField, SocialField, split_location
+from .fields import CEPField, CNPJField, CPFField, PhoneField, SocialField, split_location
 from .models import UserProfile
 
 OLD_PASSWORD = 'Senha-antiga-524!'
@@ -231,6 +231,15 @@ class BrazilianFieldsTests(TestCase):
                 field.clean(wrong)
         self.assertEqual(field.prepare_value('12345678909'), '123.456.789-09')
 
+    def test_cep(self):
+        field = CEPField()
+        self.assertEqual(field.clean('20040-020'), '20040020')
+        self.assertEqual(field.clean('20040020'), '20040020')
+        for wrong in ['2004-020', '00000-000', '2004002', 'abcde-fgh']:
+            with self.subTest(cep=wrong), self.assertRaises(ValidationError):
+                field.clean(wrong)
+        self.assertEqual(field.prepare_value('20040020'), '20040-020')
+
     def test_cnpj_numeric_and_alphanumeric(self):
         field = CNPJField()
         self.assertEqual(field.clean('11.222.333/0001-81'), '11222333000181')
@@ -327,3 +336,51 @@ class AccountPageFieldsTests(TestCase):
 
         response = self.client.post(reverse('account'), {**data, 'state': ''})
         self.assertContains(response, 'Preencha a cidade e o estado juntos.')
+
+
+class AccountAddressTests(TestCase):
+    """Endereço de entrega no perfil do comprador."""
+
+    DATA = {'name': 'Ana Lima', 'email': 'ana@example.com', 'phone': '', 'store_name': '', 'city': '', 'state': '',
+            'cep': '20040-020', 'street': 'Rua da Assembleia', 'number': '10', 'complement': '',
+            'district': 'Centro', 'address_city': 'Rio de Janeiro', 'address_state': 'RJ'}
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user('ana@example.com', email='ana@example.com',
+                                                         first_name='Ana Lima')
+        UserProfile.objects.create(user=self.user, role='buyer')
+        self.client.force_login(self.user)
+
+    def test_buyer_saves_address_with_digits_only_cep(self):
+        self.assertRedirects(self.client.post(reverse('account'), self.DATA), reverse('account'))
+        profile = UserProfile.objects.get(user=self.user)
+        self.assertEqual(profile.address_cep, '20040020')
+        self.assertEqual(profile.address_street, 'Rua da Assembleia')
+        self.assertEqual(profile.address_location, 'Rio de Janeiro, RJ')
+        response = self.client.get(reverse('account'))
+        self.assertContains(response, 'value="20040-020"')
+        self.assertContains(response, 'value="Rua da Assembleia"')
+
+    def test_address_is_optional_but_cannot_be_half_filled(self):
+        empty = {**self.DATA, 'cep': '', 'street': '', 'number': '', 'district': '',
+                 'address_city': '', 'address_state': ''}
+        self.assertRedirects(self.client.post(reverse('account'), empty), reverse('account'))
+        response = self.client.post(reverse('account'), {**empty, 'cep': '20040-020'})
+        self.assertContains(response, 'Preencha o endereço completo')
+        self.assertEqual(UserProfile.objects.get(user=self.user).address_cep, '')
+
+    def test_cleaning_the_fields_removes_the_saved_address(self):
+        self.client.post(reverse('account'), self.DATA)
+        empty = {**self.DATA, 'cep': '', 'street': '', 'number': '', 'district': '',
+                 'address_city': '', 'address_state': ''}
+        self.client.post(reverse('account'), empty)
+        self.assertEqual(UserProfile.objects.get(user=self.user).address_street, '')
+
+    def test_seller_does_not_get_the_address_section(self):
+        seller = get_user_model().objects.create_user('loja@example.com', email='loja@example.com')
+        UserProfile.objects.create(user=seller, role='seller', address_street='Rua Antiga')
+        self.client.force_login(seller)
+        self.assertNotContains(self.client.get(reverse('account')), 'Endereço de entrega')
+        data = {'name': 'Loja', 'email': 'loja@example.com', 'phone': '', 'store_name': 'Loja', 'city': '', 'state': ''}
+        self.assertRedirects(self.client.post(reverse('account'), data), reverse('account'))
+        self.assertEqual(UserProfile.objects.get(user=seller).address_street, 'Rua Antiga')

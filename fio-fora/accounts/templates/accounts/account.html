@@ -22,6 +22,9 @@
             {% if is_buyer %}
             <a href="{% url 'order_list' %}">Meus pedidos</a>
             {% endif %}
+            {% if is_buyer %}
+            <a href="#address-details">Endereço de entrega</a>
+            {% endif %}
             {% if profile and profile.role != 'buyer' %}
             <a href="#business-details">Loja ou marca</a>
             {% endif %}
@@ -60,6 +63,26 @@
                     {% include 'components/field.html' with field=form.password %}
                 </div>
             </section>
+
+            {% if form.cep %}
+            <section class="account-card" id="address-details">
+                <div class="account-card-heading">
+                    <div>
+                        <h2>Endereço de entrega</h2>
+                        <p>Opcional. O checkout já vem preenchido com ele.</p>
+                    </div>
+                </div>
+                <div class="account-fields">
+                    {% include 'components/field.html' with field=form.cep %}
+                    {% include 'components/field.html' with field=form.street %}
+                    {% include 'components/field.html' with field=form.number %}
+                    {% include 'components/field.html' with field=form.complement %}
+                    {% include 'components/field.html' with field=form.district %}
+                    {% include 'components/field.html' with field=form.address_city %}
+                    {% include 'components/field.html' with field=form.address_state %}
+                </div>
+            </section>
+            {% endif %}
 
             {% if profile and profile.role != 'buyer' %}
             <section class="account-card" id="business-details">

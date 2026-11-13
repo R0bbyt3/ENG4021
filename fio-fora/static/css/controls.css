@@ -161,3 +161,15 @@ select.form-control {
 .button--danger:hover {
     background: #792f2f;
 }
+
+/* Frete e parcelamento (página da peça, carrinho e checkout) */
+.payment-info {
+    margin: 4px 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.payment-info strong {
+    color: var(--ink);
+}

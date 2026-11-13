@@ -226,12 +226,12 @@ erDiagram
 | Model | App | Guarda |
 |---|---|---|
 | `User` | Django | Login (e-mail e senha) |
-| `UserProfile` | accounts | Tipo de conta, telefone, loja, documento |
+| `UserProfile` | accounts | Tipo de conta, telefone, loja, documento, endereço de entrega |
 | `Product` | products | Peça: nome, preços, estoque, vendedor |
 | `Defeito` | products | Tipo, localização e extensão do defeito |
 | `Category`, `ProductImage` | products | Categoria e fotos da peça |
 | `Cart`, `CartItem` | cart | Carrinho e seus itens |
-| `Order`, `OrderItem` | orders | Pedido e cópia do nome e preço de cada item |
+| `Order`, `OrderItem` | orders | Pedido (com frete e cópia do endereço de entrega) e cópia do nome e preço de cada item |
 | `Favorite` | favorites | Peça favoritada por um usuário |
 
 Regras importantes:

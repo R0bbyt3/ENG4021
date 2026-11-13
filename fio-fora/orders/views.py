@@ -9,6 +9,7 @@ from accounts.decorators import buyer_required, seller_required
 from cart.services import build_cart_summary
 from reviews.services import attach_review_forms
 
+from .forms import CheckoutAddressForm
 from .models import Order, OrderItem
 from .services import (
     CheckoutError, OrderCancellationError, OrderStatusError, advance_sale, can_cancel_order,
@@ -20,23 +21,30 @@ from .services import (
 @require_http_methods(['GET', 'POST'])
 @buyer_required
 def checkout(request):
-    if request.method == 'POST':
+    summary = build_cart_summary(request.user)
+    if not summary['lines']:
+        messages.error(request, 'Seu carrinho está vazio.')
+        return redirect('cart')
+
+    profile = getattr(request.user, 'profile', None)
+    form = CheckoutAddressForm(request.POST if request.method == 'POST' else None, profile=profile)
+    if request.method == 'POST' and form.is_valid():
         try:
-            order = checkout_cart(request.user)
+            order = checkout_cart(request.user, form.address_data())
         except CheckoutError as error:
             messages.error(request, str(error))
             return redirect('cart')
+        if form.cleaned_data['save_to_profile'] and profile is not None:
+            for key, value in form.address_data().items():
+                setattr(profile, f'address_{key}', value)
+            profile.save()
         messages.success(request, 'Pedido confirmado! Sua compra demonstrativa foi registrada.')
         order_url = request.build_absolute_uri(reverse('order_detail', args=[order.pk]))
         if not send_order_confirmation(order, order_url):
             messages.warning(request, 'Não foi possível enviar o e-mail de confirmação, mas o pedido está salvo.')
         return redirect('order_detail', order_id=order.pk)
 
-    summary = build_cart_summary(request.user)
-    if not summary['lines']:
-        messages.error(request, 'Seu carrinho está vazio.')
-        return redirect('cart')
-    return render(request, 'orders/checkout.html', summary)
+    return render(request, 'orders/checkout.html', {**summary, 'form': form})
 
 
 @require_GET

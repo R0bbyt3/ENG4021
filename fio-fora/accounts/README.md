@@ -27,13 +27,16 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 - `role`: tipo de conta (`buyer`, `seller` ou `brand`).
 - Dados de contato e de loja: `phone`, `store_name`, `document`, `location`,
     `legal_name`, `segment`, `social`.
+- Endereço de entrega padrão do comprador: `address_cep`, `address_street`,
+    `address_number`, `address_complement`, `address_district`, `address_location`
+    (cidade e estado juntos, como em `location`).
 
 ## Arquivos principais
 
 | Arquivo | O que tem |
 |---|---|
 | `forms.py` | Login por e-mail, cadastro de cada tipo de conta e perfil |
-| `fields.py` | Campos brasileiros: CPF, CNPJ, telefone, estado, cidade e site/Instagram |
+| `fields.py` | Campos brasileiros: CPF, CNPJ, telefone, CEP, estado, cidade e site/Instagram |
 | `views.py` | Login, cadastro, perfil, recuperação de senha e lista de usuários |
 | `decorators.py` | `buyer_required`, `seller_required`, `is_buyer`, `is_seller` |
 | `context_processors.py` | Coloca `is_buyer` e `is_seller` em todos os templates |
@@ -45,6 +48,9 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 - O cadastro cria o `User` e o `UserProfile` juntos.
 - O e-mail também vira o nome de usuário.
 - Vendedor exige CPF; marca exige CNPJ. Os dois têm os dígitos verificadores conferidos.
+- O comprador pode guardar um endereço de entrega no perfil (`/conta/`). Ele é
+    opcional, mas não pode ficar pela metade. O checkout vem preenchido com ele.
+    Vendedores e marcas não têm esse campo.
 - O link de recuperação de senha vale por 60 minutos. Em desenvolvimento, o
     e-mail aparece no terminal onde o `runserver` está rodando.
 - O e-mail de recuperação tem duas versões, texto e HTML, em
