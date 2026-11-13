@@ -1,4 +1,5 @@
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -92,20 +93,35 @@ def home(request):
         # Reutiliza o desconto real exibido no card, sem copiar sua fórmula.
         products.sort(key=lambda product: (-(product.discount_percent or 0), product.price, -product.pk))
 
-    selected = {'marca': brand, 'categoria': category, 'tamanho': size, 'q': query, 'ordem': ordering}
-    filter_query = request.GET.copy()
-    filter_query.clear()
-    filter_query.update({key: value for key, value in selected.items() if value})
-    band_links = []
-    for value, label in [('', 'Todas'), *FAIXAS_SEVERIDADE]:
-        params = filter_query.copy()
-        if value:
-            params['faixa'] = value
-        band_links.append({'value': value, 'label': label, 'query': params.urlencode()})
+    selected = {'marca': brand, 'categoria': category, 'tamanho': size, 'q': query,
+                'ordem': ordering, 'faixa': band}
+
+    def shortcut_links(key, options):
+        """Atalhos de um filtro que preservam os outros controles.
+
+        O número da página fica de fora de propósito: trocar de categoria ou de
+        faixa muda o resultado, então a leitura recomeça da primeira página.
+        """
+        links = []
+        for value, label in options:
+            params = {name: chosen for name, chosen in selected.items() if chosen and name != key}
+            if value:
+                params[key] = value
+            links.append({'value': value, 'label': label, 'query': urlencode(params)})
+        return links
+
+    band_links = shortcut_links('faixa', [('', 'Todas'), *FAIXAS_SEVERIDADE])
+    category_links = shortcut_links(
+        'categoria', [('', 'Todas'), *[(item.slug, item.name) for item in categories]])
+    # A paginação mantém busca, filtros e ordem; só o page muda de uma página para outra.
+    filters_query = urlencode({name: chosen for name, chosen in selected.items() if chosen})
+    page = Paginator(products, 12).get_page(request.GET.get('page'))
 
     return render(request, 'products/home.html', {
-        'products': products,
-        'result_count': len(products),
+        'products': list(page),
+        'page_obj': page,
+        'filters_query': filters_query,
+        'result_count': page.paginator.count,
         'brands': brands,
         'categories': categories,
         'sizes': sizes,
@@ -120,6 +136,7 @@ def home(request):
         'has_filters': bool(band or brand or category or size or query),
         'has_controls': bool(band or brand or category or size or query or ordering),
         'band_links': band_links,
+        'category_links': category_links,
         'active_band': band,
     })
 

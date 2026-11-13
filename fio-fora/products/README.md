@@ -148,7 +148,44 @@ Exemplo: `/vitrine/?categoria=camisetas&tamanho=M&faixa=moderada&q=linho&ordem=p
   real do anúncio, e não o desconto sugerido. Empates usam menor preço e
   depois ID decrescente. Peças sem desconto contam como 0%.
 - Para manter o cálculo no model sem duplicar a fórmula, a ordenação é feita
-  em memória sobre o catálogo filtrado. Esta vitrine não usa paginação.
+  em memória sobre o catálogo filtrado.
+
+### Abas de categoria e paginação
+
+As categorias com peça ativa aparecem como abas no topo da vitrine, antes da
+caixa de busca. Cada aba é um link que **mantém** busca, marca, tamanho, faixa
+e ordem, trocando só a categoria; “Todas” remove só a categoria. É o mesmo
+mecanismo dos atalhos de severidade (`shortcut_links()` em `views.py`), por
+isso os dois não se atrapalham. Categoria sem peça ativa não vira aba, e a
+barra some se nenhuma peça tiver categoria.
+
+A vitrine mostra **12 peças por página** com `components/pagination.html`. O
+contador continua mostrando o total da busca inteira, não o da página. Os
+links de página levam junto todos os controles (`filters_query`), então a
+página 2 é a página 2 da mesma busca. Trocar de categoria ou de faixa recomeça
+da primeira página, porque o resultado é outro.
+
+> **[PRINT]** Vitrine com as abas de categoria e a paginação no rodapé.
+
+## Marcas e lojas
+
+`/marcas/` (`store_list`) é a aba **Marcas** do menu: lista, em ordem
+alfabética, quem tem pelo menos uma peça ativa, com cidade e quantidade de
+peças. Loja sem peça na vitrine não aparece — uma lista de lojas vazias não
+ajuda ninguém a comprar.
+
+`/marcas/<id>/` (`store_detail`) é a página pública da loja: nome, cidade,
+nota média da loja (as avaliações de todas as peças dela, vindas do `reviews`)
+e as peças **ativas**, paginadas de 12 em 12. O card “Vendido por” da página
+da peça leva para cá.
+
+- Quem vende sem cadastrar nome de loja aparece pelo próprio nome
+  (`UserProfile.display_name`).
+- Usuário sem perfil não tem página de loja (404).
+
+> **[PRINT]** Aba Marcas com as lojas que têm peças na vitrine.
+
+> **[PRINT]** Página de uma marca com a nota da loja e as peças dela.
 
 ## Marcas e lojas
 
