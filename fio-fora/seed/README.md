@@ -36,12 +36,16 @@ Entre com o **e-mail** e a senha **`fiofora123`**.
 ### O que cada conta já tem
 
 **Rafael (comprador)**
+- Endereço de entrega salvo em São Paulo (Avenida Paulista), que já vem
+    preenchido no checkout.
 - 3 favoritos: camiseta de algodão, vestido estampado e calça jeans.
 - Carrinho com a camisa de linho e 2 camisetas listradas.
 - Pedido **enviado** com o vestido e a camiseta, os dois já avaliados.
 - Pedido **pendente** com a calça de alfaiataria, ainda sem avaliação.
 
 **Gabriel (comprador)**
+- Endereço de entrega salvo no Rio de Janeiro (Rua Barata Ribeiro), que já
+    vem preenchido no checkout.
 - 2 favoritos: camiseta listrada e calça de alfaiataria.
 - Carrinho com a calça jeans.
 - Pedido **pago** com a calça jeans, já avaliada.
@@ -71,7 +75,8 @@ com nota média no card "Vendido por" da página da peça.
 | Fotos | 20 (a peça inteira e o close do defeito, de cada peça) |
 | Favoritos | 5 |
 | Carrinhos | 2 |
-| Pedidos | 4 (pendente, pago, enviado e cancelado) |
+| Endereços de entrega | 2 (um em cada comprador) |
+| Pedidos | 4 (pendente, pago, enviado e cancelado), cada um com o frete fixo e uma cópia do endereço do comprador |
 | Avaliações | 3 |
 
 ## Arquivos
@@ -81,10 +86,10 @@ Cada bloco cuida de uma parte dos dados e é chamado em ordem pelo comando.
 | Arquivo | O que cria |
 |---|---|
 | `management/commands/popular_banco.py` | O comando: só chama os blocos abaixo em ordem |
-| `users.py` | Bloco 1: contas e perfis (e a senha de todas) |
+| `users.py` | Bloco 1: contas e perfis, com o endereço dos compradores (e a senha de todas) |
 | `catalog.py` | Bloco 2: categorias, peças, defeitos e fotos |
 | `shopping.py` | Bloco 3: favoritos e carrinhos |
-| `purchases.py` | Bloco 4: pedidos e avaliações |
+| `purchases.py` | Bloco 4: pedidos (com frete e endereço) e avaliações |
 | `images/` | Fotos das peças: `<nome>.jpg` e `<nome>-defeito.jpg` |
 | `tests.py` | Confere que o comando roda, não duplica e que as contas entram |
 
