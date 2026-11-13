@@ -185,7 +185,8 @@ e as peças **ativas**, paginadas de 12 em 12. O card “Vendido por” da pági
 da peça leva para cá.
 
 - Quem vende sem cadastrar nome de loja aparece pelo próprio nome
-  (`UserProfile.display_name`).
+  (`UserProfile.display_name`), tanto na página da loja quanto no card
+  “Vendido por” da página da peça.
 - Só contas de vendedor ou marca têm página de loja. Comprador e usuário sem
   perfil dão 404, para o nome e a cidade de quem compra não ficarem públicos.
 

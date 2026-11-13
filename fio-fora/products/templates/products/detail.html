@@ -65,10 +65,11 @@
         </div>
 
         {% with profile=product.seller.profile %}
-        {% if profile.store_name %}
+        {# Quem vende sem nome de loja aparece pelo próprio nome (display_name). #}
+        {% if profile %}
         <section class="seller-card">
             <p class="eyebrow">Vendido por</p>
-            <strong><a href="{% url 'store_detail' product.seller_id %}">{{ profile.store_name }}</a></strong>
+            <strong><a href="{% url 'store_detail' product.seller_id %}">{{ profile.display_name }}</a></strong>
             {% if profile.location %}<span class="field-help">{{ profile.location }}</span>{% endif %}
             {% if store_rating.count %}
             <p class="seller-rating"><span class="stars" aria-hidden="true">★</span> <strong>{{ store_rating.average|floatformat:1 }}</strong> de 5 na loja · {{ store_rating.count }} avaliaç{{ store_rating.count|pluralize:'ão,ões' }}</p>

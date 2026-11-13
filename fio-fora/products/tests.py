@@ -1044,6 +1044,14 @@ class PaginaDaMarcaTests(TestCase):
         resposta = self.client.get(reverse('product_detail', args=[self.vestido.pk]))
         self.assertContains(resposta, reverse('store_detail', args=[self.marca.pk]))
 
+    def test_vendedor_sem_nome_de_loja_tambem_aparece_no_vendido_por(self):
+        anonimo = loja('marina')
+        saia = criar_peca('Saia da Marina', seller=anonimo)
+        resposta = self.client.get(reverse('product_detail', args=[saia.pk]))
+        self.assertContains(resposta, 'Vendido por')
+        self.assertContains(resposta, reverse('store_detail', args=[anonimo.pk]))
+        self.assertContains(resposta, 'Marina')
+
     def test_menu_tem_a_aba_marcas(self):
         self.assertContains(self.client.get(reverse('home')), reverse('store_list'))
 
