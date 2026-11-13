@@ -1,6 +1,8 @@
 # products — catálogo e área do vendedor
 
-Vitrine, página da peça, cadastro de peças pelo vendedor e simulador de desconto.
+Vitrine, página da peça, marcas, cadastro de peças pelo vendedor, simulador de
+desconto e as páginas de informação (Sobre, ajuda, Trabalhe conosco, contato,
+termos e privacidade).
 
 [← Voltar para a documentação principal](../README.md)
 
@@ -10,10 +12,13 @@ Vitrine, página da peça, cadastro de peças pelo vendedor e simulador de desco
 |---|---|---|
 | `/vitrine/` | Vitrine com filtros combináveis, busca e ordenação | Todos |
 | `/sobre/` | Proposta, critérios, origem dos pesos e caráter acadêmico | Todos |
+| `/ajuda/` | Perguntas frequentes | Todos |
+| `/trabalhe-conosco/` | Trabalhe conosco | Todos |
+| `/contato/` | Contato | Todos |
 | `/termos/` e `/privacidade/` | Termos de uso e política de privacidade | Todos |
 | `/marcas/` | Aba “Marcas”: quem tem peça na vitrine | Todos |
 | `/marcas/<id>/` | Página pública de uma loja ou marca | Todos |
-| `/produtos/<id>/` | Página da peça | Todos |
+| `/produtos/<id>/` | Página da peça, com frete, total com frete e parcelamento | Todos |
 | `/simulador/` | Simulador de desconto, com os valores de uma peça em `?tipo=&local=&extensao=&preco=` | Todos |
 | `/minhas-pecas/` | Peças do vendedor logado | Vendedor e marca |
 | `/produtos/novo/` | Cadastrar peça | Vendedor e marca |
@@ -79,7 +84,7 @@ constantes da fórmula).
 |---|---|
 | `models.py` | Models, fórmula de severidade e o filtro `Product.objects.with_severity_band()` |
 | `forms.py` | `ProductForm` (cadastrar e editar) e `DiscountSimulationForm` |
-| `views.py` | Vitrine, página da peça, simulador e área do vendedor |
+| `views.py` | Vitrine, página da peça, marcas, simulador, área do vendedor e páginas de informação |
 | `templates/products/includes/card_info.html` | Card de peça (vitrine, favoritos e minhas peças): foto com o selo do defeito, marca, nome, tamanho e preço. O card inteiro leva à página da peça, onde ficam a descrição do defeito e o botão de carrinho |
 | `templates/products/includes/price.html` | Preço original, preço final e % de desconto |
 
@@ -187,33 +192,13 @@ da peça leva para cá.
 
 > **[PRINT]** Página de uma marca com a nota da loja e as peças dela.
 
-## Marcas e lojas
-
-`/marcas/` (`store_list`) é a aba **Marcas** do menu: lista, em ordem
-alfabética, quem tem pelo menos uma peça ativa, com cidade e quantidade de
-peças. Loja sem peça na vitrine não aparece — uma lista de lojas vazias não
-ajuda ninguém a comprar.
-
-`/marcas/<id>/` (`store_detail`) é a página pública da loja: nome, cidade,
-nota média da loja (as avaliações de todas as peças dela, vindas do `reviews`)
-e as peças **ativas**, paginadas de 12 em 12. O card “Vendido por” da página
-da peça leva para cá.
-
-- Quem vende sem cadastrar nome de loja aparece pelo próprio nome
-  (`UserProfile.display_name`).
-- Usuário sem perfil não tem página de loja (404).
-
-> **[PRINT]** Aba Marcas com as lojas que têm peças na vitrine.
-
-> **[PRINT]** Página de uma marca com a nota da loja e as peças dela.
-
 ## Perguntas frequentes
 
 `/ajuda/` (`faq`) é pública e só tem texto: não consulta o banco. Reúne as
 dúvidas de quem compra, de quem vende e de quem tem conta, em quatro grupos
 (Comprar, Defeitos e descontos, Vender, Conta). Cada pergunta é um
 `<details>`, que abre e fecha sem JavaScript. Os links para a página Sobre e
-para a página de cada peça levam até ela.
+para a página de cada peça levam até ela, assim como o rodapé.
 
 > **[PRINT]** Página de perguntas frequentes com uma pergunta aberta.
 
@@ -222,8 +207,8 @@ para a página de cada peça levam até ela.
 `/trabalhe-conosco/` (`careers`) é pública e só tem texto: as quatro áreas da
 equipe (Curadoria de peças, Atendimento, Desenvolvimento e Comunicação) vêm de
 uma lista na própria view. As áreas são fictícias e a página avisa que não há
-processo seletivo aberto. Ela é ligada pela página Sobre e pelas perguntas
-frequentes. Não há formulário nem model.
+processo seletivo aberto. Ela é ligada pelo rodapé, pela página Sobre e pelas
+perguntas frequentes. Não há formulário nem model.
 
 > **[PRINT]** Página Trabalhe conosco com os cards das áreas.
 
@@ -232,7 +217,8 @@ frequentes. Não há formulário nem model.
 `/contato/` (`contact`) é pública e só tem texto: manda a pessoa para as
 perguntas frequentes e para a aba "Problemas" do repositório no GitHub, e avisa
 que, por ser um projeto acadêmico, não há atendimento por telefone nem por
-e-mail. Ela é ligada pelas perguntas frequentes e pela página Trabalhe conosco.
+e-mail. Ela é ligada pelo rodapé, pelas perguntas frequentes e pela página Trabalhe
+conosco.
 Não há formulário nem model.
 
 > **[PRINT]** Página de contato com os dois caminhos.
@@ -245,7 +231,7 @@ de venda e o que não pode; a privacidade lista os dados que o site guarda
 (os mesmos dos models de conta, pedidos, favoritos e avaliações), para que
 servem, que só há cookies de sessão e de segurança, e que não há pagamento.
 Ambas avisam que são textos de exemplo de um **protótipo acadêmico**. Uma
-liga na outra e as duas são ligadas pela página de contato. Não há model.
+liga na outra e as duas ficam no rodapé. Não há model.
 
 > **[PRINT]** Página de termos de uso e página de política de privacidade.
 
