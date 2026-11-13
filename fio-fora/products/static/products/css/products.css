@@ -164,6 +164,19 @@
 .seller-card { display: grid; gap: 4px; margin-top: 26px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-medium); }
 .seller-card .eyebrow { margin: 0; }
 
+/* Fotos já enviadas, na edição da peça. */
+.photo-manager { margin-top: 26px; }
+.photo-manager > p { color: var(--muted); }
+.photo-manager-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px; margin-top: 20px; }
+.photo-item { margin: 0; }
+.photo-item img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border: 1px solid var(--line); border-radius: var(--radius-medium); }
+.photo-item figcaption { display: grid; gap: 10px; margin-top: 10px; }
+.photo-tag { justify-self: start; padding: 3px 10px; color: var(--green); background: var(--paper); border-radius: 30px; font-size: 12px; font-weight: 700; }
+.photo-tag--defect { color: var(--ink); }
+.photo-item-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.photo-item-actions form { margin: 0; }
+.photo-item-actions .button { padding: 7px 14px; font-size: 13px; }
+
 /* Aba “Marcas” e página pública de uma loja. */
 .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
 .store-card { padding: 22px 24px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-large); }

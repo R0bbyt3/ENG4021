@@ -1148,3 +1148,138 @@ class PaginacaoDaVitrineTests(TestCase):
     def test_vitrine_curta_nao_mostra_paginacao(self):
         Product.objects.exclude(name='Camiseta 00').delete()
         self.assertNotContains(self.client.get(reverse('home')), 'Paginação')
+
+
+@override_settings(MEDIA_ROOT=MEDIA_DE_TESTE)
+class GerenciarFotosNaEdicaoTests(TestCase):
+    """Listar, remover e escolher a foto principal na edição da peça."""
+
+    def setUp(self):
+        self.vendedora = get_user_model().objects.create_user(
+            'dona@example.com', email='dona@example.com', password='Strong-test-524!')
+        UserProfile.objects.create(user=self.vendedora, role='seller')
+        self.peca = criar_peca('Camisa com mancha', seller=self.vendedora,
+                               original_price=Decimal('200'), price=Decimal('140'))
+        self.defeito = ProductImage.objects.create(
+            product=self.peca, image=foto(nome='defeito.jpg'), is_defect=True,
+            alt_text='Camisa com mancha — close do defeito')
+        self.primeira = ProductImage.objects.create(
+            product=self.peca, image=foto(nome='frente.jpg'), alt_text='Camisa de frente')
+        self.segunda = ProductImage.objects.create(
+            product=self.peca, image=foto(nome='costas.jpg'), alt_text='Camisa de costas')
+        self.client.login(username='dona@example.com', password='Strong-test-524!')
+
+    def editar(self):
+        return reverse('product_update', args=[self.peca.pk])
+
+    def principal(self, image):
+        return reverse('product_photo_cover', args=[self.peca.pk, image.pk])
+
+    def remover(self, image):
+        return reverse('product_photo_delete', args=[self.peca.pk, image.pk])
+
+    def test_edicao_lista_as_fotos_atuais(self):
+        resposta = self.client.get(self.editar())
+        self.assertContains(resposta, 'Fotos já enviadas')
+        self.assertEqual(len(resposta.context['photos']), 3)
+        self.assertContains(resposta, 'Foto do defeito')
+        self.assertContains(resposta, 'Principal')
+
+    def test_cadastro_de_peca_nova_nao_mostra_a_lista(self):
+        resposta = self.client.get(reverse('product_create'))
+        self.assertEqual(resposta.context['photos'], [])
+        self.assertNotContains(resposta, 'Fotos já enviadas')
+
+    def test_sem_escolha_a_principal_e_a_primeira_enviada(self):
+        self.assertEqual(self.peca.cover_image, self.primeira)
+
+    def test_escolher_a_principal_troca_a_capa(self):
+        self.client.post(self.principal(self.segunda))
+        self.segunda.refresh_from_db()
+        self.primeira.refresh_from_db()
+        self.assertTrue(self.segunda.is_cover)
+        self.assertFalse(self.primeira.is_cover)
+        self.assertEqual(Product.objects.get(pk=self.peca.pk).cover_image, self.segunda)
+
+    def test_trocar_a_principal_duas_vezes_deixa_so_uma(self):
+        self.client.post(self.principal(self.segunda))
+        self.client.post(self.principal(self.primeira))
+        self.assertEqual(self.peca.images.filter(is_cover=True).count(), 1)
+        self.assertEqual(Product.objects.get(pk=self.peca.pk).cover_image, self.primeira)
+
+    def test_foto_do_defeito_nao_vira_principal(self):
+        resposta = self.client.post(self.principal(self.defeito), follow=True)
+        self.defeito.refresh_from_db()
+        self.assertFalse(self.defeito.is_cover)
+        self.assertContains(resposta, 'não pode ser a principal')
+
+    def test_remover_tira_a_foto_e_o_arquivo(self):
+        caminho = self.segunda.image.path
+        self.assertTrue(os.path.exists(caminho))
+        resposta = self.client.post(self.remover(self.segunda), follow=True)
+        self.assertFalse(ProductImage.objects.filter(pk=self.segunda.pk).exists())
+        self.assertFalse(os.path.exists(caminho))
+        self.assertContains(resposta, 'Foto removida')
+
+    def test_remover_a_principal_passa_a_capa_para_a_proxima(self):
+        self.client.post(self.principal(self.segunda))
+        self.client.post(self.remover(self.segunda))
+        self.assertEqual(Product.objects.get(pk=self.peca.pk).cover_image, self.primeira)
+
+    def test_foto_do_defeito_nao_pode_ser_removida(self):
+        resposta = self.client.post(self.remover(self.defeito), follow=True)
+        self.assertTrue(ProductImage.objects.filter(pk=self.defeito.pk).exists())
+        self.assertContains(resposta, 'não pode ser removida')
+
+    def test_peca_nunca_fica_sem_foto(self):
+        self.client.post(self.remover(self.primeira))
+        self.client.post(self.remover(self.segunda))
+        self.client.post(self.remover(self.defeito))
+        self.assertEqual(self.peca.images.count(), 1)
+
+    def test_a_lista_nao_mostra_botao_de_remover_na_foto_do_defeito(self):
+        resposta = self.client.get(self.editar())
+        self.assertNotContains(resposta, self.remover(self.defeito))
+        self.assertContains(resposta, self.remover(self.primeira))
+
+    def test_so_o_dono_mexe_nas_fotos(self):
+        intrusa = get_user_model().objects.create_user(
+            'outra@example.com', email='outra@example.com', password='Strong-test-524!')
+        UserProfile.objects.create(user=intrusa, role='seller')
+        self.client.login(username='outra@example.com', password='Strong-test-524!')
+        for url in (self.principal(self.segunda), self.remover(self.segunda)):
+            with self.subTest(url=url):
+                self.assertEqual(self.client.post(url).status_code, 404)
+        self.assertTrue(ProductImage.objects.filter(pk=self.segunda.pk).exists())
+
+    def test_comprador_nao_mexe_nas_fotos(self):
+        compradora = get_user_model().objects.create_user(
+            'cliente@example.com', email='cliente@example.com', password='Strong-test-524!')
+        UserProfile.objects.create(user=compradora, role='buyer')
+        self.client.login(username='cliente@example.com', password='Strong-test-524!')
+        self.assertEqual(self.client.post(self.remover(self.segunda)).status_code, 403)
+
+    def test_visitante_vai_para_o_login(self):
+        self.client.logout()
+        resposta = self.client.post(self.remover(self.segunda))
+        self.assertEqual(resposta.status_code, 302)
+        self.assertIn(reverse('login'), resposta.url)
+
+    def test_as_acoes_so_funcionam_por_post(self):
+        for url in (self.principal(self.segunda), self.remover(self.segunda)):
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 405)
+
+    def test_foto_de_outra_peca_nao_e_alcancada_pela_url(self):
+        outra_peca = criar_peca('Outra peça', seller=self.vendedora)
+        alheia = ProductImage.objects.create(product=outra_peca, image=foto(nome='x.jpg'),
+                                             alt_text='Outra')
+        url = reverse('product_photo_delete', args=[self.peca.pk, alheia.pk])
+        self.assertEqual(self.client.post(url).status_code, 404)
+
+    def test_principal_escolhida_aparece_no_card_da_vitrine(self):
+        self.client.post(self.principal(self.segunda))
+        self.client.logout()
+        resposta = self.client.get(reverse('home'))
+        self.assertContains(resposta, self.segunda.image.url)
+        self.assertNotContains(resposta, self.primeira.image.url)
