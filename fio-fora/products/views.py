@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from accounts.decorators import seller_required
 from cart.services import purchase_summary
@@ -15,7 +16,7 @@ from reviews.services import product_reviews, rating_summary, store_reviews
 from .forms import DiscountSimulationForm, ProductForm
 from .models import (
     FAIXAS_SEVERIDADE, LIMITE_LEVE, LIMITE_MODERADA, PESO_EXTENSAO, PESO_LOCALIZACAO, PESO_TIPO,
-    Category, Defeito, Product, desconto_sugerido,
+    Category, Defeito, Product, ProductImage, desconto_sugerido,
 )
 
 
@@ -255,6 +256,35 @@ def product_delete(request, product_id):
     return render(request, 'products/product_confirm_delete.html', {'product': product})
 
 
+@require_POST
+@seller_required
+def product_photo_cover(request, product_id, image_id):
+    """Escolhe qual foto representa a peça na vitrine."""
+    image = get_object_or_404(ProductImage, pk=image_id, product_id=product_id,
+                              product__seller=request.user)
+    if image.is_defect:
+        messages.error(request, 'A foto do defeito não pode ser a principal da vitrine.')
+    else:
+        image.make_cover()
+        messages.success(request, 'Foto principal atualizada.')
+    return redirect('product_update', product_id=product_id)
+
+
+@require_POST
+@seller_required
+def product_photo_delete(request, product_id, image_id):
+    """Remove uma foto da peça. A foto do defeito só é trocada pelo formulário."""
+    image = get_object_or_404(ProductImage, pk=image_id, product_id=product_id,
+                              product__seller=request.user)
+    if not image.can_be_removed:
+        messages.error(request, 'A foto do defeito não pode ser removida: '
+                                'envie outra no formulário para trocá-la.')
+    else:
+        image.delete()
+        messages.success(request, 'Foto removida.')
+    return redirect('product_update', product_id=product_id)
+
+
 def product_form(request, product, title, success_message):
     """Cadastro e edição usam o mesmo formulário e o mesmo template."""
     form = ProductForm(request.POST if request.method == 'POST' else None,
@@ -263,4 +293,8 @@ def product_form(request, product, title, success_message):
         form.save()
         messages.success(request, success_message)
         return redirect('my_products')
-    return render(request, 'products/product_form.html', {'form': form, 'title': title})
+    return render(request, 'products/product_form.html', {
+        'form': form, 'title': title, 'product': product,
+        # Na edição, as fotos já enviadas são gerenciadas fora do formulário.
+        'photos': list(product.images.all()) if product.pk else [],
+    })

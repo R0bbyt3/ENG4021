@@ -30,4 +30,44 @@
         <p class="field-help">O simulador abre em outra aba para preservar seu cadastro.</p>
     </aside>
 </div>
+
+{% if photos %}
+{% comment %}
+Fica fora do formulário acima porque HTML não permite um formulário dentro de
+outro: cada botão aqui é um POST próprio, que recarrega a página de edição.
+{% endcomment %}
+<section class="panel photo-manager" aria-labelledby="photos-heading">
+    <h2 id="photos-heading">Fotos já enviadas</h2>
+    <p>A principal é a que aparece no card da vitrine. A foto do defeito fica sempre na
+        peça; para trocá-la, envie outra no campo “Foto do defeito” do formulário.</p>
+    <div class="photo-manager-grid">
+        {% for photo in photos %}
+        <figure class="photo-item">
+            <img src="{{ photo.image.url }}" alt="{{ photo.alt_text }}" loading="lazy">
+            <figcaption>
+                {% if photo.is_defect %}
+                <span class="photo-tag photo-tag--defect">Foto do defeito</span>
+                {% elif photo == product.cover_image %}
+                <span class="photo-tag">Principal</span>
+                {% endif %}
+                <div class="photo-item-actions">
+                    {% if not photo.is_defect and photo != product.cover_image %}
+                    <form action="{% url 'product_photo_cover' product.pk photo.pk %}" method="post">
+                        {% csrf_token %}
+                        <button class="button button--secondary" type="submit">Tornar principal</button>
+                    </form>
+                    {% endif %}
+                    {% if photo.can_be_removed %}
+                    <form action="{% url 'product_photo_delete' product.pk photo.pk %}" method="post">
+                        {% csrf_token %}
+                        <button class="button button--danger" type="submit">Remover</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </figcaption>
+        </figure>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}
