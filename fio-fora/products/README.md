@@ -11,6 +11,8 @@ Vitrine, página da peça, cadastro de peças pelo vendedor e simulador de desco
 | `/vitrine/` | Vitrine com filtros combináveis, busca e ordenação | Todos |
 | `/sobre/` | Proposta, critérios, origem dos pesos e caráter acadêmico | Todos |
 | `/termos/` e `/privacidade/` | Termos de uso e política de privacidade | Todos |
+| `/marcas/` | Aba “Marcas”: quem tem peça na vitrine | Todos |
+| `/marcas/<id>/` | Página pública de uma loja ou marca | Todos |
 | `/produtos/<id>/` | Página da peça | Todos |
 | `/simulador/` | Simulador de desconto, com os valores de uma peça em `?tipo=&local=&extensao=&preco=` | Todos |
 | `/minhas-pecas/` | Peças do vendedor logado | Vendedor e marca |
@@ -147,6 +149,26 @@ Exemplo: `/vitrine/?categoria=camisetas&tamanho=M&faixa=moderada&q=linho&ordem=p
   depois ID decrescente. Peças sem desconto contam como 0%.
 - Para manter o cálculo no model sem duplicar a fórmula, a ordenação é feita
   em memória sobre o catálogo filtrado. Esta vitrine não usa paginação.
+
+## Marcas e lojas
+
+`/marcas/` (`store_list`) é a aba **Marcas** do menu: lista, em ordem
+alfabética, quem tem pelo menos uma peça ativa, com cidade e quantidade de
+peças. Loja sem peça na vitrine não aparece — uma lista de lojas vazias não
+ajuda ninguém a comprar.
+
+`/marcas/<id>/` (`store_detail`) é a página pública da loja: nome, cidade,
+nota média da loja (as avaliações de todas as peças dela, vindas do `reviews`)
+e as peças **ativas**, paginadas de 12 em 12. O card “Vendido por” da página
+da peça leva para cá.
+
+- Quem vende sem cadastrar nome de loja aparece pelo próprio nome
+  (`UserProfile.display_name`).
+- Usuário sem perfil não tem página de loja (404).
+
+> **[PRINT]** Aba Marcas com as lojas que têm peças na vitrine.
+
+> **[PRINT]** Página de uma marca com a nota da loja e as peças dela.
 
 ## Perguntas frequentes
 
