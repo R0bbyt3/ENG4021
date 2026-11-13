@@ -175,9 +175,9 @@ da primeira página, porque o resultado é outro.
 ## Marcas e lojas
 
 `/marcas/` (`store_list`) é a aba **Marcas** do menu: lista, em ordem
-alfabética, quem tem pelo menos uma peça ativa, com cidade e quantidade de
-peças. Loja sem peça na vitrine não aparece — uma lista de lojas vazias não
-ajuda ninguém a comprar.
+alfabética do nome mostrado, os vendedores e marcas com pelo menos uma peça
+ativa, com cidade e quantidade de peças. Loja sem peça na vitrine não
+aparece — uma lista de lojas vazias não ajuda ninguém a comprar.
 
 `/marcas/<id>/` (`store_detail`) é a página pública da loja: nome, cidade,
 nota média da loja (as avaliações de todas as peças dela, vindas do `reviews`)

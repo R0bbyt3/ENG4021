@@ -149,10 +149,13 @@ def store_list(request):
     não ajuda ninguém a comprar.
     """
     stores = (get_user_model().objects
-              .filter(products__is_active=True, profile__isnull=False)
+              .filter(products__is_active=True,
+                      profile__role__in=[UserProfile.Role.SELLER, UserProfile.Role.BRAND])
               .annotate(product_count=Count('products', filter=Q(products__is_active=True), distinct=True))
-              .select_related('profile')
-              .order_by('profile__store_name', 'first_name', 'username'))
+              .select_related('profile'))
+    # Ordena pelo nome que aparece na tela: quem não tem nome de loja aparece
+    # pelo próprio nome, então ordenar só por store_name o colocaria no topo.
+    stores = sorted(stores, key=lambda store: store.profile.display_name.lower())
     return render(request, 'products/store_list.html', {'stores': stores})
 
 

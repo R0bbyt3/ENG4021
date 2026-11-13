@@ -998,6 +998,12 @@ class PaginaDaMarcaTests(TestCase):
         self.assertContains(resposta, 'Reuso Carioca')
         self.assertContains(resposta, 'Ateliê Circular')
 
+    def test_aba_ordena_pelo_nome_mostrado_mesmo_sem_nome_de_loja(self):
+        criar_peca('Saia da Marina', seller=loja('marina'))
+        resposta = self.client.get(reverse('store_list'))
+        nomes = [store.profile.display_name for store in resposta.context['stores']]
+        self.assertEqual(nomes, ['Ateliê Circular', 'Marina', 'Reuso Carioca'])
+
     def test_aba_nao_lista_loja_sem_peca_ativa(self):
         criar_peca('Só inativa', seller=self.sem_peca, is_active=False)
         resposta = self.client.get(reverse('store_list'))
