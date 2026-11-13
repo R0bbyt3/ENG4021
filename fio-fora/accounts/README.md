@@ -107,6 +107,21 @@ na hora de mostrar.
 
 Para usar em outro formulário: `phone = PhoneField(required=False)`.
 
+## Regra do comprador e do vendedor
+
+Carrinho, favoritos, checkout, pedidos e avaliações são só de **comprador**.
+Vendedor e marca podem ver as peças, mas não compram nem favoritam:
+
+- As telas escondem o que daria erro: o botão "Adicionar ao carrinho" vira um
+    aviso, o coração de favoritar some e o menu não mostra Carrinho nem Favoritos.
+- Se o vendedor abrir uma dessas páginas pelo endereço, `buyer_required` o leva
+    de volta à vitrine com uma única mensagem (`BUYER_ONLY_MESSAGE`), em vez de
+    uma tela de erro.
+- Já as áreas de vendedor (`seller_required`) continuam respondendo 403 para
+    comprador.
+
+Os testes por tipo de conta ficam em `BuyerOnlyAreasTests`, no `tests.py`.
+
 ## Como proteger uma view
 
 ```python

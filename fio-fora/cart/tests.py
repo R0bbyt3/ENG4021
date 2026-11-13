@@ -91,7 +91,8 @@ class AddToCartTests(CartTestCase):
     def test_cannot_buy_own_piece(self):
         self.client.force_login(self.seller)
         # Vendedor nem entra: o carrinho é de comprador.
-        self.assertEqual(self.add(self.shirt).status_code, 403)
+        self.assertRedirects(self.add(self.shirt), reverse('home'))
+        self.assertEqual(CartItem.objects.count(), 0)
         staff = get_user_model().objects.create_user('staff@example.com', is_staff=True)
         own = Product.objects.create(name='Peça da equipe', description='x', price=Decimal('10'), stock=1, seller=staff)
         self.client.force_login(staff)

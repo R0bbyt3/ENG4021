@@ -1,7 +1,12 @@
-{% comment %}Botão "Adicionar ao carrinho" da peça (vitrine e página da peça).{% endcomment %}
+{% comment %}
+Botão "Adicionar ao carrinho" da peça (vitrine e página da peça).
+Só o comprador vê o botão; vendedor e marca veem o aviso no lugar dele.
+{% endcomment %}
 <div class="cart-add">
     {% if product.stock < 1 %}
     <p class="stock-out">Peça esgotada</p>
+    {% elif user.is_authenticated and not is_buyer %}
+    <p class="field-help">Contas de vendedor e de marca não compram peças. Para comprar, entre com uma conta de comprador.</p>
     {% elif user.is_authenticated %}
     <form method="post" action="{% url 'cart_add' product.id %}">
         {% csrf_token %}

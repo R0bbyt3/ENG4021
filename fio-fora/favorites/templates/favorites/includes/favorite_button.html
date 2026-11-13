@@ -1,8 +1,9 @@
 {% comment %}
 Botão de favoritar/desfavoritar. Espera product e is_favorite; volta para a página atual.
 Com compact=True vira só o coração (usado sobre a foto do card).
+Só aparece para comprador: vendedor e marca não favoritam.
 {% endcomment %}
-{% if user.is_authenticated %}
+{% if is_buyer %}
 <form action="{% if is_favorite %}{% url 'favorite_remove' product.id %}{% else %}{% url 'favorite_add' product.id %}{% endif %}" method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ request.get_full_path }}">

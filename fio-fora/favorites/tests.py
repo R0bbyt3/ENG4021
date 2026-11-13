@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from accounts.models import UserProfile
 from products.models import Product
 
 from .models import Favorite
@@ -14,6 +15,9 @@ class FavoritosTests(TestCase):
         User = get_user_model()
         self.user = User.objects.create_user('ana@example.com', email='ana@example.com', password='Strong-test-524!')
         self.other = User.objects.create_user('bia@example.com', email='bia@example.com', password='Strong-test-524!')
+        # Favoritar é coisa de comprador.
+        UserProfile.objects.create(user=self.user, role='buyer')
+        UserProfile.objects.create(user=self.other, role='buyer')
         self.product = Product.objects.create(name='Vestido', description='Mancha na barra',
                                               price=Decimal('80'), original_price=Decimal('100'))
         self.inactive = Product.objects.create(name='Saia', description='Fio puxado',

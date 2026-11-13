@@ -70,8 +70,8 @@ retorna 404.
     indisponível (botão desabilitado).
 - **Endereço e frete**: obrigatoriedade de cada campo, CEP inválido, frete e
     total calculados no servidor, endereço do perfil e cópia no pedido.
-- **Acesso**: visitante vai para o login, vendedor recebe 403, e o pedido de
-    outra pessoa dá 404.
+- **Acesso**: visitante vai para o login, vendedor volta para a vitrine com
+    uma mensagem, e o pedido de outra pessoa dá 404.
 - **E-mail de confirmação** com endereço e frete.
 
 ## Arquivos principais

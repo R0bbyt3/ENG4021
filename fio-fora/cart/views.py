@@ -1,12 +1,11 @@
 """Carrinho do comprador.
 
 Regras principais:
-- só o comprador autenticado mexe no próprio carrinho (itens de outros usuários dão 404);
+- só contas de comprador usam o carrinho, e cada uma mexe só no próprio (itens de outros usuários dão 404);
 - disponibilidade (peça ativa) e estoque são validados no servidor a cada ação;
 - preços, subtotais e total vêm sempre do banco: o navegador envia apenas a quantidade.
 """
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -18,7 +17,7 @@ from .models import Cart, CartItem
 from .services import MAX_QUANTITY, build_cart_summary, parse_quantity, unavailable_reason
 
 
-@login_required
+@buyer_required
 def cart_page(request):
     return render(request, 'cart/cart.html', build_cart_summary(request.user))
 
@@ -55,7 +54,7 @@ def cart_add(request, product_id):
 
 
 @require_POST
-@login_required
+@buyer_required
 def cart_update_item(request, item_id):
     quantity = parse_quantity(request.POST.get('quantity'))
     with transaction.atomic():
@@ -77,7 +76,7 @@ def cart_update_item(request, item_id):
 
 
 @require_POST
-@login_required
+@buyer_required
 def cart_remove_item(request, item_id):
     with transaction.atomic():
         Cart.objects.select_for_update().filter(user=request.user).first()

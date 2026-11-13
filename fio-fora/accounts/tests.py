@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timedelta
+from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -11,6 +12,11 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from cart.models import Cart, CartItem
+from favorites.models import Favorite
+from products.models import Product
+
+from .decorators import BUYER_ONLY_MESSAGE
 from .fields import CEPField, CNPJField, CPFField, PhoneField, SocialField, split_location
 from .models import UserProfile
 
@@ -384,3 +390,88 @@ class AccountAddressTests(TestCase):
         data = {'name': 'Loja', 'email': 'loja@example.com', 'phone': '', 'store_name': 'Loja', 'city': '', 'state': ''}
         self.assertRedirects(self.client.post(reverse('account'), data), reverse('account'))
         self.assertEqual(UserProfile.objects.get(user=seller).address_street, 'Rua Antiga')
+
+
+class BuyerOnlyAreasTests(TestCase):
+    """Regra única: carrinho, favoritos, checkout e pedidos são só do comprador."""
+
+    @classmethod
+    def setUpTestData(cls):
+        User = get_user_model()
+        cls.buyer = User.objects.create_user('comprador@example.com')
+        UserProfile.objects.create(user=cls.buyer, role='buyer')
+        cls.seller = User.objects.create_user('vendedor@example.com')
+        UserProfile.objects.create(user=cls.seller, role='seller')
+        cls.brand = User.objects.create_user('marca@example.com')
+        UserProfile.objects.create(user=cls.brand, role='brand')
+        cls.product = Product.objects.create(name='Vestido', description='Mancha na barra',
+                                             price=Decimal('80'), original_price=Decimal('100'),
+                                             stock=2, seller=cls.brand)
+        cls.url = reverse('product_detail', args=[cls.product.pk])
+
+    def buyer_areas(self, user):
+        """Cada área de comprador, com o método usado para chegar nela."""
+        item = CartItem.objects.create(cart=Cart.objects.get_or_create(user=user)[0], product=self.product)
+        return [
+            ('get', reverse('cart')),
+            ('post', reverse('cart_add', args=[self.product.pk])),
+            ('post', reverse('cart_update_item', args=[item.pk])),
+            ('post', reverse('cart_remove_item', args=[item.pk])),
+            ('get', reverse('favorites')),
+            ('post', reverse('favorite_add', args=[self.product.pk])),
+            ('post', reverse('favorite_remove', args=[self.product.pk])),
+            ('get', reverse('checkout')),
+            ('get', reverse('order_list')),
+        ]
+
+    def test_seller_and_brand_go_back_to_the_showcase_with_the_same_message(self):
+        for user in [self.seller, self.brand]:
+            self.client.force_login(user)
+            for method, url in self.buyer_areas(user):
+                with self.subTest(role=user.profile.role, url=url):
+                    response = getattr(self.client, method)(url, {'quantity': '1'}, follow=True)
+                    self.assertRedirects(response, reverse('home'))
+                    self.assertContains(response, BUYER_ONLY_MESSAGE)
+            # Nada foi gravado: o item de teste continua com quantidade 1 e não há favorito.
+            self.assertEqual(CartItem.objects.get(cart__user=user).quantity, 1)
+        self.assertEqual(Favorite.objects.count(), 0)
+
+    def test_buyer_still_uses_every_area(self):
+        self.client.force_login(self.buyer)
+        for method, url in self.buyer_areas(self.buyer):
+            with self.subTest(url=url):
+                response = getattr(self.client, method)(url, {'quantity': '1'})
+                if response.status_code == 302:
+                    self.assertNotEqual(response['Location'], reverse('home'))
+                else:
+                    self.assertEqual(response.status_code, 200)
+
+    def test_product_page_shows_no_button_that_fails_for_sellers(self):
+        for user in [self.seller, self.brand]:
+            self.client.force_login(user)
+            with self.subTest(role=user.profile.role):
+                response = self.client.get(self.url)
+                self.assertNotContains(response, reverse('cart_add', args=[self.product.pk]))
+                self.assertNotContains(response, reverse('favorite_add', args=[self.product.pk]))
+                self.assertContains(response, 'Contas de vendedor e de marca não compram peças')
+
+    def test_product_page_keeps_the_buttons_for_buyers(self):
+        self.client.force_login(self.buyer)
+        response = self.client.get(self.url)
+        self.assertContains(response, reverse('cart_add', args=[self.product.pk]))
+        self.assertContains(response, reverse('favorite_add', args=[self.product.pk]))
+        self.assertNotContains(response, 'Contas de vendedor e de marca não compram peças')
+
+    def test_header_shows_cart_and_favorites_only_to_buyers(self):
+        self.client.force_login(self.seller)
+        response = self.client.get(reverse('home'))
+        self.assertNotContains(response, f'href="{reverse("cart")}"')
+        self.assertNotContains(response, f'href="{reverse("favorites")}"')
+        self.client.force_login(self.buyer)
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, f'href="{reverse("cart")}"')
+        self.assertContains(response, f'href="{reverse("favorites")}"')
+
+    def test_seller_areas_still_answer_403_to_buyers(self):
+        self.client.force_login(self.buyer)
+        self.assertEqual(self.client.get(reverse('my_products')).status_code, 403)
