@@ -176,7 +176,7 @@ mostra sem usuário logado nem mensagens. Ambas levam de volta à vitrine.
 
 > **[PRINT]** Página 404 aberta com `DEBUG = False` (e `ALLOWED_HOSTS = ['*']`).
 
-> **[PRINT]** Cabeçalho do site logado como vendedor, mostrando os links "Minhas peças" e "Cadastrar peça".
+> **[PRINT]** Cabeçalho do site logado como vendedor, mostrando os links "Minhas peças", "Minhas vendas" e "Cadastrar peça" (sem Carrinho e Favoritos).
 
 ---
 
@@ -195,8 +195,8 @@ mostra sem usuário logado nem mensagens. Ambas levam de volta à vitrine.
 
 | Tipo | Pode |
 |---|---|
-| Comprador | Comprar (carrinho, checkout, pedidos) e favoritar |
-| Vendedor / Marca | Cadastrar, editar e remover as próprias peças |
+| Comprador | Comprar (carrinho, checkout, pedidos), cancelar pedido ainda não enviado, avaliar o que comprou e favoritar |
+| Vendedor / Marca | Cadastrar, editar e remover as próprias peças e acompanhar as vendas delas (Minhas vendas). Não compra nem favorita |
 | Equipe (staff) | Tudo acima, além do Admin e da lista de usuários |
 
 ---
