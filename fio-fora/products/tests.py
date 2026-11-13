@@ -18,6 +18,7 @@ from accounts.models import UserProfile
 from cart.models import Cart, CartItem
 from favorites.models import Favorite
 from orders.models import Order, OrderItem
+from reviews.models import Review
 
 from . import services
 from .forms import DiscountSimulationForm, ProductForm
@@ -960,3 +961,86 @@ class SimuladorLigadoAPecaTests(TestCase):
             'original_price': '200.00', 'defect_type': '2', 'defect_location': '3', 'defect_extent': '1',
         })
         self.assertEqual(response.context['result']['severity'], Decimal('2.15'))
+
+
+def loja(username, store_name='', role=UserProfile.Role.SELLER, **campos):
+    """Vendedor ou marca com perfil, do jeito que a página pública espera."""
+    user = get_user_model().objects.create_user(username, first_name=username.capitalize())
+    UserProfile.objects.create(user=user, role=role, store_name=store_name, **campos)
+    return user
+
+
+class PaginaDaMarcaTests(TestCase):
+    """Aba “Marcas” e página pública de uma loja."""
+
+    def setUp(self):
+        self.marca = loja('reuso', 'Reuso Carioca', role=UserProfile.Role.BRAND,
+                          location='Rio de Janeiro, RJ')
+        self.outra = loja('circular', 'Ateliê Circular')
+        self.sem_peca = loja('parada', 'Loja Parada')
+        self.vestido = criar_peca('Vestido da marca', seller=self.marca)
+        self.inativa = criar_peca('Peça fora da vitrine', seller=self.marca, is_active=False)
+        self.alheia = criar_peca('Calça da outra', seller=self.outra)
+
+    def test_aba_lista_quem_tem_peca_na_vitrine(self):
+        resposta = self.client.get(reverse('store_list'))
+        self.assertContains(resposta, 'Reuso Carioca')
+        self.assertContains(resposta, 'Ateliê Circular')
+
+    def test_aba_nao_lista_loja_sem_peca_ativa(self):
+        criar_peca('Só inativa', seller=self.sem_peca, is_active=False)
+        resposta = self.client.get(reverse('store_list'))
+        self.assertNotContains(resposta, 'Loja Parada')
+
+    def test_aba_conta_so_as_pecas_ativas(self):
+        resposta = self.client.get(reverse('store_list'))
+        contagem = {store.pk: store.product_count for store in resposta.context['stores']}
+        self.assertEqual(contagem[self.marca.pk], 1)  # a inativa não entra
+
+    def test_pagina_mostra_so_as_pecas_ativas_da_loja(self):
+        resposta = self.client.get(reverse('store_detail', args=[self.marca.pk]))
+        self.assertContains(resposta, 'Vestido da marca')
+        self.assertNotContains(resposta, 'Peça fora da vitrine')
+        self.assertNotContains(resposta, 'Calça da outra')
+
+    def test_pagina_mostra_o_nome_e_a_cidade_da_marca(self):
+        resposta = self.client.get(reverse('store_detail', args=[self.marca.pk]))
+        self.assertContains(resposta, 'Reuso Carioca')
+        self.assertContains(resposta, 'Rio de Janeiro, RJ')
+
+    def test_pagina_de_loja_sem_peca_explica_em_vez_de_ficar_vazia(self):
+        resposta = self.client.get(reverse('store_detail', args=[self.sem_peca.pk]))
+        self.assertContains(resposta, 'não tem peças na vitrine')
+
+    def test_vendedor_sem_nome_de_loja_aparece_pelo_proprio_nome(self):
+        anonimo = loja('marina')
+        criar_peca('Saia da Marina', seller=anonimo)
+        resposta = self.client.get(reverse('store_detail', args=[anonimo.pk]))
+        self.assertContains(resposta, 'Marina')
+
+    def test_usuario_sem_perfil_nao_tem_pagina_de_loja(self):
+        comum = get_user_model().objects.create_user('sem_perfil')
+        self.assertEqual(self.client.get(reverse('store_detail', args=[comum.pk])).status_code, 404)
+
+    def test_pagina_da_peca_linka_para_a_marca(self):
+        resposta = self.client.get(reverse('product_detail', args=[self.vestido.pk]))
+        self.assertContains(resposta, reverse('store_detail', args=[self.marca.pk]))
+
+    def test_menu_tem_a_aba_marcas(self):
+        self.assertContains(self.client.get(reverse('home')), reverse('store_list'))
+
+    def test_nota_da_loja_aparece_quando_ha_avaliacao(self):
+        comprador = get_user_model().objects.create_user('cliente', first_name='Cliente')
+        pedido = Order.objects.create(user=comprador, reference='FF-MARCA-001')
+        item = OrderItem.objects.create(order=pedido, product=self.vestido,
+                                        product_name=self.vestido.name,
+                                        unit_price=self.vestido.price, quantity=1)
+        Review.objects.create(order_item=item, user=comprador, rating=4, comment='Chegou bem.')
+
+        resposta = self.client.get(reverse('store_detail', args=[self.marca.pk]))
+        self.assertContains(resposta, '4,0')
+        self.assertNotContains(resposta, 'Loja ainda sem avaliações')
+
+    def test_loja_sem_avaliacao_diz_que_nao_tem(self):
+        resposta = self.client.get(reverse('store_detail', args=[self.marca.pk]))
+        self.assertContains(resposta, 'Loja ainda sem avaliações')

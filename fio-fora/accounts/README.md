@@ -30,6 +30,8 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 - Endereço de entrega padrão do comprador: `address_cep`, `address_street`,
     `address_number`, `address_complement`, `address_district`, `address_location`
     (cidade e estado juntos, como em `location`).
+- `display_name`: nome público da loja ou marca, usado pela página da marca.
+    Quem vende sem nome de loja aparece pelo próprio nome.
 
 ## Arquivos principais
 
