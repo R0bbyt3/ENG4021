@@ -1,10 +1,16 @@
 """Regras do carrinho, usadas também pelo checkout (orders)."""
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from .models import Cart
 
 MAX_QUANTITY = 99
 CENTS = Decimal('0.01')
+
+# Frete simples e fixo por pedido (projeto acadêmico: não há transportadora).
+SHIPPING_COST = Decimal('19.90')
+# Parcelamento sem juros: até 6 vezes, com parcela mínima de R$ 30,00.
+MAX_INSTALLMENTS = 6
+MIN_INSTALLMENT = Decimal('30.00')
 
 
 def parse_quantity(raw):
@@ -26,6 +32,31 @@ def unavailable_reason(product, quantity):
         unit = 'unidade' if product.stock == 1 else 'unidades'
         return f'Só há {product.stock} {unit} em estoque.'
     return None
+
+
+def shipping_for(subtotal):
+    """Frete de um pedido com esse subtotal. Sem peças, não há o que enviar."""
+    return SHIPPING_COST if subtotal > 0 else Decimal('0.00')
+
+
+def max_installments(total):
+    """Em quantas vezes dá para parcelar `total` (no mínimo 1, no máximo MAX_INSTALLMENTS)."""
+    return max(1, min(MAX_INSTALLMENTS, int(total // MIN_INSTALLMENT)))
+
+
+def purchase_summary(subtotal):
+    """Subtotal, frete, total e parcelamento. Só o servidor calcula: o navegador nunca envia valores."""
+    subtotal = Decimal(subtotal).quantize(CENTS)
+    shipping = shipping_for(subtotal)
+    total = subtotal + shipping
+    installments = max_installments(total)
+    return {
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'total': total,
+        'installments': installments,
+        'installment_value': (total / installments).quantize(CENTS, rounding=ROUND_HALF_UP),
+    }
 
 
 def build_cart_summary(user):
@@ -55,4 +86,5 @@ def build_cart_summary(user):
         'total': total,
         'pieces': pieces,
         'has_unavailable': any(line['problem'] for line in lines),
+        'payment': purchase_summary(total),
     }

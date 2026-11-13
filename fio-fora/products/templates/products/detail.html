@@ -46,6 +46,7 @@
         </section>
 
         {% include 'products/includes/price.html' %}
+        {% include 'cart/includes/payment_info.html' %}
         {% if product.discount_percent and product.defeito %}<p class="field-help">O desconto é calculado a partir da gravidade do defeito.</p>{% endif %}
 
         <dl class="product-specs">

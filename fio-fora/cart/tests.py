@@ -8,6 +8,7 @@ from accounts.models import UserProfile
 from products.models import Product
 
 from .models import Cart, CartItem
+from .services import MAX_INSTALLMENTS, SHIPPING_COST, max_installments, purchase_summary
 
 
 class CartTestCase(TestCase):
@@ -217,3 +218,50 @@ class CartPageTests(CartTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Entrar para comprar')
         self.assertNotContains(response, reverse('cart_add', args=[self.shirt.pk]))
+
+
+class ShippingAndInstallmentsTests(CartTestCase):
+    def test_shipping_is_fixed_and_added_to_the_total(self):
+        summary = purchase_summary(Decimal('85.00'))
+        self.assertEqual(summary['shipping'], SHIPPING_COST)
+        self.assertEqual(summary['total'], Decimal('104.90'))
+        self.assertEqual(purchase_summary(Decimal('500.00'))['shipping'], SHIPPING_COST)
+
+    def test_no_pieces_means_no_shipping(self):
+        summary = purchase_summary(Decimal('0.00'))
+        self.assertEqual(summary['shipping'], Decimal('0.00'))
+        self.assertEqual(summary['total'], Decimal('0.00'))
+
+    def test_installments_respect_the_minimum_and_the_maximum(self):
+        for total, expected in [('10.00', 1), ('29.99', 1), ('30.00', 1), ('60.00', 2), ('89.99', 2),
+                                ('119.90', 3), ('180.00', 6), ('5000.00', MAX_INSTALLMENTS)]:
+            with self.subTest(total=total):
+                self.assertEqual(max_installments(Decimal(total)), expected)
+
+    def test_installment_value_is_the_total_divided_without_interest(self):
+        summary = purchase_summary(Decimal('85.00'))  # total 104,90 em 3x
+        self.assertEqual(summary['installments'], 3)
+        self.assertEqual(summary['installment_value'], Decimal('34.97'))
+
+    def test_cart_shows_shipping_total_and_installments(self):
+        self.client.force_login(self.buyer)
+        self.add(self.shirt)
+        response = self.client.get(reverse('cart'))
+        self.assertEqual(response.context['payment']['total'], Decimal('104.90'))
+        self.assertContains(response, 'R$ 19,90')
+        self.assertContains(response, 'R$ 104,90')
+        self.assertContains(response, 'Em até <strong>3x de R$ 34,97</strong> sem juros', html=True)
+
+    def test_unavailable_items_do_not_count_for_shipping_or_total(self):
+        self.client.force_login(self.buyer)
+        self.add(self.jeans)
+        Product.objects.filter(pk=self.jeans.pk).update(is_active=False)
+        payment = self.client.get(reverse('cart')).context['payment']
+        self.assertEqual(payment['shipping'], Decimal('0.00'))
+        self.assertEqual(payment['total'], Decimal('0.00'))
+
+    def test_product_page_shows_shipping_and_installments(self):
+        response = self.client.get(reverse('product_detail', args=[self.shirt.pk]))
+        self.assertContains(response, 'Frete fixo de')
+        self.assertContains(response, 'R$ 19,90')
+        self.assertContains(response, '3x de R$ 34,97')
