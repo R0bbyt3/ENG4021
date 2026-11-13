@@ -31,7 +31,7 @@
         {% if order.next_sale_status %}
         <form class="order-actions" action="{% url 'sale_status_update' order.pk %}" method="post">
             {% csrf_token %}
-            <button class="button" type="submit" name="status" value="{{ order.next_sale_status }}">Marcar como {{ order.next_sale_status.label|lower }}</button>
+            <button class="button" type="submit" name="status" value="{{ order.next_sale_status }}">{{ order.next_sale_action }}</button>
         </form>
         {% endif %}
     </article>

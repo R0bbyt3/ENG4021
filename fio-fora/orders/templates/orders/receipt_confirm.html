@@ -1,0 +1,19 @@
+{% extends 'orders/base.html' %}
+
+{% block title %}Confirmar recebimento | FioFora{% endblock %}
+
+{% block content %}
+<section class="panel panel--narrow">
+    <h1>Você recebeu as peças?</h1>
+    <p>Do pedido <strong>{{ order.reference }}</strong>, enviadas pela mesma loja:</p>
+    <ul>
+        {% for item in items %}<li>{{ item.product_name }}</li>{% endfor %}
+    </ul>
+    <p class="order-notice"><strong>Depois de confirmar não dá para voltar atrás.</strong> As peças ficam como entregues e o pedido não pode mais ser cancelado.</p>
+    <form method="post" class="form-actions">
+        {% csrf_token %}
+        <button class="button" type="submit">Sim, recebi</button>
+        <a href="{% url 'order_detail' order.pk %}">Voltar ao pedido</a>
+    </form>
+</section>
+{% endblock %}

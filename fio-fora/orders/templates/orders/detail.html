@@ -27,6 +27,10 @@
             <h3>{{ item.product_name }}</h3>
             <p>Status da peça: {{ item.sale_status.label }}</p>
             <p>{{ item.quantity }} unidade{{ item.quantity|pluralize:'s' }} · R$ {{ item.unit_price|floatformat:2 }} cada</p>
+            {# Depois do envio, o comprador pode confirmar que recebeu (abre a tela de confirmação). #}
+            {% if item.sale_status == 'shipped' and item.product.seller_id %}
+            <a class="button button--secondary" href="{% url 'order_receipt' order.pk item.product.seller_id %}">Recebi a peça</a>
+            {% endif %}
         </div>
         <strong class="order-price">R$ {{ item.subtotal|floatformat:2 }}</strong>
     </article>

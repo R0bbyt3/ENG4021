@@ -12,6 +12,7 @@ Finalização da compra (simulada) e histórico de pedidos.
 | `/pedidos/` | Histórico de pedidos do comprador |
 | `/pedidos/<id>/` | Detalhe de um pedido |
 | `/pedidos/<id>/cancelar/` | Ação POST para cancelar um pedido próprio ainda não enviado |
+| `/pedidos/<id>/recebi/<id da loja>/` | “Recebi a peça”: confirmação (GET) e gravação (POST) do recebimento das peças de uma loja |
 | `/minhas-vendas/` | Painel de pedidos com peças do vendedor ou da marca logada |
 
 Checkout e histórico são áreas do comprador. Cada vendedor ou marca vê apenas
@@ -53,12 +54,31 @@ retorna 404.
     e-mail da recuperação de senha: por padrão aparece no terminal do servidor.
 - O histórico do comprador conserva o nome e o preço mesmo se a peça for
     alterada ou apagada. O painel do vendedor usa o vínculo com a peça cadastrada.
-- O vendedor pode avançar os status das próprias peças na ordem: pendente,
-    pago, enviado e entregue. Em pedidos de várias lojas, o status geral indica
-    a etapa alcançada por todas; o comprador também vê o status de cada item.
+- O vendedor avança os status das próprias peças, um passo por vez e sem
+    voltar atrás:
+
+| Status | Botão do vendedor para chegar nele |
+|---|---|
+| Pendente | (é o status da compra) |
+| Pago | Confirmar pagamento |
+| Enviado | Marcar como enviado |
+| Entregue | Confirmar entrega |
+
+- Em pedidos de várias lojas, cada loja anda separada e o status geral é a
+    etapa mais atrasada entre as peças (`refresh_order_status()`); o comprador
+    vê o status de cada item.
+- **Recebi a peça:** depois que uma loja marca as peças como enviadas, o
+    comprador pode confirmar que recebeu. O primeiro clique abre uma tela com
+    as peças e o aviso de que não dá para voltar atrás; só o “Sim, recebi”
+    (POST) grava. Vale para todas as peças daquela loja no pedido, como o botão
+    do vendedor. Só o dono do pedido confirma (os outros recebem 404).
+- **Avisos ao comprador:** cada mudança de status feita pelo vendedor avisa o
+    comprador no sininho, com link para o pedido. A entrega avisa que já dá
+    para avaliar. Quando o comprador confirma o recebimento, a loja é avisada.
 - O comprador pode cancelar um pedido próprio pendente ou pago até o
-    primeiro envio. O pedido fica cancelado e as peças ainda cadastradas
-    voltam ao estoque uma única vez, na mesma transação.
+    primeiro envio. Depois que qualquer loja envia, a opção de cancelar some
+    da tela e o servidor recusa o cancelamento. O pedido cancelado devolve ao
+    estoque as peças ainda cadastradas uma única vez, na mesma transação.
 - **Aviso ao vendedor:** a compra e o cancelamento criam um aviso no sininho
     de cada vendedor ou marca do pedido (um por pedido, mesmo com várias
     peças), levando para Minhas vendas. O aviso entra na mesma transação: se a
@@ -77,14 +97,19 @@ retorna 404.
 - **Acesso**: visitante vai para o login, vendedor volta para a vitrine com
     uma mensagem, e o pedido de outra pessoa dá 404.
 - **E-mail de confirmação** com endereço e frete.
+- **Aviso ao vendedor**: venda nova e cancelamento chegam só às lojas do pedido.
+- **Andamento**: botões do vendedor, avisos ao comprador, “Recebi a peça” só
+    depois do envio, só pelo dono, uma vez só, e a opção de cancelar sumindo
+    depois do envio.
 
 ## Arquivos principais
 
 | Arquivo | O que tem |
 |---|---|
 | `forms.py` | `CheckoutAddressForm`: endereço de entrega do checkout |
-| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação; `advance_sale()`: avança os itens do vendedor; `cancel_order()`: cancela e repõe o estoque; `items_by_seller()`: agrupa os itens por loja para os avisos |
-| `views.py` | Checkout, lista e detalhe dos pedidos e painel de vendas |
+| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação; `advance_sale()`: avança os itens do vendedor e avisa o comprador; `confirm_receipt()`: “Recebi a peça”; `cancel_order()`: cancela e repõe o estoque; `items_by_seller()`: agrupa os itens por loja para os avisos |
+| `views.py` | Checkout, lista e detalhe dos pedidos, “Recebi a peça” e painel de vendas |
+| `templates/orders/receipt_confirm.html` | Tela de confirmação do “Recebi a peça”, com o aviso de que não tem volta |
 | `templates/orders/email/` | Assunto, texto e versão HTML do e-mail de confirmação |
 
 > **[PRINT]** Página de detalhe de um pedido confirmado.

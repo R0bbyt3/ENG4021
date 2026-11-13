@@ -198,14 +198,14 @@ Todas levam de volta à vitrine.
 | `cart` | Carrinho do comprador, com validação de estoque | [cart/README.md](cart/README.md) |
 | `orders` | Checkout simulado e histórico de pedidos | [orders/README.md](orders/README.md) |
 | `favorites` | Peças favoritas do usuário | [favorites/README.md](favorites/README.md) |
-| `notifications` | Avisos do sininho: venda nova e pedido cancelado para o vendedor | [notifications/README.md](notifications/README.md) |
+| `notifications` | Avisos do sininho: vendas e cancelamentos para o vendedor, andamento do pedido para o comprador | [notifications/README.md](notifications/README.md) |
 | `seed` | Contas, peças com fotos, pedidos, avaliações e avisos de exemplo (`popular_banco`) | [seed/README.md](seed/README.md) |
 
 ### Tipos de conta
 
 | Tipo | Pode |
 |---|---|
-| Comprador | Comprar (carrinho, checkout, pedidos), cancelar pedido ainda não enviado, avaliar o que comprou e favoritar |
+| Comprador | Comprar (carrinho, checkout, pedidos), cancelar pedido ainda não enviado, confirmar que recebeu, avaliar o que comprou e favoritar |
 | Vendedor / Marca | Cadastrar, editar e remover as próprias peças e acompanhar as vendas delas (Minhas vendas). Não compra nem favorita |
 | Equipe (staff) | Tudo acima, além do Admin e da lista de usuários |
 

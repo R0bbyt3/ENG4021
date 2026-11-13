@@ -728,3 +728,119 @@ class SellerNoticeTests(CheckoutTestCase):
         self.buy()
         self.client.force_login(self.seller)
         self.assertContains(self.client.get('/vitrine/'), 'class="nav-badge"')
+
+
+class OrderProgressTests(CheckoutTestCase):
+    """Andamento do pedido: botões do vendedor, “Recebi a peça” e avisos ao comprador."""
+
+    def setUp(self):
+        super().setUp()
+        from accounts.models import UserProfile
+        self.other_seller = get_user_model().objects.create_user('outra-loja-andamento', 'b@example.com')
+        UserProfile.objects.create(user=self.other_seller, role='seller')
+        self.skirt = Product.objects.create(seller=self.other_seller, name='Saia midi', description='Fio puxado.',
+                                            original_price=Decimal('90.00'), price=Decimal('70.00'), stock=3)
+        self.put_in_cart(self.dress)
+        self.put_in_cart(self.skirt)
+        self.buy()
+        self.order = Order.objects.get()
+        self.receipt_url = f'/pedidos/{self.order.pk}/recebi/{self.seller.pk}/'
+
+    def advance(self, status, seller=None):
+        self.client.force_login(seller or self.seller)
+        response = self.client.post(f'/minhas-vendas/{self.order.pk}/status/', {'status': status})
+        self.client.force_login(self.buyer)
+        return response
+
+    def status_of(self, product):
+        return OrderItem.objects.get(order=self.order, product=product).sale_status
+
+    def buyer_notices(self):
+        return list(Notification.objects.filter(user=self.buyer).values_list('text', flat=True))
+
+    def test_seller_buttons_follow_the_steps(self):
+        self.client.force_login(self.seller)
+        self.assertContains(self.client.get('/minhas-vendas/'), 'Confirmar pagamento')
+        self.advance('paid')
+        self.client.force_login(self.seller)
+        self.assertContains(self.client.get('/minhas-vendas/'), 'Marcar como enviado')
+        self.advance('shipped')
+        self.client.force_login(self.seller)
+        self.assertContains(self.client.get('/minhas-vendas/'), 'Confirmar entrega')
+
+    def test_each_step_notifies_the_buyer_with_a_link_to_the_order(self):
+        self.advance('paid')
+        self.advance('shipped')
+        self.advance('delivered')
+        ref = self.order.reference
+        self.assertEqual(self.buyer_notices(), [
+            f'Pedido {ref}: Vestido floral com status “Pago”.',
+            f'Pedido {ref}: Vestido floral com status “Enviado”.',
+            f'Pedido {ref}: Vestido floral com status “Entregue”. Já dá para avaliar.',
+        ])
+        urls = set(Notification.objects.filter(user=self.buyer).values_list('url', flat=True))
+        self.assertEqual(urls, {f'/pedidos/{self.order.pk}/'})
+
+    def test_receipt_button_appears_only_after_shipping(self):
+        detail = f'/pedidos/{self.order.pk}/'
+        self.advance('paid')
+        self.assertNotContains(self.client.get(detail), 'Recebi a peça')
+        self.advance('shipped')
+        self.assertContains(self.client.get(detail), self.receipt_url)
+
+    def test_first_click_only_asks_for_confirmation(self):
+        self.advance('paid')
+        self.advance('shipped')
+        response = self.client.get(self.receipt_url)
+        self.assertContains(response, 'Depois de confirmar não dá para voltar atrás')
+        self.assertContains(response, 'Vestido floral')
+        self.assertNotContains(response, 'Saia midi')  # é de outra loja
+        self.assertEqual(self.status_of(self.dress), Order.Status.SHIPPED)
+
+    def test_confirming_delivers_the_pieces_of_that_store_and_notifies_it(self):
+        self.advance('paid')
+        self.advance('shipped')
+        response = self.client.post(self.receipt_url, follow=True)
+        self.assertContains(response, 'Recebimento confirmado')
+        self.assertEqual(self.status_of(self.dress), Order.Status.DELIVERED)
+        self.assertEqual(self.status_of(self.skirt), Order.Status.PENDING)  # a outra loja não muda
+        self.assertIn(f'comprador confirmou que recebeu Vestido floral do pedido {self.order.reference}.',
+                      Notification.objects.filter(user=self.seller).values_list('text', flat=True))
+
+    def test_whole_order_is_delivered_when_every_store_delivered(self):
+        for seller in [self.seller, self.other_seller]:
+            for status in ['paid', 'shipped']:
+                self.advance(status, seller)
+        self.client.post(self.receipt_url)
+        self.advance('delivered', self.other_seller)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.Status.DELIVERED)
+
+    def test_cannot_confirm_what_was_not_shipped_or_twice(self):
+        response = self.client.post(self.receipt_url, follow=True)
+        self.assertContains(response, 'Não há peças enviadas desta loja')
+        self.assertEqual(self.status_of(self.dress), Order.Status.PENDING)
+        self.advance('paid')
+        self.advance('shipped')
+        self.client.post(self.receipt_url)
+        self.client.post(self.receipt_url)
+        self.assertEqual(Notification.objects.filter(user=self.seller, text__contains='recebeu').count(), 1)
+
+    def test_only_the_buyer_of_the_order_can_confirm(self):
+        self.advance('paid')
+        self.advance('shipped')
+        self.client.force_login(self.other_buyer)
+        self.assertEqual(self.client.post(self.receipt_url).status_code, 404)
+        self.client.force_login(self.seller)
+        self.assertRedirects(self.client.post(self.receipt_url), '/vitrine/')
+        self.assertEqual(self.status_of(self.dress), Order.Status.SHIPPED)
+
+    def test_cancel_option_disappears_after_shipping(self):
+        detail = f'/pedidos/{self.order.pk}/'
+        self.assertContains(self.client.get(detail), 'Confirmar cancelamento')
+        self.advance('paid')
+        self.advance('shipped')
+        self.assertNotContains(self.client.get(detail), 'Confirmar cancelamento')
+        self.client.post(f'/pedidos/{self.order.pk}/cancelar/')
+        self.order.refresh_from_db()
+        self.assertNotEqual(self.order.status, Order.Status.CANCELLED)

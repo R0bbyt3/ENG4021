@@ -41,7 +41,7 @@ class PopularBancoTests(TestCase):
         self.assertEqual(ProductImage.objects.count(), 2 * len(PRODUCTS))
         self.assertEqual(Order.objects.count(), 4)
         self.assertEqual(Review.objects.count(), 3)
-        self.assertEqual(Notification.objects.count(), 2)
+        self.assertEqual(Notification.objects.count(), 4)
         # Toda peça tem a foto da peça e a do defeito.
         for product in Product.objects.all():
             self.assertIsNotNone(product.cover_image)
@@ -78,3 +78,10 @@ class PopularBancoTests(TestCase):
         julia = get_user_model().objects.get(email='julia@fiofora.com')
         self.client.force_login(julia)
         self.assertEqual(self.client.get(reverse('home')).context['unread_notifications'], 1)
+
+    def test_buyer_with_a_shipped_order_can_confirm_receipt(self):
+        gabriel = get_user_model().objects.get(email='gabriel@fiofora.com')
+        order = Order.objects.get(reference='FF-SEED-PEDIDO-002')
+        self.assertEqual(order.status, Order.Status.SHIPPED)
+        self.client.force_login(gabriel)
+        self.assertContains(self.client.get(reverse('order_detail', args=[order.pk])), 'Recebi a peça')

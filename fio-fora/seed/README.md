@@ -40,15 +40,18 @@ Entre com o **e-mail** e a senha **`fiofora123`**.
     preenchido no checkout.
 - 3 favoritos: camiseta de algodão, vestido estampado e calça jeans.
 - Carrinho com a camisa de linho e 2 camisetas listradas.
-- Pedido **enviado** com o vestido e a camiseta, os dois já avaliados.
+- Pedido **entregue** com o vestido e a camiseta, os dois já avaliados.
 - Pedido **pendente** com a calça de alfaiataria, ainda sem avaliação.
+- 1 aviso já lido: a entrega do pedido do vestido e da camiseta.
 
 **Gabriel (comprador)**
 - Endereço de entrega salvo no Rio de Janeiro (Rua Barata Ribeiro), que já
     vem preenchido no checkout.
 - 2 favoritos: camiseta listrada e calça de alfaiataria.
 - Carrinho com a calça jeans.
-- Pedido **pago** com a calça jeans, já avaliada.
+- Pedido **enviado** com a calça jeans, já avaliada. Mostra o botão
+    “Recebi a peça” no detalhe do pedido.
+- 1 aviso não lido: o envio da calça jeans.
 - Pedido **cancelado** com a jaqueta jeans, que não pode ser avaliada.
 
 **Julia (vendedor)**: 3 peças. Uma delas, o vestido de malha, está
@@ -78,9 +81,9 @@ com nota média no card "Vendido por" da página da peça.
 | Favoritos | 5 |
 | Carrinhos | 2 |
 | Endereços de entrega | 2 (um em cada comprador) |
-| Pedidos | 4 (pendente, pago, enviado e cancelado), cada um com o frete fixo e uma cópia do endereço do comprador |
+| Pedidos | 4 (pendente, enviado, entregue e cancelado), cada um com o frete fixo e uma cópia do endereço do comprador |
 | Avaliações | 3 |
-| Avisos | 2 (um não lido para a Julia, um lido para o Diego) |
+| Avisos | 4 (não lidos: Julia e Gabriel; lidos: Diego e Rafael) |
 
 ## Arquivos
 

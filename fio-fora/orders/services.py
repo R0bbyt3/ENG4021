@@ -121,6 +121,12 @@ class OrderStatusError(ValueError):
 
 STATUS_STEPS = (Order.Status.PENDING, Order.Status.PAID, Order.Status.SHIPPED, Order.Status.DELIVERED)
 NEXT_SALE_STATUS = dict(zip(STATUS_STEPS, STATUS_STEPS[1:]))
+# Texto do botão do vendedor para levar a venda a cada status.
+SALE_ACTIONS = {
+    Order.Status.PAID: 'Confirmar pagamento',
+    Order.Status.SHIPPED: 'Marcar como enviado',
+    Order.Status.DELIVERED: 'Confirmar entrega',
+}
 
 
 def next_sale_status(items):
@@ -147,9 +153,57 @@ def advance_sale(order_id, seller, requested_status):
     # Fixa o status anterior de itens legados antes de recalcular o pedido.
     order.items.filter(fulfillment_status__isnull=True).update(fulfillment_status=order.status)
     owned_items.update(fulfillment_status=target)
+    refresh_order_status(order)
+    notify_buyer_status(order, seller_items, target)
+
+
+def refresh_order_status(order):
+    """O status geral do pedido é a etapa mais atrasada entre as peças (de todas as lojas)."""
     statuses = set(order.items.values_list('fulfillment_status', flat=True))
     order.status = next(step for step in STATUS_STEPS if step in statuses)
     order.save(update_fields=['status'])
+
+
+def notify_buyer_status(order, items, status):
+    """Avisa o comprador que peças do pedido mudaram de status."""
+    text = f'Pedido {order.reference}: {pieces_text(items)} com status “{status.label}”.'
+    if status == Order.Status.DELIVERED:
+        text += ' Já dá para avaliar.'
+    notify(order.user, text, reverse('order_detail', args=[order.pk]))
+
+
+class ReceiptError(ValueError):
+    pass
+
+
+def shipped_items_from(order, seller_id):
+    """Peças de uma loja neste pedido que já foram enviadas e esperam o comprador confirmar."""
+    items = order.items.select_related('order', 'product__seller')
+    return [item for item in items
+            if item.product and item.product.seller_id == seller_id and item.sale_status == Order.Status.SHIPPED]
+
+
+@transaction.atomic
+def confirm_receipt(order_id, buyer, seller_id):
+    """“Recebi a peça”: o comprador marca como entregues as peças enviadas por uma loja.
+
+    Vale para a loja inteira, porque o vendedor também avança todas as peças
+    dele juntas. Não tem volta: entregue é o último status.
+    """
+    # Trava o pedido (só o do próprio comprador) para dois cliques não confirmarem duas vezes.
+    if not Order.objects.filter(pk=order_id, user=buyer).update(status=F('status')):
+        raise Http404
+    order = Order.objects.get(pk=order_id)
+    items = shipped_items_from(order, seller_id)
+    if not items:
+        raise ReceiptError('Não há peças enviadas desta loja para confirmar neste pedido.')
+    order.items.filter(fulfillment_status__isnull=True).update(fulfillment_status=order.status)
+    OrderItem.objects.filter(pk__in=[item.pk for item in items]).update(fulfillment_status=Order.Status.DELIVERED)
+    refresh_order_status(order)
+    buyer_name = buyer.get_full_name() or buyer.get_username()
+    notify(items[0].product.seller,
+           f'{buyer_name} confirmou que recebeu {pieces_text(items)} do pedido {order.reference}.',
+           reverse('sales_list'))
 
 
 class OrderCancellationError(ValueError):

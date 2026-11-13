@@ -38,9 +38,11 @@ avisos.
 |---|---|---|
 | Compra finalizada | Cada vendedor ou marca do pedido (um aviso por pedido, mesmo com várias peças) | Minhas vendas |
 | Comprador cancela o pedido | Cada vendedor ou marca do pedido | Minhas vendas |
+| Vendedor confirma o pagamento, marca como enviado ou confirma a entrega | O comprador (a entrega avisa que já dá para avaliar) | Detalhe do pedido |
+| Comprador clica em “Recebi a peça” | A loja das peças | Minhas vendas |
 
-- O aviso é criado dentro da mesma transação da compra ou do cancelamento: se
-    a ação falhar, o aviso não existe.
+- O aviso é criado dentro da mesma transação da ação que o gerou (compra,
+    cancelamento, mudança de status): se a ação falhar, o aviso não existe.
 
 ## Como criar um aviso em outro app
 

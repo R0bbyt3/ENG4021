@@ -12,9 +12,9 @@ from reviews.services import attach_review_forms
 from .forms import CheckoutAddressForm
 from .models import Order, OrderItem
 from .services import (
-    CheckoutError, OrderCancellationError, OrderStatusError, advance_sale, can_cancel_order,
-    cancel_order, checkout_cart, next_sale_status,
-    send_order_confirmation,
+    SALE_ACTIONS, CheckoutError, OrderCancellationError, OrderStatusError, ReceiptError, advance_sale,
+    can_cancel_order, cancel_order, checkout_cart, confirm_receipt, next_sale_status,
+    send_order_confirmation, shipped_items_from,
 )
 
 
@@ -79,6 +79,27 @@ def order_cancel(request, order_id):
     return redirect('order_detail', order_id=order_id)
 
 
+@require_http_methods(['GET', 'POST'])
+@buyer_required
+def order_receipt(request, order_id, seller_id):
+    """“Recebi a peça”: o GET mostra a confirmação com o aviso, só o POST grava (não tem volta)."""
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    if request.method == 'POST':
+        try:
+            confirm_receipt(order.pk, request.user, seller_id)
+        except ReceiptError as error:
+            messages.error(request, str(error))
+        else:
+            messages.success(request, 'Recebimento confirmado. Agora você já pode avaliar as peças.')
+        return redirect('order_detail', order_id=order.pk)
+
+    items = shipped_items_from(order, seller_id)
+    if not items:
+        messages.error(request, 'Não há peças enviadas desta loja para confirmar neste pedido.')
+        return redirect('order_detail', order_id=order.pk)
+    return render(request, 'orders/receipt_confirm.html', {'order': order, 'items': items})
+
+
 @require_GET
 @seller_required
 def sales_list(request):
@@ -91,6 +112,7 @@ def sales_list(request):
     page = Paginator(orders, 10).get_page(request.GET.get('page'))
     for order in page:
         order.next_sale_status = next_sale_status(order.seller_items)
+        order.next_sale_action = SALE_ACTIONS.get(order.next_sale_status)
     return render(request, 'orders/sales.html', {'page_obj': page})
 
 

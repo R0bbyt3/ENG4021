@@ -1,12 +1,14 @@
-"""Bloco 4: pedidos (um de cada status) e avaliações das peças compradas."""
+"""Bloco 4: pedidos (pendente, enviado, entregue e cancelado) e avaliações das peças compradas."""
 from cart.services import SHIPPING_COST
 from orders.models import Order, OrderItem
 from reviews.models import Review
 
 ORDERS = [
-    {'reference': 'FF-SEED-PEDIDO-001', 'buyer': 'rafael@fiofora.com', 'status': 'shipped',
+    # Entregue: libera as avaliações.
+    {'reference': 'FF-SEED-PEDIDO-001', 'buyer': 'rafael@fiofora.com', 'status': 'delivered',
      'items': ['FF-SEED-003', 'FF-SEED-001']},
-    {'reference': 'FF-SEED-PEDIDO-002', 'buyer': 'gabriel@fiofora.com', 'status': 'paid',
+    # Enviado: mostra o botão "Recebi a peça" para o comprador.
+    {'reference': 'FF-SEED-PEDIDO-002', 'buyer': 'gabriel@fiofora.com', 'status': 'shipped',
      'items': ['FF-SEED-005']},
     # Pendente e sem avaliação: mostra o formulário "Avaliar esta peça".
     {'reference': 'FF-SEED-PEDIDO-003', 'buyer': 'rafael@fiofora.com', 'status': 'pending',
