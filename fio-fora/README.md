@@ -140,6 +140,7 @@ fio-fora/
 ├── orders/                 # Checkout e pedidos
 ├── favorites/              # Favoritos
 ├── reviews/                # Avaliações das peças compradas
+├── notifications/          # Avisos (sininho do cabeçalho)
 └── seed/                   # Dados de exemplo (comando popular_banco)
 ```
 
@@ -158,7 +159,7 @@ Todo app segue este formato:
 
 | Arquivo | Uso |
 |---|---|
-| `header.html` | Cabeçalho único; mostra links conforme o tipo de conta |
+| `header.html` | Cabeçalho único; mostra links conforme o tipo de conta e o sininho de avisos para quem está logado |
 | `messages.html` | Mensagens de sucesso e erro (já incluído no `base.html`) |
 | `form_fields.html` | Todos os campos de um formulário |
 | `field.html` | Um campo de formulário |
@@ -197,7 +198,8 @@ Todas levam de volta à vitrine.
 | `cart` | Carrinho do comprador, com validação de estoque | [cart/README.md](cart/README.md) |
 | `orders` | Checkout simulado e histórico de pedidos | [orders/README.md](orders/README.md) |
 | `favorites` | Peças favoritas do usuário | [favorites/README.md](favorites/README.md) |
-| `seed` | Contas, peças com fotos, pedidos e avaliações de exemplo (`popular_banco`) | [seed/README.md](seed/README.md) |
+| `notifications` | Avisos do sininho: venda nova e pedido cancelado para o vendedor | [notifications/README.md](notifications/README.md) |
+| `seed` | Contas, peças com fotos, pedidos, avaliações e avisos de exemplo (`popular_banco`) | [seed/README.md](seed/README.md) |
 
 ### Tipos de conta
 
@@ -229,6 +231,7 @@ erDiagram
     Product |o--o{ OrderItem : era
     User ||--o{ Favorite : marca
     Product ||--o{ Favorite : recebe
+    User ||--o{ Notification : recebe
 ```
 
 | Model | App | Guarda |
@@ -241,6 +244,7 @@ erDiagram
 | `Cart`, `CartItem` | cart | Carrinho e seus itens |
 | `Order`, `OrderItem` | orders | Pedido (com frete e cópia do endereço de entrega) e cópia do nome e preço de cada item |
 | `Favorite` | favorites | Peça favoritada por um usuário |
+| `Notification` | notifications | Aviso do sininho: texto, link e se já foi lido |
 
 Regras importantes:
 
@@ -264,8 +268,8 @@ Regras importantes:
     é referenciado como `products/home.html`.
 - **Decorators de permissão:** `@seller_required` e `@buyer_required`, em
     `accounts/decorators.py`, protegem as views.
-- **Context processor:** `is_buyer` e `is_seller` ficam disponíveis em todos os
-    templates.
+- **Context processor:** `is_buyer`, `is_seller` e `unread_notifications`
+    (número do sininho) ficam disponíveis em todos os templates.
 - **Services:** regras usadas por mais de um app ficam em `services.py`
     (por exemplo, `cart/services.py` é usado pelo checkout).
 - **ModelForm:** formulários gerados a partir do model, com validação.

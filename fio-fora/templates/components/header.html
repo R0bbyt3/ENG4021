@@ -18,6 +18,8 @@
 
         <div class="site-actions">
             {% if user.is_authenticated %}
+            {# Sininho: o número é um strong (e não span) para continuar visível no celular. #}
+            <a class="icon-link" href="{% url 'notifications' %}"{% if current == 'notifications' %} aria-current="page"{% endif %}><i class="bi bi-bell" aria-hidden="true"></i><span>Avisos</span>{% if unread_notifications %}<strong class="nav-badge" aria-label="{{ unread_notifications }} aviso{{ unread_notifications|pluralize }} não lido{{ unread_notifications|pluralize }}">{{ unread_notifications }}</strong>{% endif %}</a>
             {% if is_buyer %}
             <a class="icon-link" href="{% url 'favorites' %}"{% if current == 'favorites' %} aria-current="page"{% endif %}><i class="bi bi-heart" aria-hidden="true"></i><span>Favoritos</span></a>
             <a class="icon-link" href="{% url 'cart' %}"{% if current == 'cart' %} aria-current="page"{% endif %}><i class="bi bi-bag" aria-hidden="true"></i><span>Carrinho</span></a>

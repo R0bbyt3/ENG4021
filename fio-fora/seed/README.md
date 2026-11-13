@@ -52,10 +52,12 @@ Entre com o **e-mail** e a senha **`fiofora123`**.
 - Pedido **cancelado** com a jaqueta jeans, que não pode ser avaliada.
 
 **Julia (vendedor)**: 3 peças. Uma delas, o vestido de malha, está
-**esgotada** e mostra o aviso na página da peça.
+**esgotada** e mostra o aviso na página da peça. Tem **1 aviso não lido** no
+sininho: a venda da calça de alfaiataria.
 
 **Diego (vendedor)**: 3 peças. A camisa social está **pausada**: aparece em
-"Minhas peças", mas não na vitrine.
+"Minhas peças", mas não na vitrine. Tem 1 aviso já lido: o cancelamento
+do pedido da jaqueta jeans.
 
 **Fábio (marca)**: 2 peças. A camiseta tem avaliação, então a loja aparece
 com nota média no card "Vendido por" da página da peça.
@@ -78,6 +80,7 @@ com nota média no card "Vendido por" da página da peça.
 | Endereços de entrega | 2 (um em cada comprador) |
 | Pedidos | 4 (pendente, pago, enviado e cancelado), cada um com o frete fixo e uma cópia do endereço do comprador |
 | Avaliações | 3 |
+| Avisos | 2 (um não lido para a Julia, um lido para o Diego) |
 
 ## Arquivos
 
@@ -90,6 +93,7 @@ Cada bloco cuida de uma parte dos dados e é chamado em ordem pelo comando.
 | `catalog.py` | Bloco 2: categorias, peças, defeitos e fotos |
 | `shopping.py` | Bloco 3: favoritos e carrinhos |
 | `purchases.py` | Bloco 4: pedidos (com frete e endereço) e avaliações |
+| `notifications.py` | Bloco 5: avisos do sininho |
 | `images/` | Fotos das peças: `<nome>.jpg` e `<nome>-defeito.jpg` |
 | `tests.py` | Confere que o comando roda, não duplica e que as contas entram |
 

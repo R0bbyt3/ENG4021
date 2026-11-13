@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'orders',
     'favorites',
     'reviews',
+    'notifications',
     'seed',  # só o comando popular_banco e os dados de exemplo
 ]
 
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.roles',
+                'notifications.context_processors.unread_notifications',
             ],
         },
     },

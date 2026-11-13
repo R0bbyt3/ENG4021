@@ -6,10 +6,12 @@ from django.http import Http404
 from django.db import transaction
 from django.db.models import F
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from accounts.forms import ADDRESS_KEYS
 from cart.models import Cart
 from cart.services import purchase_summary, unavailable_reason
+from notifications.services import notify
 from products.models import Product
 
 from .models import Order, OrderItem
@@ -17,6 +19,21 @@ from .models import Order, OrderItem
 
 class CheckoutError(ValueError):
     pass
+
+
+def items_by_seller(items):
+    """Agrupa os itens de um pedido por loja: cada loja recebe um aviso, não um por peça."""
+    groups = {}
+    for item in items:
+        # Peça apagada ou sem vendedor não tem loja para avisar.
+        if item.product is not None and item.product.seller_id is not None:
+            groups.setdefault(item.product.seller, []).append(item)
+    return groups
+
+
+def pieces_text(items):
+    """“Vestido floral” para uma peça, “2 peças” para mais de uma."""
+    return items[0].product_name if len(items) == 1 else f'{len(items)} peças'
 
 
 # Partes do endereço sem as quais não dá para entregar (o complemento é opcional).
@@ -55,21 +72,25 @@ def checkout_cart(user, address):
         shipping_cost=purchase_summary(subtotal)['shipping'],
         **{f'shipping_{key}': address.get(key, '') for key in ADDRESS_KEYS},
     )
+    order_items = []
     for item in items:
         updated = Product.objects.filter(
             pk=item.product_id, is_active=True, stock__gte=item.quantity,
         ).update(stock=F('stock') - item.quantity)
         if not updated:
             raise CheckoutError('O estoque mudou. Confira seu carrinho antes de finalizar novamente.')
-        OrderItem.objects.create(
+        order_items.append(OrderItem.objects.create(
             order=order,
             product=item.product,
             product_name=item.product.name,
             unit_price=item.product.price,
             quantity=item.quantity,
-        )
+        ))
 
     cart.items.filter(pk__in=[item.pk for item in items]).delete()
+    # Aviso ao vendedor: dentro da transação, então só existe se a compra deu certo.
+    for seller, seller_items in items_by_seller(order_items).items():
+        notify(seller, f'Nova venda: {pieces_text(seller_items)} no pedido {order.reference}.', reverse('sales_list'))
     return order
 
 
@@ -161,3 +182,8 @@ def cancel_order(order_id, buyer):
 
     for product_id, quantity in items.exclude(product_id=None).order_by('product_id').values_list('product_id', 'quantity'):
         Product.objects.filter(pk=product_id).update(stock=F('stock') + quantity)
+
+    order = Order.objects.get(pk=order_id)
+    for seller, seller_items in items_by_seller(items.select_related('product__seller')).items():
+        notify(seller, f'O pedido {order.reference} foi cancelado pelo comprador ({pieces_text(seller_items)}). '
+                       'O estoque já foi devolvido.', reverse('sales_list'))

@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from cart.models import Cart, CartItem
 from favorites.models import Favorite
+from notifications.models import Notification
 from products.models import Defeito, Product
 
 from .models import Order, OrderItem
@@ -677,3 +678,53 @@ class OrderCancellationTests(TestCase):
         self.other_product.refresh_from_db()
         self.assertEqual(self.order.status, Order.Status.CANCELLED)
         self.assertEqual(self.other_product.stock, 5)
+
+
+class SellerNoticeTests(CheckoutTestCase):
+    """Aviso ao vendedor: venda nova e pedido cancelado chegam à loja certa."""
+
+    def setUp(self):
+        super().setUp()
+        from accounts.models import UserProfile
+        self.other_seller = get_user_model().objects.create_user('outra-loja-aviso', 'outra@example.com')
+        UserProfile.objects.create(user=self.other_seller, role='seller')
+        self.skirt = Product.objects.create(seller=self.other_seller, name='Saia midi', description='Fio puxado.',
+                                            original_price=Decimal('90.00'), price=Decimal('70.00'), stock=3)
+
+    def texts_for(self, user):
+        return list(Notification.objects.filter(user=user).values_list('text', flat=True))
+
+    def test_purchase_notifies_each_seller_once_with_their_pieces(self):
+        self.put_in_cart(self.dress)
+        self.put_in_cart(self.shirt)
+        self.put_in_cart(self.skirt)
+        self.buy()
+        reference = Order.objects.get().reference
+        self.assertEqual(self.texts_for(self.seller), [f'Nova venda: 2 peças no pedido {reference}.'])
+        self.assertEqual(self.texts_for(self.other_seller), [f'Nova venda: Saia midi no pedido {reference}.'])
+        self.assertEqual(Notification.objects.get(user=self.seller).url, '/minhas-vendas/')
+
+    def test_buyer_is_not_notified_of_the_sale(self):
+        self.put_in_cart(self.dress)
+        self.buy()
+        self.assertEqual(self.texts_for(self.buyer), [])
+
+    def test_failed_purchase_notifies_nobody(self):
+        self.put_in_cart(self.dress, 99)
+        self.buy()
+        self.assertFalse(Notification.objects.exists())
+
+    def test_cancellation_notifies_the_seller(self):
+        self.put_in_cart(self.dress)
+        self.buy()
+        order = Order.objects.get()
+        self.client.post(f'/pedidos/{order.pk}/cancelar/')
+        self.assertIn(f'O pedido {order.reference} foi cancelado pelo comprador (Vestido floral). '
+                      'O estoque já foi devolvido.', self.texts_for(self.seller))
+        self.assertEqual(self.texts_for(self.other_seller), [])
+
+    def test_seller_sees_the_bell_after_a_sale(self):
+        self.put_in_cart(self.dress)
+        self.buy()
+        self.client.force_login(self.seller)
+        self.assertContains(self.client.get('/vitrine/'), 'class="nav-badge"')

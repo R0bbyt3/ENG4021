@@ -10,6 +10,7 @@ from django.urls import reverse
 from accounts.models import UserProfile
 from cart.models import Cart, CartItem
 from favorites.models import Favorite
+from notifications.models import Notification
 from orders.models import Order, OrderItem
 from products.models import Category, Defeito, Product, ProductImage
 from reviews.models import Review
@@ -21,7 +22,7 @@ from .users import ADMIN, PASSWORD, USERS
 MEDIA_DE_TESTE = tempfile.mkdtemp()
 
 MODELS = [get_user_model(), UserProfile, Category, Product, Defeito, ProductImage,
-          Favorite, Cart, CartItem, Order, OrderItem, Review]
+          Favorite, Cart, CartItem, Order, OrderItem, Review, Notification]
 
 
 def tearDownModule():
@@ -40,6 +41,7 @@ class PopularBancoTests(TestCase):
         self.assertEqual(ProductImage.objects.count(), 2 * len(PRODUCTS))
         self.assertEqual(Order.objects.count(), 4)
         self.assertEqual(Review.objects.count(), 3)
+        self.assertEqual(Notification.objects.count(), 2)
         # Toda peça tem a foto da peça e a do defeito.
         for product in Product.objects.all():
             self.assertIsNotNone(product.cover_image)
@@ -71,3 +73,8 @@ class PopularBancoTests(TestCase):
         response = self.client.get(reverse('home'))
         self.assertContains(response, 'Calça jeans reta')
         self.assertNotContains(response, 'Camisa social azul-clara')
+
+    def test_seller_starts_with_an_unread_notice(self):
+        julia = get_user_model().objects.get(email='julia@fiofora.com')
+        self.client.force_login(julia)
+        self.assertEqual(self.client.get(reverse('home')).context['unread_notifications'], 1)

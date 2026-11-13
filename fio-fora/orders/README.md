@@ -59,6 +59,10 @@ retorna 404.
 - O comprador pode cancelar um pedido próprio pendente ou pago até o
     primeiro envio. O pedido fica cancelado e as peças ainda cadastradas
     voltam ao estoque uma única vez, na mesma transação.
+- **Aviso ao vendedor:** a compra e o cancelamento criam um aviso no sininho
+    de cada vendedor ou marca do pedido (um por pedido, mesmo com várias
+    peças), levando para Minhas vendas. O aviso entra na mesma transação: se a
+    compra falha, ninguém é avisado. Veja o app [`notifications`](../notifications/README.md).
 
 ## Testes
 
@@ -79,7 +83,7 @@ retorna 404.
 | Arquivo | O que tem |
 |---|---|
 | `forms.py` | `CheckoutAddressForm`: endereço de entrega do checkout |
-| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação; `advance_sale()`: avança os itens do vendedor; `cancel_order()`: cancela e repõe o estoque |
+| `services.py` | `checkout_cart()`: cria o pedido com endereço e frete e desconta o estoque; `send_order_confirmation()`: e-mail de confirmação; `advance_sale()`: avança os itens do vendedor; `cancel_order()`: cancela e repõe o estoque; `items_by_seller()`: agrupa os itens por loja para os avisos |
 | `views.py` | Checkout, lista e detalhe dos pedidos e painel de vendas |
 | `templates/orders/email/` | Assunto, texto e versão HTML do e-mail de confirmação |
 

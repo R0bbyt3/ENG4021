@@ -28,6 +28,7 @@ fio-fora/
 ├── orders/        # checkout e pedidos
 ├── favorites/     # favoritos
 ├── reviews/       # avaliações das peças compradas
+├── notifications/ # avisos (sininho do cabeçalho)
 └── seed/          # dados de exemplo (comando popular_banco)
 ```
 

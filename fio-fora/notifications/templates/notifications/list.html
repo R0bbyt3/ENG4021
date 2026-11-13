@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Avisos | FioFora{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'notifications/css/notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Avisos</h1>
+    <p>O que aconteceu com as suas compras e vendas.</p>
+</section>
+
+{% if notifications %}
+<ul class="notification-list">
+    {% for notification in notifications %}
+    <li class="notification{% if not notification.is_read %} notification--unread{% endif %}">
+        <a href="{{ notification.url }}">{{ notification.text }}</a>
+        <span class="notification__date">{% if not notification.is_read %}Novo · {% endif %}{{ notification.created_at|date:'d/m/Y H:i' }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% include 'components/pagination.html' %}
+{% else %}
+<section class="empty-state">
+    <h2>Nenhum aviso por enquanto</h2>
+    <p>Quando uma compra ou uma venda sua mudar de situação, o aviso aparece aqui.</p>
+    <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
+</section>
+{% endif %}
+{% endblock %}

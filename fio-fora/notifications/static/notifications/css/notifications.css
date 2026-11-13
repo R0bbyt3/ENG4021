@@ -1,0 +1,39 @@
+/* Lista de avisos: um por linha, os novos com a faixa coral à esquerda. */
+.notification-list {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 30px;
+    padding: 0;
+    list-style: none;
+}
+
+.notification {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 16px;
+    padding: 16px 18px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-medium);
+}
+
+.notification a {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.notification a:hover {
+    color: var(--coral);
+    text-decoration: underline;
+}
+
+.notification__date {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.notification--unread {
+    border-left: 4px solid var(--coral);
+}

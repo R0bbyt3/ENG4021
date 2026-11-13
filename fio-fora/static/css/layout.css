@@ -47,6 +47,18 @@
     border-color: var(--coral);
 }
 
+/* Número de avisos não lidos ao lado do sininho. */
+.nav-badge {
+    min-width: 18px;
+    padding: 1px 6px;
+    color: var(--white);
+    background: var(--coral);
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+}
+
 /* Ações da conta: ícone + texto, e um único botão de destaque. */
 .site-actions,
 .site-actions form {
