@@ -162,12 +162,18 @@ def product_detail(request, product_id):
         'rating': rating_summary(reviews),
         'reviews': reviews[:10],  # só as mais recentes
         'store_rating': rating_summary(store_reviews(product.seller)) if product.seller else None,
+        # Leva os dados do defeito para o simulador já preenchido.
+        'simulator_query': DiscountSimulationForm.query_for(product),
     })
 
 
 def discount_simulator(request):
-    form = DiscountSimulationForm(request.POST if request.method == 'POST' else None)
-    result = form.preview() if request.method == 'POST' and form.is_valid() else None
+    """Simulador de desconto, com ou sem os valores de uma peça na URL."""
+    if request.method == 'POST':
+        form = DiscountSimulationForm(request.POST)
+    else:
+        form = DiscountSimulationForm.from_query(request.GET)
+    result = form.preview() if form.is_bound and form.is_valid() else None
     return render(request, 'products/discount_simulator.html', {'form': form, 'result': result})
 
 

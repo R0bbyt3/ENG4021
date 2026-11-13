@@ -20,8 +20,9 @@ from favorites.models import Favorite
 from orders.models import Order, OrderItem
 
 from . import services
-from .forms import ProductForm
-from .models import Category, Defeito, Product, ProductImage
+from .forms import DiscountSimulationForm, ProductForm
+from .models import (Category, Defeito, Product, ProductImage, detalhar_severidade,
+                     severidade)
 
 
 # As fotos dos testes vão para uma pasta temporária, não para media/ do projeto.
@@ -882,3 +883,80 @@ class FooterTests(TestCase):
         user = get_user_model().objects.create_user('comprador@example.com', 'comprador@example.com', 'Senha-forte-524!')
         self.client.force_login(user)
         self.assertContains(self.client.get(reverse('about')), 'Informações legais')
+
+
+class SimuladorLigadoAPecaTests(TestCase):
+    """Link “Entender o desconto” na peça e a conta aberta no simulador."""
+
+    def setUp(self):
+        self.peca = criar_peca('Calça com mancha', tipo=2, localizacao=3, extensao=1,
+                               original_price=Decimal('200.00'), price=Decimal('130.00'))
+
+    def link(self, peca=None):
+        return reverse('discount_simulator') + '?' + DiscountSimulationForm.query_for(peca or self.peca)
+
+    def test_pagina_da_peca_tem_link_com_os_valores_do_defeito(self):
+        response = self.client.get(reverse('product_detail', args=[self.peca.pk]))
+        self.assertContains(response, 'Entender o desconto')
+        self.assertContains(response, 'tipo=2&amp;local=3&amp;extensao=1&amp;preco=200.00')
+
+    def test_peca_sem_defeito_nao_mostra_o_link(self):
+        sem_ficha = Product.objects.create(name='Saia sem ficha', description='x', price=Decimal('50'))
+        response = self.client.get(reverse('product_detail', args=[sem_ficha.pk]))
+        self.assertNotContains(response, 'Entender o desconto')
+
+    def test_link_cai_para_o_preco_final_quando_nao_ha_preco_original(self):
+        sem_original = criar_peca('Blusa', tipo=1, localizacao=1, extensao=1, price=Decimal('45.00'))
+        self.assertIn('preco=45.00', DiscountSimulationForm.query_for(sem_original))
+
+    def test_link_abre_o_simulador_ja_calculado(self):
+        response = self.client.get(self.link())
+        resultado = response.context['result']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].data['defect_location'], '3')
+        self.assertEqual(resultado['severity'], self.peca.severity)
+        self.assertEqual(resultado['discount'], self.peca.suggested_discount)
+        self.assertEqual(resultado['final_price'], self.peca.suggested_price)
+
+    def test_resultado_mostra_a_formula_os_pesos_e_o_que_cada_criterio_somou(self):
+        response = self.client.get(self.link())
+        self.assertContains(response, '0,45 × tipo do defeito')
+        self.assertContains(response, '0,35 × localização')
+        self.assertContains(response, '0,20 × extensão')
+        # 0,45×2 = 0,90 | 0,35×3 = 1,05 | 0,20×1 = 0,20 | nota = 2,15
+        for soma in ('0,90', '1,05', '0,20', '2,15'):
+            self.assertContains(response, soma)
+        self.assertContains(response, 'Funcional reparável')
+        self.assertContains(response, 'Visível')
+
+    def test_a_soma_dos_criterios_e_a_propria_nota_nas_27_combinacoes(self):
+        for tipo, local, extensao in combinations((1, 2, 3), repeat=3):
+            with self.subTest(notas=(tipo, local, extensao)):
+                linhas = detalhar_severidade(tipo, local, extensao)
+                self.assertEqual(sum(linha['soma'] for linha in linhas),
+                                 severidade(tipo, local, extensao))
+                self.assertEqual([linha['nota'] for linha in linhas], [tipo, local, extensao])
+
+    def test_simulador_sem_parametros_abre_vazio_e_sem_erro(self):
+        response = self.client.get(reverse('discount_simulator'))
+        self.assertIsNone(response.context['result'])
+        self.assertFalse(response.context['form'].is_bound)
+        self.assertNotContains(response, 'form-errors')
+
+    def test_parametro_invalido_na_url_pede_correcao_em_vez_de_calcular(self):
+        response = self.client.get(reverse('discount_simulator') + '?tipo=9&local=1&extensao=1&preco=10')
+        self.assertIsNone(response.context['result'])
+        self.assertIn('defect_type', response.context['form'].errors)
+
+    def test_url_pela_metade_mantem_o_que_veio_e_pede_o_resto(self):
+        response = self.client.get(reverse('discount_simulator') + '?tipo=3')
+        formulario = response.context['form']
+        self.assertIsNone(response.context['result'])
+        self.assertEqual(formulario.data['defect_type'], '3')
+        self.assertIn('original_price', formulario.errors)
+
+    def test_simulador_continua_funcionando_por_post(self):
+        response = self.client.post(reverse('discount_simulator'), {
+            'original_price': '200.00', 'defect_type': '2', 'defect_location': '3', 'defect_extent': '1',
+        })
+        self.assertEqual(response.context['result']['severity'], Decimal('2.15'))

@@ -12,7 +12,7 @@ Vitrine, página da peça, cadastro de peças pelo vendedor e simulador de desco
 | `/sobre/` | Proposta, critérios, origem dos pesos e caráter acadêmico | Todos |
 | `/termos/` e `/privacidade/` | Termos de uso e política de privacidade | Todos |
 | `/produtos/<id>/` | Página da peça | Todos |
-| `/simulador/` | Simulador de desconto | Todos |
+| `/simulador/` | Simulador de desconto, com os valores de uma peça em `?tipo=&local=&extensao=&preco=` | Todos |
 | `/minhas-pecas/` | Peças do vendedor logado | Vendedor e marca |
 | `/produtos/novo/` | Cadastrar peça | Vendedor e marca |
 | `/produtos/<id>/editar/` | Editar peça | Dono da peça |
@@ -52,6 +52,25 @@ Severidade = 0,45 × Tipo + 0,35 × Localização + 0,20 × Extensão
 O desconto vai de 15% (severidade 1) a 50% (severidade 3), arredondado de 5 em
 5. O preço final é sempre calculado; o vendedor informa só o preço original.
 
+### Simulador ligado à peça
+
+A página da peça tem o link **“Entender o desconto”**, que abre o simulador já
+preenchido com o defeito daquela peça:
+
+```text
+/simulador/?tipo=2&local=3&extensao=1&preco=200.00
+```
+
+Os nomes na URL são em português, como todo caminho do site;
+`DiscountSimulationForm.QUERY_PARAMS` faz a tradução para os campos do
+formulário, `query_for()` monta o link e `from_query()` monta o formulário. Com
+parâmetros válidos o resultado já vem calculado; faltando ou errando algum, a
+tela pede a correção em vez de calcular.
+
+O resultado mostra a conta aberta: a fórmula, o peso de cada critério e quanto
+cada um somou na nota (`detalhar_severidade()` em `models.py`, que usa as mesmas
+constantes da fórmula).
+
 ## Arquivos principais
 
 | Arquivo | O que tem |
@@ -67,6 +86,8 @@ Os dados de exemplo (peças, fotos e vendedores) ficam no app [`seed`](../seed/R
 > **[PRINT]** Tela "Minhas peças" com os botões Editar e Remover.
 
 > **[PRINT]** Simulador de desconto com um resultado calculado.
+
+> **[PRINT]** Simulador aberto pelo link da peça, com a fórmula e o que cada critério somou na nota.
 
 ## Fotos da peça
 
