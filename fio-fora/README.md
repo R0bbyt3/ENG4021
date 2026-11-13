@@ -130,7 +130,7 @@ fio-fora/
 ├── config/                 # Configuração do projeto
 ├── templates/              # HTML compartilhado
 │   ├── base.html           # Layout: <head>, cabeçalho e mensagens
-│   ├── 404.html  500.html  # Páginas de erro com o visual do site
+│   ├── 403.html  404.html  500.html  # Páginas de erro com o visual do site
 │   └── components/         # Pedaços reutilizáveis
 ├── static/                 # CSS, js/masks.js, ícones, fontes e logo compartilhados
 │   └── css/site.css        # Importa os CSS gerais
@@ -168,11 +168,19 @@ Todo app segue este formato:
 
 ### Páginas de erro
 
-`templates/404.html` (página inexistente) e `templates/500.html` (erro no
-servidor) são os nomes que o Django procura sozinho, sem rota nem view. Elas só
-aparecem com `DEBUG = False`; com `DEBUG = True` o Django mostra a tela técnica.
-A 404 usa o layout completo; a 500 não inclui o cabeçalho, porque o Django a
-mostra sem usuário logado nem mensagens. Ambas levam de volta à vitrine.
+`templates/403.html` (acesso negado), `templates/404.html` (página
+inexistente) e `templates/500.html` (erro no servidor) são os nomes que o
+Django procura sozinho, sem rota nem view.
+
+- A 403 aparece sempre, mesmo com `DEBUG = True`, por exemplo quando um
+    comprador abre `/minhas-pecas/`. Ela mostra o motivo escrito no decorator
+    (`seller_required`).
+- A 404 e a 500 só aparecem com `DEBUG = False`; com `DEBUG = True` o Django
+    mostra a tela técnica.
+- A 403 e a 404 usam o layout completo; a 500 não inclui o cabeçalho, porque o
+    Django a mostra sem usuário logado nem mensagens.
+
+Todas levam de volta à vitrine.
 
 > **[PRINT]** Página 404 aberta com `DEBUG = False` (e `ALLOWED_HOSTS = ['*']`).
 

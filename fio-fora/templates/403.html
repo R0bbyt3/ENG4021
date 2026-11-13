@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso negado | FioFora{% endblock %}
+
+{% block content %}
+<header class="page-heading">
+    <p class="eyebrow">Erro 403</p>
+    <h1>Acesso<br><em>negado.</em></h1>
+    {# exception traz o motivo escrito no decorator (por exemplo, só vendedores e marcas). #}
+    <p>{{ exception|default:'Sua conta não tem permissão para abrir esta página.' }}</p>
+</header>
+
+<section class="panel panel--note error-page">
+    <h2>Por onde seguir</h2>
+    <div class="form-actions">
+        <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
+        <a class="button button--secondary" href="{% url 'faq' %}">Perguntas frequentes</a>
+    </div>
+</section>
+{% endblock %}

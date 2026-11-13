@@ -863,6 +863,16 @@ class ErrorPagesTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertContains(response, 'Erro 404', status_code=404)
 
+    def test_forbidden_area_shows_friendly_403_with_the_reason(self):
+        buyer = get_user_model().objects.create_user('comprador-403@example.com')
+        UserProfile.objects.create(user=buyer, role='buyer')
+        self.client.force_login(buyer)
+        response = self.client.get(reverse('my_products'))
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, 'Erro 403', status_code=403)
+        self.assertContains(response, 'exclusiva para vendedores e marcas', status_code=403)
+        self.assertContains(response, reverse('home'), status_code=403)
+
     def test_server_error_page_has_no_header_and_links_home(self):
         from django.test import RequestFactory
         from django.views.defaults import server_error
