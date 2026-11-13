@@ -120,6 +120,32 @@ foi tirada.
 
 > **[PRINT]** Galeria da página da peça, com a foto do defeito em destaque.
 
+### Gerenciar as fotos depois de cadastrar
+
+A tela de edição lista as fotos já enviadas e deixa o vendedor **remover** uma
+foto e **escolher qual é a principal** (a que aparece no card da vitrine).
+Adicionar novas continua sendo pelo campo “Fotos da peça” do formulário.
+
+| Ação | URL (POST) |
+|---|---|
+| Tornar principal | `/produtos/<id>/fotos/<foto>/principal/` |
+| Remover | `/produtos/<id>/fotos/<foto>/remover/` |
+
+- A principal é guardada em `ProductImage.is_cover`. O banco garante **uma por
+  peça** (`unique_product_cover`), e `make_cover()` desmarca a anterior e marca
+  a nova na mesma transação.
+- Enquanto o vendedor não escolhe, vale a primeira foto enviada. Remover a
+  principal passa a capa para a próxima sozinho.
+- A **foto do defeito não pode ser removida** pela lista: sem ela o cadastro
+  não aceitaria a peça. Para trocá-la, envie outra no campo “Foto do defeito”.
+  Por isso a peça nunca fica sem nenhuma foto.
+- Só o dono mexe: a foto é buscada por `product__seller=request.user`, então a
+  foto de outra pessoa (ou de outra peça) responde 404.
+- A lista fica **fora** do formulário de edição porque HTML não permite um
+  formulário dentro de outro: cada botão é um POST próprio.
+
+> **[PRINT]** Lista de fotos na edição, com a principal marcada e os botões de remover.
+
 ## Busca, filtros e ordenação da vitrine
 
 Os controles funcionam por GET e podem ser compartilhados na URL:
