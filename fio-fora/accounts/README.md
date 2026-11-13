@@ -48,6 +48,9 @@ Login, cadastro, perfil, recuperação de senha, permissões e lista de usuário
 ## Regras
 
 - O cadastro cria o `User` e o `UserProfile` juntos.
+- A caixa "Li e aceito os termos..." tem embaixo os links para os termos de
+    uso e a política de privacidade, que abrem em outra aba para a pessoa não
+    perder o que já preencheu. O aceite fica salvo em `terms_accepted_at`.
 - O e-mail também vira o nome de usuário.
 - Vendedor exige CPF; marca exige CNPJ. Os dois têm os dígitos verificadores conferidos.
 - O comprador pode guardar um endereço de entrega no perfil (`/conta/`). Ele é

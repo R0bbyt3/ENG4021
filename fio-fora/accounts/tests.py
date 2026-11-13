@@ -311,6 +311,14 @@ class RegistrationFieldsTests(TestCase):
         self.assertEqual(profile.document, '12ABC34501DE35')
         self.assertEqual(profile.social, '@segundavolta')
 
+    def test_terms_box_links_to_terms_and_privacy_in_every_signup(self):
+        for role in ['comprador', 'vendedor', 'marca']:
+            with self.subTest(role=role):
+                response = self.client.get(reverse('register', args=[role]))
+                self.assertContains(response, 'Li e aceito os termos de uso')
+                self.assertContains(response, f'href="{reverse("terms")}"')
+                self.assertContains(response, f'href="{reverse("privacy")}"')
+
     def test_register_page_shows_formats(self):
         response = self.client.get(reverse('register', args=['vendedor']))
         self.assertContains(response, 'placeholder="000.000.000-00"')

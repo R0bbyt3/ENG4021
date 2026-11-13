@@ -231,7 +231,8 @@ de venda e o que não pode; a privacidade lista os dados que o site guarda
 (os mesmos dos models de conta, pedidos, favoritos e avaliações), para que
 servem, que só há cookies de sessão e de segurança, e que não há pagamento.
 Ambas avisam que são textos de exemplo de um **protótipo acadêmico**. Uma
-liga na outra e as duas ficam no rodapé. Não há model.
+liga na outra, as duas ficam no rodapé e a caixa de aceite do cadastro
+linka para elas (abrindo em outra aba). Não há model.
 
 > **[PRINT]** Página de termos de uso e página de política de privacidade.
 

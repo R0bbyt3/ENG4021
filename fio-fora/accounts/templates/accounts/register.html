@@ -13,7 +13,10 @@
     <p class="form-intro">Preencha seus dados para criar uma conta.</p>
     <form class="form-stack" method="post">
         {% csrf_token %}
-        {% include 'components/form_fields.html' %}
+        {% include 'components/form_fields.html' with exclude_field='terms' %}
+        {% include 'components/field.html' with field=form.terms %}
+        {# Abrem em outra aba para a pessoa não perder o que já preencheu. #}
+        <p class="field-help">Leia os <a href="{% url 'terms' %}" target="_blank" rel="noopener">termos de uso</a> e a <a href="{% url 'privacy' %}" target="_blank" rel="noopener">política de privacidade</a> (abrem em outra aba).</p>
         <button class="button button--full" type="submit">Criar conta</button>
     </form>
     <p class="form-switch">Já tem uma conta? <a href="{% url 'login' %}">Entrar</a></p>
