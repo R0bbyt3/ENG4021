@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models, transaction
+from django.db import models
 from django.db.models import ExpressionWrapper, F
 
 
@@ -137,14 +137,8 @@ class Product(models.Model):
 
     @property
     def cover_image(self):
-        """Foto que representa a peça no card.
-
-        É a que o vendedor marcou como principal; enquanto ele não escolher
-        nenhuma, vale a primeira foto que ele enviou.
-        """
-        gallery = [image for image in self.images.all() if not image.is_defect]
-        chosen = next((image for image in gallery if image.is_cover), None)
-        return chosen or (gallery[0] if gallery else None)
+        """Primeira foto da peça (sem ser a do defeito). É a capa do card."""
+        return next((i for i in self.images.all() if not i.is_defect), None)
 
     @property
     def defect_image(self):
@@ -239,45 +233,17 @@ class ProductImage(models.Model):
     image = models.ImageField("foto", upload_to=product_image_path)
     alt_text = models.CharField("descrição da imagem", max_length=160)
     is_defect = models.BooleanField("foto do defeito", default=False)
-    is_cover = models.BooleanField("foto principal", default=False)
     created_at = models.DateTimeField("enviada em", auto_now_add=True)
 
     class Meta:
         # A foto do defeito vem primeiro: é ela que explica o desconto.
-        # Depois vem a principal, que o vendedor escolheu para a vitrine.
-        ordering = ["-is_defect", "-is_cover", "id"]
+        ordering = ["-is_defect", "id"]
         verbose_name = "foto de produto"
         verbose_name_plural = "fotos de produtos"
-        constraints = [
-            models.UniqueConstraint(fields=["product", "image"], name="unique_product_image"),
-            # Uma peça tem no máximo uma foto principal, garantido pelo banco.
-            models.UniqueConstraint(fields=["product"], condition=models.Q(is_cover=True),
-                                    name="unique_product_cover"),
-        ]
+        constraints = [models.UniqueConstraint(fields=["product", "image"], name="unique_product_image")]
 
     def __str__(self):
         return self.alt_text
-
-    @property
-    def can_be_removed(self):
-        """A foto do defeito não sai pela lista: ela é trocada pelo formulário.
-
-        Sem ela a peça não pode ser publicada, então removê-la deixaria o
-        anúncio em um estado que o próprio cadastro recusa.
-        """
-        return not self.is_defect
-
-    def make_cover(self):
-        """Torna esta foto a principal da peça; a anterior deixa de ser.
-
-        As duas gravações ficam na mesma transação por causa da restrição do
-        banco: no meio do caminho a peça teria duas fotos principais.
-        """
-        with transaction.atomic():
-            (ProductImage.objects.filter(product_id=self.product_id, is_cover=True)
-             .exclude(pk=self.pk).update(is_cover=False))
-            ProductImage.objects.filter(pk=self.pk).update(is_cover=True)
-        self.is_cover = True
 
     def delete(self, *args, **kwargs):
         """Apagar o registro apaga o arquivo junto, senão o disco enche de
