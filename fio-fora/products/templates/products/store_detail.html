@@ -1,0 +1,37 @@
+{% extends 'products/base.html' %}
+
+{% block title %}{{ seller.profile.display_name }} | FioFora{% endblock %}
+
+{% block content %}
+<section class="hero store-heading">
+    <p class="eyebrow">Marca na FioFora</p>
+    <h1>{{ seller.profile.display_name }}</h1>
+    {% if seller.profile.location %}<p>{{ seller.profile.location }}</p>{% endif %}
+    {% if rating.count %}
+    <p class="seller-rating"><span class="stars" aria-hidden="true">★</span> <strong>{{ rating.average|floatformat:1 }}</strong> de 5 na loja · {{ rating.count }} avaliaç{{ rating.count|pluralize:'ão,ões' }}</p>
+    {% else %}
+    <p class="field-help">Loja ainda sem avaliações</p>
+    {% endif %}
+</section>
+
+{% if page_obj %}
+<div class="section-heading">
+    <h2>Peças na vitrine</h2>
+    <span>{{ page_obj.paginator.count }} peça{{ page_obj.paginator.count|pluralize }}</span>
+</div>
+<section class="product-grid">
+    {% for product in page_obj %}
+    <article class="product-card">
+        {% include 'products/includes/card_info.html' with show_favorite=True is_favorite=product.is_favorite %}
+    </article>
+    {% endfor %}
+</section>
+{% include 'components/pagination.html' %}
+{% else %}
+<section class="empty-state">
+    <h2>Esta marca não tem peças na vitrine</h2>
+    <p>Pode ser que as peças tenham sido vendidas ou estejam fora da vitrine no momento.</p>
+    <a class="button" href="{% url 'store_list' %}">Ver outras marcas</a>
+</section>
+{% endif %}
+{% endblock %}

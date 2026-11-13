@@ -1,0 +1,32 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Marcas e lojas | FioFora{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Marcas e lojas</h1>
+    <p>Quem anuncia na FioFora. Entre na página de uma marca para ver todas as peças dela.</p>
+</section>
+
+{% if stores %}
+<div class="section-heading">
+    <h2>Com peças na vitrine</h2>
+    <span>{{ stores|length }} marca{{ stores|length|pluralize }}</span>
+</div>
+<section class="store-grid">
+    {% for store in stores %}
+    <article class="store-card">
+        <h3><a href="{% url 'store_detail' store.pk %}">{{ store.profile.display_name }}</a></h3>
+        {% if store.profile.location %}<p class="field-help">{{ store.profile.location }}</p>{% endif %}
+        <p class="store-count">{{ store.product_count }} peça{{ store.product_count|pluralize }} na vitrine</p>
+    </article>
+    {% endfor %}
+</section>
+{% else %}
+<section class="empty-state">
+    <h2>Nenhuma marca com peças ainda</h2>
+    <p>Assim que alguém cadastrar uma peça e deixá-la na vitrine, a loja aparece aqui.</p>
+    <a class="button" href="{% url 'home' %}">Ver a vitrine</a>
+</section>
+{% endif %}
+{% endblock %}
