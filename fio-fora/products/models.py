@@ -193,6 +193,30 @@ class Defeito(models.Model):
         return self.tipo != 3
 
 
+def detalhar_severidade(tipo, localizacao, extensao):
+    """Quanto cada critério somou na nota, para o simulador explicar a conta.
+
+    Devolve uma linha por critério, com o peso, a opção escolhida e o produto
+    peso × nota. A soma das linhas é exatamente o que severidade() devolve:
+    os pesos saem das mesmas constantes, sem repetir a fórmula.
+    """
+    criterios = [
+        ("Tipo do defeito", PESO_TIPO, tipo, Defeito.TIPO_CHOICES),
+        ("Localização", PESO_LOCALIZACAO, localizacao, Defeito.LOCALIZACAO_CHOICES),
+        ("Extensão", PESO_EXTENSAO, extensao, Defeito.EXTENSAO_CHOICES),
+    ]
+    return [
+        {
+            "criterio": nome,
+            "peso": peso,
+            "nota": nota,
+            "escolha": dict(opcoes).get(nota, nota),
+            "soma": peso * nota,
+        }
+        for nome, peso, nota, opcoes in criterios
+    ]
+
+
 def product_image_path(instance, filename):
     """Uma pasta por peça, nome sorteado.
 
