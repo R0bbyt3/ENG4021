@@ -1,4 +1,4 @@
-{% comment %}Avaliação de um item do pedido. Espera "item" com review_done, can_review e review_form (ver services.attach_review_forms).{% endcomment %}
+{% comment %}Avaliação de um item do pedido. Espera "item" com review_done, can_review, awaiting_delivery e review_form (ver services.attach_review_forms).{% endcomment %}
 {% if item.can_review %}
 <div class="item-review">
     {% if item.review_done %}
@@ -13,4 +13,6 @@
         </form>
     </details>
 </div>
+{% elif item.awaiting_delivery %}
+<p class="field-help">Você poderá avaliar esta peça quando a entrega for confirmada.</p>
 {% endif %}

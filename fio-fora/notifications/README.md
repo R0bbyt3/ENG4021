@@ -40,6 +40,7 @@ avisos.
 | Comprador cancela o pedido | Cada vendedor ou marca do pedido | Minhas vendas |
 | Vendedor confirma o pagamento, marca como enviado ou confirma a entrega | O comprador (a entrega avisa que já dá para avaliar) | Detalhe do pedido |
 | Comprador clica em “Recebi a peça” | A loja das peças | Minhas vendas |
+| Comprador avalia uma peça (só a avaliação nova) | A loja da peça | Página da peça |
 
 - O aviso é criado dentro da mesma transação da ação que o gerou (compra,
     cancelamento, mudança de status): se a ação falhar, o aviso não existe.

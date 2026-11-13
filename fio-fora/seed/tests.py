@@ -40,7 +40,7 @@ class PopularBancoTests(TestCase):
         self.assertEqual(Product.objects.count(), len(PRODUCTS))
         self.assertEqual(ProductImage.objects.count(), 2 * len(PRODUCTS))
         self.assertEqual(Order.objects.count(), 4)
-        self.assertEqual(Review.objects.count(), 3)
+        self.assertEqual(Review.objects.count(), 2)
         self.assertEqual(Notification.objects.count(), 4)
         # Toda peça tem a foto da peça e a do defeito.
         for product in Product.objects.all():

@@ -7,21 +7,20 @@ ORDERS = [
     # Entregue: libera as avaliações.
     {'reference': 'FF-SEED-PEDIDO-001', 'buyer': 'rafael@fiofora.com', 'status': 'delivered',
      'items': ['FF-SEED-003', 'FF-SEED-001']},
-    # Enviado: mostra o botão "Recebi a peça" para o comprador.
+    # Enviado: mostra o botão "Recebi a peça"; depois de confirmar, libera a avaliação.
     {'reference': 'FF-SEED-PEDIDO-002', 'buyer': 'gabriel@fiofora.com', 'status': 'shipped',
      'items': ['FF-SEED-005']},
-    # Pendente e sem avaliação: mostra o formulário "Avaliar esta peça".
+    # Pendente: mostra que só dá para avaliar depois da entrega.
     {'reference': 'FF-SEED-PEDIDO-003', 'buyer': 'rafael@fiofora.com', 'status': 'pending',
      'items': ['FF-SEED-008']},
     {'reference': 'FF-SEED-PEDIDO-004', 'buyer': 'gabriel@fiofora.com', 'status': 'cancelled',
      'items': ['FF-SEED-006']},
 ]
 
-# {(pedido, sku): (nota, comentário)}
+# {(pedido, sku): (nota, comentário)}. Só pedidos entregues têm avaliação.
 REVIEWS = {
     ('FF-SEED-PEDIDO-001', 'FF-SEED-003'): (5, 'A mancha é bem menor do que eu imaginava e some na estampa.'),
     ('FF-SEED-PEDIDO-001', 'FF-SEED-001'): (4, 'Chegou como no anúncio. A costura solta foi fácil de arrumar.'),
-    ('FF-SEED-PEDIDO-002', 'FF-SEED-005'): (4, 'O desbotado aparece, mas combina com o estilo da calça.'),
 }
 
 

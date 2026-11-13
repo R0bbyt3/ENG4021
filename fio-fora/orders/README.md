@@ -62,7 +62,7 @@ retorna 404.
 | Pendente | (é o status da compra) |
 | Pago | Confirmar pagamento |
 | Enviado | Marcar como enviado |
-| Entregue | Confirmar entrega |
+| Entregue | Confirmar entrega (libera a avaliação da peça) |
 
 - Em pedidos de várias lojas, cada loja anda separada e o status geral é a
     etapa mais atrasada entre as peças (`refresh_order_status()`); o comprador

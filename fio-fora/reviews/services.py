@@ -9,12 +9,18 @@ from .forms import ReviewForm
 from .models import Review
 
 
+AWAITING_DELIVERY = 'Você poderá avaliar esta peça quando a entrega for confirmada.'
+
+
 def review_block_reason(item):
     """Motivo pelo qual o item não pode ser avaliado, ou None se pode."""
     if item.order.status == Order.Status.CANCELLED:
         return 'Pedidos cancelados não podem ser avaliados.'
     if item.product_id is None:
         return 'Esta peça não existe mais e não pode ser avaliada.'
+    # Só dá para opinar sobre a peça depois de recebê-la (vale para avaliar e para editar).
+    if item.sale_status != Order.Status.DELIVERED:
+        return AWAITING_DELIVERY
     return None
 
 
@@ -23,7 +29,10 @@ def attach_review_forms(items):
     reviews = {r.order_item_id: r for r in Review.objects.filter(order_item__in=items)}
     for item in items:
         item.review_done = reviews.get(item.pk)
-        item.can_review = review_block_reason(item) is None
+        reason = review_block_reason(item)
+        item.can_review = reason is None
+        # Antes da entrega a tela explica quando vai dar para avaliar, em vez de não mostrar nada.
+        item.awaiting_delivery = reason == AWAITING_DELIVERY
         item.review_form = ReviewForm(instance=item.review_done, auto_id=f'review_{item.pk}_%s')
     return items
 

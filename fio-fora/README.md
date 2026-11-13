@@ -198,7 +198,8 @@ Todas levam de volta à vitrine.
 | `cart` | Carrinho do comprador, com validação de estoque | [cart/README.md](cart/README.md) |
 | `orders` | Checkout simulado e histórico de pedidos | [orders/README.md](orders/README.md) |
 | `favorites` | Peças favoritas do usuário | [favorites/README.md](favorites/README.md) |
-| `notifications` | Avisos do sininho: vendas e cancelamentos para o vendedor, andamento do pedido para o comprador | [notifications/README.md](notifications/README.md) |
+| `reviews` | Avaliações das peças compradas, liberadas depois da entrega | [reviews/README.md](reviews/README.md) |
+| `notifications` | Avisos do sininho: vendas e cancelamentos para o vendedor, andamento do pedido para o comprador, avaliações para a loja | [notifications/README.md](notifications/README.md) |
 | `seed` | Contas, peças com fotos, pedidos, avaliações e avisos de exemplo (`popular_banco`) | [seed/README.md](seed/README.md) |
 
 ### Tipos de conta
@@ -232,6 +233,7 @@ erDiagram
     User ||--o{ Favorite : marca
     Product ||--o{ Favorite : recebe
     User ||--o{ Notification : recebe
+    OrderItem ||--o| Review : recebe
 ```
 
 | Model | App | Guarda |
@@ -244,6 +246,7 @@ erDiagram
 | `Cart`, `CartItem` | cart | Carrinho e seus itens |
 | `Order`, `OrderItem` | orders | Pedido (com frete e cópia do endereço de entrega) e cópia do nome e preço de cada item |
 | `Favorite` | favorites | Peça favoritada por um usuário |
+| `Review` | reviews | Nota de 1 a 5 e comentário de um item de pedido entregue |
 | `Notification` | notifications | Aviso do sininho: texto, link e se já foi lido |
 
 Regras importantes:

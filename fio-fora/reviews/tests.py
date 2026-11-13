@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import UserProfile
+from notifications.models import Notification
 from orders.models import Order, OrderItem
 from products.models import Product
 
@@ -27,12 +28,14 @@ class ReviewTestCase(TestCase):
         cls.seller = make_user('seller@example.com', 'seller')
         cls.shirt = Product.objects.create(name='Camisa de linho', description='Mancha pequena', price=Decimal('85.00'), seller=cls.seller)
         cls.jeans = Product.objects.create(name='Calça jeans', description='Fio puxado', price=Decimal('120.00'), seller=cls.seller)
-        cls.order = Order.objects.create(user=cls.buyer, reference='FF-TESTE-001')
+        # Entregue: só peça entregue pode ser avaliada.
+        cls.order = Order.objects.create(user=cls.buyer, reference='FF-TESTE-001', status=Order.Status.DELIVERED)
         cls.shirt_item = OrderItem.objects.create(order=cls.order, product=cls.shirt, product_name=cls.shirt.name, unit_price=cls.shirt.price)
         cls.jeans_item = OrderItem.objects.create(order=cls.order, product=cls.jeans, product_name=cls.jeans.name, unit_price=cls.jeans.price)
 
-    def review(self, item, rating='5', comment='Chegou como no anúncio.'):
-        return self.client.post(reverse('review_save', args=[item.pk]), {'rating': rating, 'comment': comment})
+    def review(self, item, rating='5', comment='Chegou como no anúncio.', follow=False):
+        return self.client.post(reverse('review_save', args=[item.pk]), {'rating': rating, 'comment': comment},
+                                follow=follow)
 
 
 class SaveReviewTests(ReviewTestCase):
@@ -163,3 +166,79 @@ class ShowReviewsTests(ReviewTestCase):
         self.assertEqual(response.context['rating']['count'], 12)
         self.assertContains(response, 'Comentário 11')
         self.assertNotContains(response, 'Comentário 0<')
+
+
+class ReviewAfterDeliveryTests(ReviewTestCase):
+    """Só dá para avaliar (ou editar a avaliação) depois que a entrega é confirmada."""
+
+    def set_status(self, status):
+        Order.objects.filter(pk=self.order.pk).update(status=status)
+        OrderItem.objects.filter(order=self.order).update(fulfillment_status=status)
+
+    def test_piece_not_delivered_cannot_be_reviewed(self):
+        self.client.force_login(self.buyer)
+        for status in [Order.Status.PENDING, Order.Status.PAID, Order.Status.SHIPPED]:
+            with self.subTest(status=status):
+                self.set_status(status)
+                response = self.review(self.shirt_item, follow=True)
+                self.assertContains(response, 'quando a entrega for confirmada')
+                self.assertEqual(Review.objects.count(), 0)
+
+    def test_order_page_explains_instead_of_showing_the_form(self):
+        self.set_status(Order.Status.SHIPPED)
+        self.client.force_login(self.buyer)
+        response = self.client.get(reverse('order_detail', args=[self.order.pk]))
+        self.assertContains(response, 'Você poderá avaliar esta peça quando a entrega for confirmada.')
+        self.assertNotContains(response, 'avaliar/')
+
+    def test_existing_review_cannot_be_edited_before_delivery(self):
+        Review.objects.create(order_item=self.shirt_item, user=self.buyer, rating=2)
+        self.set_status(Order.Status.SHIPPED)
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item, '5')
+        self.assertEqual(Review.objects.get().rating, 2)
+
+    def test_each_store_releases_its_own_pieces(self):
+        # Pedido de duas lojas: só a peça já entregue pode ser avaliada.
+        self.set_status(Order.Status.SHIPPED)
+        OrderItem.objects.filter(pk=self.shirt_item.pk).update(fulfillment_status=Order.Status.DELIVERED)
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item)
+        self.review(self.jeans_item)
+        self.assertEqual(list(Review.objects.values_list('order_item', flat=True)), [self.shirt_item.pk])
+
+    def test_buyer_confirming_receipt_releases_the_review(self):
+        self.set_status(Order.Status.SHIPPED)
+        self.client.force_login(self.buyer)
+        self.client.post(reverse('order_receipt', args=[self.order.pk, self.seller.pk]))
+        self.review(self.shirt_item, '5')
+        self.assertEqual(Review.objects.get().rating, 5)
+
+
+class ReviewNoticeTests(ReviewTestCase):
+    """A loja recebe um aviso quando uma peça dela é avaliada."""
+
+    def test_new_review_notifies_the_store_with_the_stars(self):
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item, '5')
+        notice = Notification.objects.get(user=self.seller)
+        self.assertEqual(notice.text, 'Ana Souza deu 5 estrelas para Camisa de linho.')
+        self.assertEqual(notice.url, reverse('product_detail', args=[self.shirt.pk]))
+
+    def test_one_star_is_singular(self):
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item, '1')
+        self.assertEqual(Notification.objects.get(user=self.seller).text,
+                         'Ana Souza deu 1 estrela para Camisa de linho.')
+
+    def test_editing_the_review_does_not_notify_again(self):
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item, '3')
+        self.review(self.shirt_item, '4')
+        self.assertEqual(Notification.objects.filter(user=self.seller).count(), 1)
+
+    def test_blocked_review_notifies_nobody(self):
+        Order.objects.filter(pk=self.order.pk).update(status=Order.Status.CANCELLED)
+        self.client.force_login(self.buyer)
+        self.review(self.shirt_item)
+        self.assertFalse(Notification.objects.exists())

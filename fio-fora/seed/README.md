@@ -41,7 +41,8 @@ Entre com o **e-mail** e a senha **`fiofora123`**.
 - 3 favoritos: camiseta de algodão, vestido estampado e calça jeans.
 - Carrinho com a camisa de linho e 2 camisetas listradas.
 - Pedido **entregue** com o vestido e a camiseta, os dois já avaliados.
-- Pedido **pendente** com a calça de alfaiataria, ainda sem avaliação.
+- Pedido **pendente** com a calça de alfaiataria, que só poderá ser avaliada
+    depois da entrega.
 - 1 aviso já lido: a entrega do pedido do vestido e da camiseta.
 
 **Gabriel (comprador)**
@@ -49,8 +50,8 @@ Entre com o **e-mail** e a senha **`fiofora123`**.
     vem preenchido no checkout.
 - 2 favoritos: camiseta listrada e calça de alfaiataria.
 - Carrinho com a calça jeans.
-- Pedido **enviado** com a calça jeans, já avaliada. Mostra o botão
-    “Recebi a peça” no detalhe do pedido.
+- Pedido **enviado** com a calça jeans, ainda sem avaliação: o pedido avisa
+    que só dá para avaliar depois da entrega e mostra o botão “Recebi a peça”.
 - 1 aviso não lido: o envio da calça jeans.
 - Pedido **cancelado** com a jaqueta jeans, que não pode ser avaliada.
 
@@ -82,7 +83,7 @@ com nota média no card "Vendido por" da página da peça.
 | Carrinhos | 2 |
 | Endereços de entrega | 2 (um em cada comprador) |
 | Pedidos | 4 (pendente, enviado, entregue e cancelado), cada um com o frete fixo e uma cópia do endereço do comprador |
-| Avaliações | 3 |
+| Avaliações | 2 (só no pedido entregue) |
 | Avisos | 4 (não lidos: Julia e Gabriel; lidos: Diego e Rafael) |
 
 ## Arquivos
