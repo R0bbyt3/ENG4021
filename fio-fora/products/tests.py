@@ -1033,6 +1033,13 @@ class PaginaDaMarcaTests(TestCase):
         comum = get_user_model().objects.create_user('sem_perfil')
         self.assertEqual(self.client.get(reverse('store_detail', args=[comum.pk])).status_code, 404)
 
+    def test_comprador_nao_tem_pagina_de_loja(self):
+        comprador = get_user_model().objects.create_user('compradora', first_name='Ana')
+        UserProfile.objects.create(user=comprador, role=UserProfile.Role.BUYER, location='Niterói, RJ')
+        resposta = self.client.get(reverse('store_detail', args=[comprador.pk]))
+        self.assertEqual(resposta.status_code, 404)
+        self.assertNotContains(resposta, 'Niterói', status_code=404)
+
     def test_pagina_da_peca_linka_para_a_marca(self):
         resposta = self.client.get(reverse('product_detail', args=[self.vestido.pk]))
         self.assertContains(resposta, reverse('store_detail', args=[self.marca.pk]))

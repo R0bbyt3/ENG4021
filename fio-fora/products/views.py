@@ -8,6 +8,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import seller_required
+from accounts.models import UserProfile
 from cart.services import purchase_summary
 from favorites.models import mark_favorites
 from reviews.services import product_reviews, rating_summary, store_reviews
@@ -157,8 +158,10 @@ def store_list(request):
 
 def store_detail(request, seller_id):
     """Página pública de uma loja ou marca, com a nota da loja e as peças dela."""
-    seller = get_object_or_404(get_user_model().objects.select_related('profile'),
-                               pk=seller_id, profile__isnull=False)
+    # Só contas de vendedor ou marca têm página: a de um comprador mostraria o
+    # nome e a cidade dele para qualquer pessoa.
+    seller = get_object_or_404(get_user_model().objects.select_related('profile'), pk=seller_id,
+                               profile__role__in=[UserProfile.Role.SELLER, UserProfile.Role.BRAND])
     # Só peças ativas: a página é pública e espelha o que está na vitrine.
     products = (Product.objects.filter(seller=seller, is_active=True)
                 .select_related('defeito', 'category').prefetch_related('images')

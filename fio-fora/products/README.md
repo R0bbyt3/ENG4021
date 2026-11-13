@@ -186,7 +186,8 @@ da peça leva para cá.
 
 - Quem vende sem cadastrar nome de loja aparece pelo próprio nome
   (`UserProfile.display_name`).
-- Usuário sem perfil não tem página de loja (404).
+- Só contas de vendedor ou marca têm página de loja. Comprador e usuário sem
+  perfil dão 404, para o nome e a cidade de quem compra não ficarem públicos.
 
 > **[PRINT]** Aba Marcas com as lojas que têm peças na vitrine.
 
