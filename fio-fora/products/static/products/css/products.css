@@ -132,6 +132,12 @@
 .filter-chip:hover { border-color: var(--green); }
 .filter-chip.is-active { color: var(--white); background: var(--ink); border-color: var(--ink); }
 
+/* Abas de categoria no topo da vitrine. */
+.category-tabs { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+.category-tab { padding: 10px 2px; color: var(--muted); border-bottom: 2px solid transparent; text-decoration: none; }
+.category-tab:hover { color: var(--ink); }
+.category-tab.is-active { color: var(--ink); border-bottom-color: var(--green); font-weight: 700; }
+
 /* Página da peça. */
 .product-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; padding-bottom: 60px; }
 
