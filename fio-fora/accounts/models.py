@@ -34,3 +34,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
+
+    @property
+    def display_name(self):
+        """Nome público da loja ou marca, para a vitrine e a página da marca.
+
+        Quem vende sem cadastrar nome de loja aparece pelo próprio nome, para a
+        peça nunca ficar sem dono visível.
+        """
+        return self.store_name or self.user.get_full_name() or self.user.username

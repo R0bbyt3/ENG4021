@@ -158,6 +158,14 @@
 .seller-card { display: grid; gap: 4px; margin-top: 26px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-medium); }
 .seller-card .eyebrow { margin: 0; }
 
+/* Aba “Marcas” e página pública de uma loja. */
+.store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.store-card { padding: 22px 24px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-large); }
+.store-card h3 { margin: 0 0 6px; font-size: 18px; }
+.store-card p { margin: 0; }
+.store-count { margin-top: 10px; color: var(--muted); font-size: 14px; }
+.store-heading .seller-rating, .store-heading .field-help { margin-top: 10px; }
+
 @media (max-width: 760px) {
     .product-detail { grid-template-columns: 1fr; gap: 24px; }
 }

@@ -1,8 +1,9 @@
 from decimal import Decimal
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.decorators import seller_required
@@ -120,6 +121,37 @@ def home(request):
         'has_controls': bool(band or brand or category or size or query or ordering),
         'band_links': band_links,
         'active_band': band,
+    })
+
+
+def store_list(request):
+    """Aba “Marcas”: quem tem peça na vitrine, em ordem alfabética.
+
+    Só aparece quem tem pelo menos uma peça ativa — uma lista de lojas vazias
+    não ajuda ninguém a comprar.
+    """
+    stores = (get_user_model().objects
+              .filter(products__is_active=True, profile__isnull=False)
+              .annotate(product_count=Count('products', filter=Q(products__is_active=True), distinct=True))
+              .select_related('profile')
+              .order_by('profile__store_name', 'first_name', 'username'))
+    return render(request, 'products/store_list.html', {'stores': stores})
+
+
+def store_detail(request, seller_id):
+    """Página pública de uma loja ou marca, com a nota da loja e as peças dela."""
+    seller = get_object_or_404(get_user_model().objects.select_related('profile'),
+                               pk=seller_id, profile__isnull=False)
+    # Só peças ativas: a página é pública e espelha o que está na vitrine.
+    products = (Product.objects.filter(seller=seller, is_active=True)
+                .select_related('defeito', 'category').prefetch_related('images')
+                .order_by('-created_at', '-pk'))
+    products = mark_favorites(products, request.user)
+    page = Paginator(products, 12).get_page(request.GET.get('page'))
+    return render(request, 'products/store_detail.html', {
+        'seller': seller,
+        'page_obj': page,
+        'rating': rating_summary(store_reviews(seller)),
     })
 
 
