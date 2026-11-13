@@ -108,7 +108,8 @@ class ProductForm(DefectFieldsMixin, forms.ModelForm):
         label='Fotos da peça', required=False,
         help_text=f'Até {services.MAX_PHOTOS} fotos, {services.FORMAT_NAMES}, '
                   f'{services.MAX_BYTES // (1024 * 1024)} MB cada, mínimo '
-                  f'{services.MIN_SIDE} px no menor lado. A primeira vira a capa.',
+                  f'{services.MIN_SIDE} px no menor lado. Depois de salvar você escolhe '
+                  'qual delas é a principal.',
     )
     defect_photo = forms.ImageField(
         label='Foto do defeito', required=False,
